@@ -30,11 +30,8 @@ public class ProjectArticle {
     @Enumerated(EnumType.STRING)
     private Statut statut = Statut.A_LIRE;
 
-    @Column(length = 1000)
+    @Column(length = 100)
     private String note;
-
-    @Column(name = "raison_exclusion")
-    private String raisonExclusion;
 
     @Column(name = "date_ajout")
     private LocalDateTime dateAjout = LocalDateTime.now();

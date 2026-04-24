@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class Utilisateur {
     private String role = "USER";
 
     @Column
-    private LocalDate dateInscription;
+    private LocalDate dateInscription = LocalDate.now();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
     private List<Project> projets = new ArrayList<>();

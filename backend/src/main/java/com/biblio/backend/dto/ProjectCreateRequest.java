@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
-    private String email;
-    private String motDePasse;
+@NoArgsConstructor
+public class ProjectCreateRequest {
+    private String nomProjet;
+    private String Description;
 }

@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectArticleRepository extends JpaRepository<ProjectArticle, Long> {
-    List<ProjectArticle> findByProject(Project project);
-    List<ProjectArticle> findByProjectId(Long projectId);
-    Optional<ProjectArticle> findByProjectAndArticle(Project project, Article article);
-    void deleteByProjectAndArticle(Project project, Article article);
-
+    List<ProjectArticle> findByProjet(Project project);
+    List<ProjectArticle> findByProjetId(Long projectId);
+    Optional<ProjectArticle> findByProjetAndArticle(Project project, Article article);
+    void deleteByProjetAndArticle(Project project, Article article);
+    long countByProjetIdAndStatut(Long projetId, ProjectArticle.Statut statut);
 }

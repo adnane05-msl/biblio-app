@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class Article {
     @Column(nullable = false)
     private String titre;
 
-    @Column(length = 1000)
+    @Column(length = 100)
     private String auteurs;
 
     private Integer annee;
@@ -40,8 +39,8 @@ public class Article {
 
     private String source;  // "Crossref", "OpenAlex", etc.
 
-    @Column(name = "date_ajout")
-    private LocalDateTime dateAjout = LocalDateTime.now();
+    @Column(name = "mot_cles")
+    private String motCles;
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private List<ProjectArticle> projectArticles = new ArrayList<>();
