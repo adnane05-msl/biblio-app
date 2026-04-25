@@ -63,3 +63,16 @@
     text-decoration: none;
     font-weight: 500;
 }
+
+.input-field select,
+select.input-field {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    cursor: pointer;
+}

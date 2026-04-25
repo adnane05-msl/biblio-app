@@ -31,6 +31,7 @@ public class UtilisateurService {
         user.setEmail(request.getEmail());
         user.setMotDePasse(request.getMotDePasse());
         user.setRole("USER");
+        user.setSpecialite(request.getSpecialite());
 
         Utilisateur savedUser = utilisateurRepository.save(user);
 
@@ -40,7 +41,8 @@ public class UtilisateurService {
                 savedUser.getNom(),
                 savedUser.getPrenom(),
                 savedUser.getEmail(),
-                savedUser.getRole()
+                savedUser.getRole(),
+                savedUser.getSpecialite()
         );
     }
 
@@ -63,7 +65,8 @@ public class UtilisateurService {
                 user.getNom(),
                 user.getPrenom(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getSpecialite()
         );
     }
 

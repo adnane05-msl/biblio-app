@@ -32,6 +32,9 @@ public class Utilisateur {
     @Column(length = 10)
     private String role = "USER";
 
+    @Column(length = 50)
+    private String specialite;
+
     @Column
     private LocalDate dateInscription = LocalDate.now();
 

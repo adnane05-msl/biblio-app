@@ -13,6 +13,7 @@ function RegisterPage() {
         prenom: '',
         email: '',
         motDePasse: '',
+        specialite: '',
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -31,7 +32,8 @@ function RegisterPage() {
                 form.nom,
                 form.prenom,
                 form.email,
-                form.motDePasse
+                form.motDePasse,
+                form.specialite
             )
             login(
                 { email: data.email, nom: data.nom, prenom: data.prenom },
@@ -106,6 +108,26 @@ function RegisterPage() {
                             required
                         />
                     </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Spécialité</label>
+                            <select
+                                className="input-field"
+                                name="specialite"
+                                value={form.specialite}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">-- Choisir votre profil --</option>
+                                <option value="Etudiant Licence">Étudiant Licence</option>
+                                <option value="Etudiant Master">Étudiant Master</option>
+                                <option value="Doctorant">Doctorant</option>
+                                <option value="Chercheur">Chercheur</option>
+                                <option value="Enseignant-Chercheur">Enseignant-Chercheur</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                    </div>
+
 
                     <button className="btn-primary" type="submit" disabled={loading}>
                         {loading ? 'Inscription...' : "S'inscrire"}
