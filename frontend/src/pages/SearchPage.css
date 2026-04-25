@@ -1,0 +1,29 @@
+.search-container {
+    padding: 40px;
+}
+
+.search-title {
+    font-size: 24px;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.search-subtitle {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.btn-logout {
+    background-color: #ef4444;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn-logout:hover {
+    background-color: #dc2626;
+}

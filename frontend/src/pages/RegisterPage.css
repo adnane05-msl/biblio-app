@@ -1,0 +1,65 @@
+.register-container {
+    min-height: 100vh;
+    background-color: #f0f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.register-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.register-title {
+    text-align: center;
+    font-size: 28px;
+    color: #2563eb;
+    margin-bottom: 4px;
+}
+
+.register-subtitle {
+    text-align: center;
+    font-size: 18px;
+    color: #374151;
+    margin-bottom: 24px;
+    font-weight: 400;
+}
+
+.register-error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.register-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.register-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
