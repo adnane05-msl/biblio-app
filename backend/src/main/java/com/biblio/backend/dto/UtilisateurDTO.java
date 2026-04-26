@@ -12,4 +12,5 @@ public class UtilisateurDTO {
     private String email;
     private String role;
     private String specialite;
+    private String token;
 }

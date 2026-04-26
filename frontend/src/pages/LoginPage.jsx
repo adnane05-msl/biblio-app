@@ -25,7 +25,7 @@ function LoginPage() {
             const data = await loginService(form.email, form.motDePasse)
             login(
                 { email: data.email, nom: data.nom, prenom: data.prenom },
-                null
+                data.token
             )
             navigate('/search')
         } catch (err) {

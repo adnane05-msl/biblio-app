@@ -5,7 +5,10 @@ import com.biblio.backend.dto.RegisterRequest;
 import com.biblio.backend.dto.UtilisateurDTO;
 import com.biblio.backend.model.Utilisateur;
 import com.biblio.backend.repository.UtilisateurRepository;
+import com.biblio.backend.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.Optional;
 
@@ -13,9 +16,15 @@ import java.util.Optional;
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository,
+                              PasswordEncoder passwordEncoder,
+                              JwtService jwtService) {
         this.utilisateurRepository = utilisateurRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public UtilisateurDTO register(RegisterRequest request) {
@@ -29,11 +38,12 @@ public class UtilisateurService {
         user.setNom(request.getNom());
         user.setPrenom(request.getPrenom());
         user.setEmail(request.getEmail());
-        user.setMotDePasse(request.getMotDePasse());
+        user.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         user.setRole("USER");
         user.setSpecialite(request.getSpecialite());
 
         Utilisateur savedUser = utilisateurRepository.save(user);
+        String token = jwtService.generateToken(savedUser.getEmail());
 
         // Convertir en DTO
         return new UtilisateurDTO(
@@ -42,7 +52,8 @@ public class UtilisateurService {
                 savedUser.getPrenom(),
                 savedUser.getEmail(),
                 savedUser.getRole(),
-                savedUser.getSpecialite()
+                savedUser.getSpecialite(),
+                token
         );
     }
 
@@ -56,9 +67,12 @@ public class UtilisateurService {
 
         Utilisateur user = userOpt.get();
 
-        if (!user.getMotDePasse().equals(request.getMotDePasse())) {
+        if (!passwordEncoder.matches(request.getMotDePasse(),
+                user.getMotDePasse())) {
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
+
+        String token = jwtService.generateToken(user.getEmail());
 
         return new UtilisateurDTO(
                 user.getId(),
@@ -66,7 +80,8 @@ public class UtilisateurService {
                 user.getPrenom(),
                 user.getEmail(),
                 user.getRole(),
-                user.getSpecialite()
+                user.getSpecialite(),
+                token
         );
     }
 
