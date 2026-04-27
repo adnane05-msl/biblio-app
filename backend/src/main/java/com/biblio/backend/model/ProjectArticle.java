@@ -21,7 +21,7 @@ public class ProjectArticle {
 
     @ManyToOne
     @JoinColumn(name = "id_projet", nullable = false)
-    private Project projet;
+    private Project project;
 
     @ManyToOne
     @JoinColumn(name = "id_article", nullable = false)
@@ -34,7 +34,12 @@ public class ProjectArticle {
     private String note;
 
     @Column(name = "date_ajout")
-    private LocalDateTime dateAjout = LocalDateTime.now();
+    private LocalDateTime dateAjout;
+
+    @PrePersist
+    public void prePersist() {
+        this.dateAjout = LocalDateTime.now();
+    }
 
     public enum Statut {
         A_LIRE,

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { register } from '../services/AuthService'
-import { useAuth } from '../context/useAuth'
+import { register } from '../../services/AuthService'
+import { useAuth } from '../../context/useAuth'
 import './RegisterPage.css'
 
 function RegisterPage() {

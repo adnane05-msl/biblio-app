@@ -1,5 +1,6 @@
 package com.biblio.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,8 @@ import java.util.List;
 public class Project {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "projet_seq", sequenceName = "projet_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
@@ -27,17 +29,27 @@ public class Project {
     private String description;
 
     @Column(name = "date_creation")
-    private LocalDateTime dateCreation =  LocalDateTime.now();
+    private LocalDateTime dateCreation;
 
     @Column(name = "date_modification")
-    private LocalDateTime dateModification =   LocalDateTime.now();
+    private LocalDateTime dateModification;
 
     @ManyToOne
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;
 
-    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<ProjectArticle> projectArticles = new ArrayList<>();
 
+    @PrePersist
+    public void prePersist() {
+        this.dateCreation = LocalDateTime.now();
+        this.dateModification = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    public void preUpdate() {
+        this.dateModification = LocalDateTime.now();
+    }
 }

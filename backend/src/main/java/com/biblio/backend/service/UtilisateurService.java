@@ -86,9 +86,9 @@ public class UtilisateurService {
     }
 
     // Trouver un utilisateur par ID
-    public Utilisateur findById(Long id) {
-        return utilisateurRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-    }
+//    public Utilisateur findById(Long id) {
+//        return utilisateurRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+//    }
 
 }

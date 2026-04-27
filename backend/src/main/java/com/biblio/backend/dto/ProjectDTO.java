@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProjectDTO {
     private Long id;
     private String nomProjet;
-    private String Description;
-    private LocalDateTime DateCreation;
-    private LocalDateTime DateModification;
+    private String description;
+    private LocalDateTime dateCreation;
+    private LocalDateTime dateModification;
+    private int nombreArticles;
 }

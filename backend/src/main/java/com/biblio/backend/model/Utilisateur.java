@@ -39,5 +39,5 @@ public class Utilisateur {
     private LocalDate dateInscription = LocalDate.now();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
-    private List<Project> projets = new ArrayList<>();
+    private List<Project> projects = new ArrayList<>();
 }

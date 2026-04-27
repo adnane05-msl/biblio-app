@@ -4,14 +4,17 @@ import com.biblio.backend.model.Article;
 import com.biblio.backend.model.Project;
 import com.biblio.backend.model.ProjectArticle;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ProjectArticleRepository extends JpaRepository<ProjectArticle, Long> {
-    List<ProjectArticle> findByProjet(Project project);
-    List<ProjectArticle> findByProjetId(Long projectId);
-    Optional<ProjectArticle> findByProjetAndArticle(Project project, Article article);
-    void deleteByProjetAndArticle(Project project, Article article);
-    long countByProjetIdAndStatut(Long projetId, ProjectArticle.Statut statut);
+    List<ProjectArticle> findByProject(Project project);
+    List<ProjectArticle> findByProjectId(Long projectId);
+    Optional<ProjectArticle> findByProjectAndArticle(Project project, Article article);
+    void deleteByProjectAndArticle(Project project, Article article);
+    long countByProjectIdAndStatut(Long projectId, ProjectArticle.Statut statut);
+
 }
