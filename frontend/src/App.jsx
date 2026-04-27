@@ -20,6 +20,12 @@ function AppRoutes() {
             <Route path="/search"   element={
                 <ProtectedRoute><SearchPage /></ProtectedRoute>
             } />
+            <Route path="/projects"   element={
+                <ProtectedRoute><ProjectsPage /></ProtectedRoute>
+            } />
+            <Route path="/projects/:id" element={
+                <ProtectedRoute><ProjectDetail /></ProtectedRoute>
+            } />
             {/* <Route path="/projects" element={
                 <ProtectedRoute><ProjectPage /></ProtectedRoute>
             } />

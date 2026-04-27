@@ -36,7 +36,7 @@ function RegisterPage() {
                 form.specialite
             )
             login(
-                { email: data.email, nom: data.nom, prenom: data.prenom },
+                {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
                 data.token
             )
             navigate('/search')
