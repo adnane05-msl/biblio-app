@@ -3,10 +3,9 @@ import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import LoginPage from './pages/Authentification/LoginPage'
 import RegisterPage from './pages/Authentification/RegisterPage'
-import SearchPage from './pages/SearchPage'
+import SearchPage from './pages/Search/SearchPage'
 import ProjectsPage from './pages/Projets/ProjectsPage'
 import ProjectDetail from './pages/Projets/ProjectDetail'
-// import DashboardPage from './pages/DashboardPage'
 
 function ProtectedRoute({ children }) {
     const { user } = useAuth()
@@ -27,12 +26,7 @@ function AppRoutes() {
             <Route path="/projects/:id" element={
                 <ProtectedRoute><ProjectDetail /></ProtectedRoute>
             } />
-            {/* <Route path="/projects" element={
-                <ProtectedRoute><ProjectPage /></ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-                <ProtectedRoute><DashboardPage /></ProtectedRoute>
-            } /> */}
+            
         </Routes>
     )
 }

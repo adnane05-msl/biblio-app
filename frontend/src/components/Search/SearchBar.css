@@ -1,0 +1,100 @@
+.searchbar-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 28px;
+}
+
+.searchbar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.searchbar-input-row {
+    display: flex;
+    gap: 12px;
+}
+
+.searchbar-input {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.searchbar-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.searchbar-btn {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.searchbar-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.searchbar-btn:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+}
+
+.searchbar-sources {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.sources-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.source-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #d1d5db;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    background-color: #f9fafb;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.source-toggle input {
+    display: none;
+}
+
+.source-toggle.active {
+    background-color: #eff6ff;
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.source-toggle:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+}

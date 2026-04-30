@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ArticleDTO {
     private String title;
     private String authors;
-    private String year;
+    private Integer year;
     private String journal;
     private String publisher;
     private String doi;
