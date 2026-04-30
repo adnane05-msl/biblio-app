@@ -4,7 +4,8 @@ import { useAuth } from './context/useAuth'
 import LoginPage from './pages/Authentification/LoginPage'
 import RegisterPage from './pages/Authentification/RegisterPage'
 import SearchPage from './pages/SearchPage'
-// import ProjectPage from './pages/ProjectPage'
+import ProjectsPage from './pages/Projets/ProjectsPage'
+import ProjectDetail from './pages/Projets/ProjectDetail'
 // import DashboardPage from './pages/DashboardPage'
 
 function ProtectedRoute({ children }) {

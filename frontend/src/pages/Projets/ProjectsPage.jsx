@@ -7,10 +7,14 @@ import {
     updateProject,
     deleteProject
 } from '../../services/ProjectServices'
-import Navbar from '../../components/Navbar'
+import Navbar from '../../components/Navbar/Navbar'
 import ProjectCard from '../../components/Projets/ProjectCard'
 import ProjectForm from '../../components/Projets/ProjectForm'
 import './ProjectsPage.css'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faFolder } from '@fortawesome/free-solid-svg-icons'
 
 function ProjectsPage() {
     const { user } = useAuth()
@@ -100,7 +104,7 @@ function ProjectsPage() {
             <div className="projects-container">
                 <div className="projects-header">
                     <div>
-                        <h1 className="projects-title">📁 Mes Projets</h1>
+                        <h1 className="projects-title"><FontAwesomeIcon icon={faFolder} /> Mes Projets</h1>
                         <p className="projects-subtitle">
                             {projects.length} projet{projects.length !== 1 ? 's' : ''} de recherche
                         </p>
@@ -109,7 +113,7 @@ function ProjectsPage() {
                         className="btn-new-project"
                         onClick={() => setShowForm(true)}
                     >
-                        ➕ Nouveau projet
+                        <FontAwesomeIcon icon={faPlus} /> Nouveau projet
                     </button>
                 </div>
 
@@ -132,7 +136,7 @@ function ProjectsPage() {
                     </div>
                 ) : projects.length === 0 ? (
                     <div className="empty-state">
-                        <p className="empty-icon">📂</p>
+                        <p className="empty-icon"><FontAwesomeIcon icon={faFolder} /></p>
                         <p className="empty-title">Aucun projet pour l'instant</p>
                         <p className="empty-subtitle">
                             Créez votre premier projet de recherche
@@ -141,7 +145,7 @@ function ProjectsPage() {
                             className="btn-new-project"
                             onClick={() => setShowForm(true)}
                         >
-                            ➕ Créer un projet
+                            <FontAwesomeIcon icon={faPlus} /> Créer un projet
                         </button>
                     </div>
                 ) : (

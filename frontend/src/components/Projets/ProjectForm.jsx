@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import './ProjectForm.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
 function ProjectForm({ project, onSubmit, onCancel, loading }) {
 
@@ -22,7 +25,10 @@ function ProjectForm({ project, onSubmit, onCancel, loading }) {
         <div className="modal-overlay">
             <div className="modal-card">
                 <h2 className="modal-title">
-                    {project ? '✏️ Modifier le projet' : '➕ Nouveau projet'}
+                    {project 
+                        ? <><FontAwesomeIcon icon={faPencil} /> Modifier le projet</>
+                        : <><FontAwesomeIcon icon={faPlus} /> Nouveau projet</>
+}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="modal-form">

@@ -39,7 +39,7 @@ function RegisterPage() {
                 {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
                 data.token
             )
-            navigate('/search')
+            navigate('/Projects')
         } catch (err) {
             setError(err.response?.data?.message || "Erreur lors de l'inscription")
         } finally {

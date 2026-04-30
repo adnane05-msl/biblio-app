@@ -27,7 +27,7 @@ function LoginPage() {
                 {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
                 data.token
             )
-            navigate('/search')
+            navigate('/Projects')
         } catch (err) {
             setError(err.response?.data?.message || 'Email ou mot de passe incorrect')
         } finally {

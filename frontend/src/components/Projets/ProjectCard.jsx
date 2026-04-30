@@ -1,4 +1,8 @@
 import './ProjectCard.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFile } from '@fortawesome/free-solid-svg-icons'
+import { faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
 
 function ProjectCard({ project, onEdit, onDelete, onClick }) {
 
@@ -16,7 +20,7 @@ function ProjectCard({ project, onEdit, onDelete, onClick }) {
             <div className="project-card-header">
                 <h3 className="project-name">{project.nomProjet}</h3>
                 <span className="project-articles">
-                    📄 {project.nombreArticles} article{project.nombreArticles !== 1 ? 's' : ''}
+                    <FontAwesomeIcon icon={faFile} /> {project.nombreArticles} article{project.nombreArticles !== 1 ? 's' : ''}
                 </span>
             </div>
 
@@ -33,13 +37,13 @@ function ProjectCard({ project, onEdit, onDelete, onClick }) {
                         className="btn-edit"
                         onClick={(e) => { e.stopPropagation(); onEdit(project) }}
                     >
-                        ✏️ Modifier
+                        <FontAwesomeIcon icon={faPencil} /> Modifier
                     </button>
                     <button
                         className="btn-delete"
                         onClick={(e) => { e.stopPropagation(); onDelete(project.id) }}
                     >
-                        🗑️ Supprimer
+                        <FontAwesomeIcon icon={faTrashCan} /> Supprimer
                     </button>
                 </div>
             </div>
