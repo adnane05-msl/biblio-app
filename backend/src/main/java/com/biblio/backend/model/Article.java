@@ -37,11 +37,16 @@ public class Article {
     @Column(name = "nb_citations")
     private Integer nbCitations;
 
-    private String source;  // "Crossref", "OpenAlex", etc.
-
     @Column(name = "mot_cles")
     private String motCles;
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private List<ProjectArticle> projectArticles = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "id_source")
+    private Source source;
+
+    @OneToMany(mappedBy = "article")
+    private List<Historique> historiques = new ArrayList<>();
 }

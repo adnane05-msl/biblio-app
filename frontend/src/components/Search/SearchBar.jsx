@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import './SearchBar.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMagnifyingGlass, faHourglass } from '@fortawesome/free-solid-svg-icons'
+
 
 function SearchBar({ onSearch, loading }) {
     const [query, setQuery] = useState('')
@@ -36,7 +39,9 @@ function SearchBar({ onSearch, loading }) {
                         type="submit"
                         disabled={loading}
                     >
-                        {loading ? '⏳ Recherche...' : '🔍 Rechercher'}
+                        {loading 
+                        ?<><FontAwesomeIcon icon={faHourglass} /> Recherche... </>
+                        :<><FontAwesomeIcon icon={faMagnifyingGlass} /> Rechercher</>}
                     </button>
                 </div>
 

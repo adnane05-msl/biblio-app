@@ -6,6 +6,8 @@ import Navbar from '../../components/Navbar/Navbar'
 import SearchBar from '../../components/Search/SearchBar'
 import ArticleCard from '../../components/Search/ArticleCard'
 import './SearchPage.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 
 function SearchPage() {
     const { user } = useAuth()
@@ -65,7 +67,7 @@ function SearchPage() {
             <div className="search-container">
                 {/* En-tête */}
                 <div className="search-header">
-                    <h1 className="search-title">🔍 Recherche d'articles</h1>
+                    <h1 className="search-title"><FontAwesomeIcon icon={faMagnifyingGlass} /> Recherche d'articles</h1>
                     <p className="search-subtitle">
                         Recherchez dans Crossref, OpenAlex et arXiv simultanément
                     </p>

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './ArticleCard.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCalendar, faChartColumn, faFloppyDisk, faFile, faUsers, faBook } from '@fortawesome/free-solid-svg-icons'
 
 function ArticleCard({ article, onSave, projects }) {
     const [expanded, setExpanded] = useState(false)
@@ -27,11 +29,11 @@ function ArticleCard({ article, onSave, projects }) {
                         <span className="article-type">{article.documentType}</span>
                     )}
                     {article.year && (
-                        <span className="article-year">📅 {article.year}</span>
+                        <span className="article-year"><FontAwesomeIcon icon={faCalendar} /> {article.year}</span>
                     )}
                     {article.citations != null && (
                         <span className="article-citations">
-                            📊 {article.citations} citations
+                            <FontAwesomeIcon icon={faChartColumn} /> {article.citations} citations
                         </span>
                     )}
                 </div>
@@ -42,7 +44,7 @@ function ArticleCard({ article, onSave, projects }) {
                             className="btn-save"
                             onClick={() => setShowSaveMenu(!showSaveMenu)}
                         >
-                            💾 Sauvegarder
+                            <FontAwesomeIcon icon={faFloppyDisk} /> Sauvegarder
                         </button>
                         {showSaveMenu && (
                             <div className="save-menu">
@@ -56,7 +58,7 @@ function ArticleCard({ article, onSave, projects }) {
                                                 setShowSaveMenu(false)
                                             }}
                                         >
-                                            📁 {p.nomProjet}
+                                            <FontAwesomeIcon icon={faFile} /> {p.nomProjet}
                                         </button>
                                     ))
                                 ) : (
@@ -82,13 +84,13 @@ function ArticleCard({ article, onSave, projects }) {
 
             {article.authors && (
                 <p className="article-authors">
-                    👥 {article.authors}
+                    <FontAwesomeIcon icon={faUsers} /> {article.authors}
                 </p>
             )}
 
             {article.journal && (
                 <p className="article-journal">
-                    📖 {article.journal}
+                    <FontAwesomeIcon icon={faBook} /> {article.journal}
                     {article.publisher && article.publisher !== article.journal
                         ? ` — ${article.publisher}` : ''}
                 </p>
