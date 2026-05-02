@@ -5,6 +5,7 @@ import { getProjectsByUser } from '../../services/ProjectServices'
 import Navbar from '../../components/Navbar/Navbar'
 import SearchBar from '../../components/Search/SearchBar'
 import ArticleCard from '../../components/Search/ArticleCard'
+import { saveArticleToProject } from '../../services/ProjectArticleServices'
 import './SearchPage.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
@@ -55,10 +56,22 @@ function SearchPage() {
         }
     }
 
-    const handleSave = (_article, projectId) => {
-        setSuccess(`Article sauvegardé dans le projet !`)
+    const handleSave = async (article, projectId) => {
+    try {
+        await saveArticleToProject(article, projectId)
+        setSuccess('✅ Article sauvegardé dans le projet !')
         setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+        const msg = err.response?.data?.message
+        if (msg === 'Article déjà sauvegardé dans ce projet') {
+            setError('⚠️ Cet article est déjà dans ce projet !')
+        } else {
+            setError('Erreur lors de la sauvegarde')
+        }
+        setTimeout(() => setError(''), 3000)
     }
+}
+
 
     return (
         <div className="search-page">

@@ -34,12 +34,12 @@ public class ProjectArticle {
     private String note;
 
     @Column(name = "date_ajout")
-    private LocalDateTime dateAjout;
+    private LocalDateTime dateAjout = LocalDateTime.now();
 
-    @PrePersist
-    public void prePersist() {
-        this.dateAjout = LocalDateTime.now();
-    }
+//    @PrePersist
+//    public void prePersist() {
+//        this.dateAjout = LocalDateTime.now();
+//    }
 
     public enum Statut {
         A_LIRE,
