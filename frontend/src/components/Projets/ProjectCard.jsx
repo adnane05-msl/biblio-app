@@ -1,8 +1,7 @@
 import './ProjectCard.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFile } from '@fortawesome/free-solid-svg-icons'
-import { faPencil } from '@fortawesome/free-solid-svg-icons'
-import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import { faPencil,faTrashCan } from '@fortawesome/free-solid-svg-icons'
 
 function ProjectCard({ project, onEdit, onDelete, onClick }) {
 

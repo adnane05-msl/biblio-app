@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './ArticleCard.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendar, faChartColumn, faFloppyDisk, faFile, faUsers, faBook } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faChartColumn, faFloppyDisk, faFile, faUsers, faBook,faLink } from '@fortawesome/free-solid-svg-icons'
 
 function ArticleCard({ article, onSave, projects }) {
     const [expanded, setExpanded] = useState(false)
@@ -98,7 +98,8 @@ function ArticleCard({ article, onSave, projects }) {
 
             {article.doi && (
                 <p className="article-doi">
-                    DOI : <a href={`https://doi.org/${article.doi}`}
+                    <FontAwesomeIcon icon={faLink} />DOI : 
+                    <a href={`https://doi.org/${article.doi}`}
                         target="_blank" rel="noreferrer">
                         {article.doi}
                     </a>

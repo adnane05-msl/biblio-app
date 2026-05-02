@@ -10,11 +10,7 @@ import {
 import Navbar from '../../components/Navbar/Navbar'
 import './ProjectDetail.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-    faTrash, faNoteSticky,
-    faCircleCheck, faCircleXmark,
-    faBookOpen, faArrowLeft
-} from '@fortawesome/free-solid-svg-icons'
+import {faTrash, faNoteSticky,faCircleCheck, faCircleXmark,faBookOpen, faArrowLeft,faMagnifyingGlass,faUsers,faChartBar,faCalendar,faLink} from '@fortawesome/free-solid-svg-icons'
 
 const STATUTS = [
     { value: 'A_LIRE',  label: 'À lire',  color: '#6b7280' },
@@ -215,7 +211,7 @@ function ProjectDetail() {
                             className="btn-go-search"
                             onClick={() => navigate('/search')}
                         >
-                            🔍 Aller à la recherche
+                            <FontAwesomeIcon icon={faMagnifyingGlass} /> Aller à la recherche
                         </button>
                     </div>
                 ) : (
@@ -232,12 +228,12 @@ function ProjectDetail() {
                                         <div className="saved-card-meta">
                                             {article.annee && (
                                                 <span className="saved-year">
-                                                    📅 {article.annee}
+                                                    <FontAwesomeIcon icon={faCalendar} /> {article.annee}
                                                 </span>
                                             )}
                                             {article.nbCitations != null && (
                                                 <span className="saved-citations">
-                                                    📊 {article.nbCitations} citations
+                                                    <FontAwesomeIcon icon={faChartBar} /> {article.nbCitations} citations
                                                 </span>
                                             )}
                                         </div>
@@ -279,14 +275,14 @@ function ProjectDetail() {
                                     {/* Auteurs */}
                                     {article.auteurs && (
                                         <p className="saved-authors">
-                                            👥 {article.auteurs}
+                                            <FontAwesomeIcon icon={faUsers} /> {article.auteurs}
                                         </p>
                                     )}
 
                                     {/* DOI */}
                                     {article.doi && (
                                         <p className="saved-doi">
-                                            DOI : 
+                                            <FontAwesomeIcon icon={faLink} /> DOI : 
                                             <a href={`https://doi.org/${article.doi}`}
                                                 target="_blank"
                                                 rel="noreferrer">
