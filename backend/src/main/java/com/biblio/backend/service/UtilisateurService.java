@@ -40,7 +40,7 @@ public class UtilisateurService {
         user.setEmail(request.getEmail());
         user.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         user.setRole("USER");
-        user.setSpecialite(request.getSpecialite());
+        user.setProfil(request.getProfil());
 
         Utilisateur savedUser = utilisateurRepository.save(user);
         String token = jwtService.generateToken(savedUser.getEmail());
@@ -52,7 +52,7 @@ public class UtilisateurService {
                 savedUser.getPrenom(),
                 savedUser.getEmail(),
                 savedUser.getRole(),
-                savedUser.getSpecialite(),
+                savedUser.getProfil(),
                 token
         );
     }
@@ -80,7 +80,7 @@ public class UtilisateurService {
                 user.getPrenom(),
                 user.getEmail(),
                 user.getRole(),
-                user.getSpecialite(),
+                user.getProfil(),
                 token
         );
     }

@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class ArxivService {
 
-    private static final String API_URL = "https://export.arxiv.org/api/query";
+    private static final String API_URL = "http://export.arxiv.org/api/query";
     private static final int MAX_RESULTS = 50;
 
     private final RestTemplate restTemplate = new RestTemplate();

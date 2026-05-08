@@ -7,10 +7,12 @@ import {
     updateArticleNote,
     removeArticleFromProject
 } from '../../services/ProjectArticleServices'
+import {exportBibtex,exportCsv,exportRis} from '../../services/ExportServices'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Navbar from '../../components/Navbar/Navbar'
 import './ProjectDetail.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faTrash, faNoteSticky,faCircleCheck, faCircleXmark,faBookOpen, faArrowLeft,faMagnifyingGlass,faUsers,faChartBar,faCalendar,faLink} from '@fortawesome/free-solid-svg-icons'
+import {faFileCode,faFileCsv,faFileAlt,faDownload} from '@fortawesome/free-solid-svg-icons'
 
 const STATUTS = [
     { value: 'A_LIRE',  label: 'À lire',  color: '#6b7280' },
@@ -155,6 +157,36 @@ function ProjectDetail() {
                         <span className="stat-lbl">Doublons</span>
                     </div>
                 </div>
+
+                {/* Boutons Export */}
+                {articles.length > 0 && (
+                    <div className="export-section">
+                        <span className="export-label">
+                            <FontAwesomeIcon icon={faDownload} /> Exporter :
+                        </span>
+                        <button
+                            className="btn-export btn-bibtex"
+                            onClick={() => exportBibtex(id)}
+                            title="Télécharger le fichier BibTeX (.bib)"
+                        >
+                            <FontAwesomeIcon icon={faFileCode} /> BibTeX
+                        </button>
+                        <button
+                            className="btn-export btn-csv"
+                            onClick={() => exportCsv(id)}
+                            title="Télécharger en CSV"
+                        >
+                            <FontAwesomeIcon icon={faFileCsv} /> CSV
+                        </button>
+                        <button
+                            className="btn-export btn-ris"
+                            onClick={() => exportRis(id)}
+                            title="Télécharger en RIS (Zotero/Mendeley)"
+                        >
+                            <FontAwesomeIcon icon={faFileAlt} /> RIS
+                        </button>
+                    </div>
+                )}
 
                 {/* Alertes */}
                 {error && (

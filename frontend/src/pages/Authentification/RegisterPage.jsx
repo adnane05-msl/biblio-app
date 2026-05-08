@@ -13,7 +13,7 @@ function RegisterPage() {
         prenom: '',
         email: '',
         motDePasse: '',
-        specialite: '',
+        profile: '',
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -33,7 +33,7 @@ function RegisterPage() {
                 form.prenom,
                 form.email,
                 form.motDePasse,
-                form.specialite
+                form.profile
             )
             login(
                 {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
@@ -110,11 +110,11 @@ function RegisterPage() {
                     </div>
 
                     <div className="input-group">
-                        <label className="input-label">Spécialité</label>
+                        <label className="input-label">Profil</label>
                             <select
                                 className="input-field"
                                 name="specialite"
-                                value={form.specialite}
+                                value={form.profil}
                                 onChange={handleChange}
                                 required
                             >

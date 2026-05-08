@@ -412,3 +412,66 @@
     padding: 60px;
     color: #6b7280;
 }
+/* ===== Export ===== */
+.export-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+    padding: 16px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+}
+
+.export-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-right: 4px;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-bibtex {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.btn-bibtex:hover {
+    background-color: #dbeafe;
+}
+
+.btn-csv {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-csv:hover {
+    background-color: #dcfce7;
+}
+
+.btn-ris {
+    background-color: #faf5ff;
+    color: #7c3aed;
+    border: 1px solid #ddd6fe;
+}
+
+.btn-ris:hover {
+    background-color: #ede9fe;
+}

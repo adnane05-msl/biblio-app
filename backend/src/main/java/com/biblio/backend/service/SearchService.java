@@ -67,8 +67,8 @@ public class SearchService {
         });
 
         // Limiter à 100 résultats maximum
-        if (sortedResults.size() > 100) {
-            sortedResults = sortedResults.subList(0, 100);
+        if (sortedResults.size() > 200) {
+            sortedResults = sortedResults.subList(0, 200);
         }
 
         return sortedResults;

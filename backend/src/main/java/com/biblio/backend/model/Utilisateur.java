@@ -33,7 +33,7 @@ public class Utilisateur {
     private String role = "USER";
 
     @Column(length = 50)
-    private String specialite;
+    private String profil;
 
     @Column
     private LocalDate dateInscription = LocalDate.now();
