@@ -13,6 +13,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 function SearchPage() {
     const { user } = useAuth()
 
+    
     const [articles, setArticles] = useState([])
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(false)
@@ -22,6 +23,10 @@ function SearchPage() {
     const [stats, setStats] = useState({
         total: 0, crossref: 0, openalex: 0, arxiv: 0
     })
+    const [publisherFilter, setPublisherFilter] = useState('TOUS')
+    const [publishers, setPublishers] = useState([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const ARTICLES_PER_PAGE = 10
 
     // Charger les projets de l'utilisateur
     useEffect(() => {
@@ -41,6 +46,19 @@ function SearchPage() {
         try {
             const data = await searchArticles(query, sources)
             setArticles(data)
+
+            const uniquePublishers = [
+                ...new Set(
+                    data
+                        .map(a => a.publisher)
+                        .filter(p => p && p.trim() !== '')
+                )
+            ].sort()
+            setPublishers(uniquePublishers)
+            setPublisherFilter('TOUS')
+            setCurrentPage(1)
+
+
 
             // Calculer les stats par source
             setStats({
@@ -70,7 +88,33 @@ function SearchPage() {
         }
         setTimeout(() => setError(''), 3000)
     }
-}
+    }
+
+    // Articles filtrés par publisher
+    const filteredArticles = publisherFilter === 'TOUS'
+        ? articles
+        : articles.filter(a => a.publisher === publisherFilter)
+
+    
+    const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
+    const paginatedArticles = filteredArticles.slice(
+        (currentPage - 1) * ARTICLES_PER_PAGE,
+        currentPage * ARTICLES_PER_PAGE
+    )
+
+    const getPageNumbers = (current, total) => {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i + 1)
+    }
+    if (current <= 3) {
+        return [1, 2, 3, 4, '...', total]
+    }
+    if (current >= total - 2) {
+        return [1, '...', total - 3, total - 2, total - 1, total]
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total]
+    }
+
 
 
     return (
@@ -104,8 +148,16 @@ function SearchPage() {
                 {hasSearched && !loading && (
                     <div className="search-stats">
                         <div className="stat-item stat-total">
-                            <span className="stat-number">{stats.total}</span>
-                            <span className="stat-label">Total</span>
+                            <span className="stat-number">
+                                {filteredArticles.length}
+                                {publisherFilter !== 'TOUS' &&
+                                    <span className="stat-filtered">
+                                        /{articles.length}
+                                    </span>}
+                            </span>
+                            <span className="stat-label">
+                                {publisherFilter !== 'TOUS' ? 'Filtrés' : 'Total'}
+                            </span>
                         </div>
                         <div className="stat-item stat-crossref">
                             <span className="stat-number">{stats.crossref}</span>
@@ -118,6 +170,38 @@ function SearchPage() {
                         <div className="stat-item stat-arxiv">
                             <span className="stat-number">{stats.arxiv}</span>
                             <span className="stat-label">arXiv</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Filtre par publisher */}
+                {publishers.length > 0 && (
+                    <div className="publisher-filter">
+                        <span className="publisher-filter-label">
+                            🏢 Éditeur :
+                        </span>
+                        <div className="publisher-filter-scroll">
+                            <button
+                                className={`publisher-btn ${publisherFilter === 'TOUS' ? 'active' : ''}`}
+                                onClick={() => setPublisherFilter('TOUS')}
+                            >
+                                Tous ({articles.length})
+                            </button>
+                            {publishers.map(publisher => (
+                                <button
+                                    key={publisher}
+                                    className={`publisher-btn ${publisherFilter === publisher ? 'active' : ''}`}
+                                    onClick={() => setPublisherFilter(publisher)}
+                                >
+                                    {publisher.length > 30
+                                        ? publisher.substring(0, 30) + '...'
+                                        : publisher}
+                                    <span className="publisher-count">
+                                        {articles.filter(a =>
+                                            a.publisher === publisher).length}
+                                    </span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 )}
@@ -155,7 +239,7 @@ function SearchPage() {
                 {/* Liste des articles */}
                 {articles.length > 0 && (
                     <div className="articles-list">
-                        {articles.map((article, index) => (
+                        {paginatedArticles.map((article, index) => (
                             <ArticleCard
                                 key={`${article.doi || article.title}-${index}`}
                                 article={article}
@@ -163,6 +247,92 @@ function SearchPage() {
                                 projects={projects}
                             />
                         ))}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <div className="pagination-info">
+                            Page {currentPage} sur {totalPages}
+                            <span className="pagination-total">
+                                ({filteredArticles.length} articles)
+                            </span>
+                        </div>
+
+                        <div className="pagination-controls">
+                            {/* Bouton Première page */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === 1}
+                                title="Première page"
+                            >
+                                «
+                            </button>
+
+                            {/* Bouton Précédent */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(p => p - 1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === 1}
+                                title="Page précédente"
+                            >
+                                ‹
+                            </button>
+
+                            {/* Numéros de pages */}
+                            {getPageNumbers(currentPage, totalPages).map((page, index) =>
+                                page === '...' ? (
+                                    <span key={`dots-${index}`} className="page-dots">
+                                        ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setCurrentPage(page)
+                                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                                        }}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            )}
+
+                            {/* Bouton Suivant */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(p => p + 1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === totalPages}
+                                title="Page suivante"
+                            >
+                                ›
+                            </button>
+
+                            {/* Bouton Dernière page */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(totalPages)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === totalPages}
+                                title="Dernière page"
+                            >
+                                »
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

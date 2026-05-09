@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import './SearchBar.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass, faHourglass } from '@fortawesome/free-solid-svg-icons'
-
+import {
+    faMagnifyingGlass,
+    faHourglass,
+    faDatabase
+} from '@fortawesome/free-solid-svg-icons'
 
 function SearchBar({ onSearch, loading }) {
     const [query, setQuery] = useState('')
@@ -25,6 +28,7 @@ function SearchBar({ onSearch, loading }) {
     return (
         <div className="searchbar-container">
             <form onSubmit={handleSubmit} className="searchbar-form">
+
                 <div className="searchbar-input-row">
                     <input
                         className="searchbar-input"
@@ -39,41 +43,31 @@ function SearchBar({ onSearch, loading }) {
                         type="submit"
                         disabled={loading}
                     >
-                        {loading 
-                        ?<><FontAwesomeIcon icon={faHourglass} /> Recherche... </>
-                        :<><FontAwesomeIcon icon={faMagnifyingGlass} /> Rechercher</>}
+                        {loading
+                            ? <><FontAwesomeIcon icon={faHourglass} /> Recherche...</>
+                            : <><FontAwesomeIcon icon={faMagnifyingGlass} /> Rechercher</>}
                     </button>
                 </div>
 
                 <div className="searchbar-sources">
-                    <span className="sources-label">Sources :</span>
-
-                    <label className={`source-toggle ${sources.crossref ? 'active' : ''}`}>
-                        <input
-                            type="checkbox"
-                            checked={sources.crossref}
-                            onChange={() => handleToggle('crossref')}
-                        />
-                        Crossref
-                    </label>
-
-                    <label className={`source-toggle ${sources.openalex ? 'active' : ''}`}>
-                        <input
-                            type="checkbox"
-                            checked={sources.openalex}
-                            onChange={() => handleToggle('openalex')}
-                        />
-                        OpenAlex
-                    </label>
-
-                    <label className={`source-toggle ${sources.arxiv ? 'active' : ''}`}>
-                        <input
-                            type="checkbox"
-                            checked={sources.arxiv}
-                            onChange={() => handleToggle('arxiv')}
-                        />
-                        arXiv
-                    </label>
+                    <span className="sources-label">
+                        <FontAwesomeIcon icon={faDatabase} /> Sources :
+                    </span>
+                    {['crossref', 'openalex', 'arxiv'].map(source => (
+                        <label
+                            key={source}
+                            className={`source-toggle ${sources[source] ? 'active' : ''}`}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={sources[source]}
+                                onChange={() => handleToggle(source)}
+                            />
+                            {source === 'crossref' ? 'Crossref'
+                                : source === 'openalex' ? 'OpenAlex'
+                                : 'arXiv'}
+                        </label>
+                    ))}
                 </div>
             </form>
         </div>

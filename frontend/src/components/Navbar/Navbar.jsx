@@ -20,7 +20,7 @@ function Navbar() {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                📚 BiblioApp
+                BiblioApp
             </div>
 
             <div className="navbar-links">

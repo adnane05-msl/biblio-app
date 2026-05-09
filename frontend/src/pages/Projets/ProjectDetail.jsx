@@ -14,6 +14,7 @@ import './ProjectDetail.css'
 import {faTrash, faNoteSticky,faCircleCheck, faCircleXmark,faBookOpen, faArrowLeft,faMagnifyingGlass,faUsers,faChartBar,faCalendar,faLink} from '@fortawesome/free-solid-svg-icons'
 import {faFileCode,faFileCsv,faFileAlt,faDownload} from '@fortawesome/free-solid-svg-icons'
 
+
 const STATUTS = [
     { value: 'A_LIRE',  label: 'À lire',  color: '#6b7280' },
     { value: 'RETENU',  label: 'Retenu',  color: '#16a34a' },
@@ -125,6 +126,8 @@ function ProjectDetail() {
                     onClick={() => navigate('/projects')}>
                     <FontAwesomeIcon icon={faArrowLeft} /> Retour aux projets
                 </button>
+
+                
 
                 {/* En-tête projet */}
                 <h1 className="detail-title">{project?.nomProjet}</h1>
