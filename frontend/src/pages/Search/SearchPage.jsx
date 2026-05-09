@@ -20,9 +20,9 @@ function SearchPage() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [hasSearched, setHasSearched] = useState(false)
-    const [stats, setStats] = useState({
-        total: 0, crossref: 0, openalex: 0, arxiv: 0
-    })
+    // const [stats, setStats] = useState({
+    //     total: 0, crossref: 0, openalex: 0, arxiv: 0
+    // })
     const [publisherFilter, setPublisherFilter] = useState('TOUS')
     const [publishers, setPublishers] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
@@ -37,14 +37,16 @@ function SearchPage() {
         }
     }, [user])
 
-    const handleSearch = async (query, sources) => {
+    const handleSearch = async (query) => {
         setLoading(true)
         setError('')
         setHasSearched(true)
         setArticles([])
+        setCurrentPage(1)
+
 
         try {
-            const data = await searchArticles(query, sources)
+            const data = await searchArticles(query)
             setArticles(data)
 
             const uniquePublishers = [
@@ -61,12 +63,12 @@ function SearchPage() {
 
 
             // Calculer les stats par source
-            setStats({
-                total: data.length,
-                crossref: data.filter(a => a.source === 'Crossref').length,
-                openalex: data.filter(a => a.source === 'OpenAlex').length,
-                arxiv: data.filter(a => a.source === 'arXiv').length,
-            })
+            // setStats({
+            //     total: data.length,
+            //     crossref: data.filter(a => a.source === 'Crossref').length,
+            //     openalex: data.filter(a => a.source === 'OpenAlex').length,
+            //     arxiv: data.filter(a => a.source === 'arXiv').length,
+            // })
         } catch{
             setError('Erreur lors de la recherche. Vérifiez votre connexion.')
         } finally {
@@ -125,9 +127,9 @@ function SearchPage() {
                 {/* En-tête */}
                 <div className="search-header">
                     <h1 className="search-title"><FontAwesomeIcon icon={faMagnifyingGlass} /> Recherche d'articles</h1>
-                    <p className="search-subtitle">
+                    {/* <p className="search-subtitle">
                         Recherchez dans Crossref, OpenAlex et arXiv simultanément
-                    </p>
+                    </p> */}
                 </div>
 
                 {/* Barre de recherche */}
@@ -145,7 +147,7 @@ function SearchPage() {
                 )}
 
                 {/* Stats après recherche */}
-                {hasSearched && !loading && (
+                {/* {hasSearched && !loading && (
                     <div className="search-stats">
                         <div className="stat-item stat-total">
                             <span className="stat-number">
@@ -172,7 +174,7 @@ function SearchPage() {
                             <span className="stat-label">arXiv</span>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Filtre par publisher */}
                 {publishers.length > 0 && (

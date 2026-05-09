@@ -1,16 +1,13 @@
 import api from './Api'
 
-export const searchArticles = async (query, sources = {
-    crossref: true,
-    openalex: true,
-    arxiv: false
-}) => {
+export const searchArticles = async (query, maxResults = 50) => {
     const response = await api.get('/api/recherche', {
         params: {
             query,
-            crossref: sources.crossref,
-            openalex: sources.openalex,
-            arxiv: sources.arxiv,
+            crossref: true,    // ← toujours true
+            openalex: true,    // ← toujours true
+            arxiv: false,      // ← toujours false
+            maxResults,
         }
     })
     return response.data

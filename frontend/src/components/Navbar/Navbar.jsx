@@ -24,6 +24,9 @@ function Navbar() {
             </div>
 
             <div className="navbar-links">
+                <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+                    Accueil
+                </Link>
                 <Link
                     to="/search"
                     className={`nav-link ${isActive('/search') ? 'active' : ''}`}
@@ -36,6 +39,10 @@ function Navbar() {
                 >
                     Mes Projets
                 </Link>
+                
+                {/* <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>
+                    À propos
+                </Link> */}
             </div>
 
             <div className="navbar-user">

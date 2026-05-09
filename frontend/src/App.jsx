@@ -7,6 +7,9 @@ import SearchPage from './pages/Search/SearchPage'
 import ProjectsPage from './pages/Projets/ProjectsPage'
 import ProjectDetail from './pages/Projets/ProjectDetail'
 import DashboardPage from './pages/Dashboard/DashboardPage'
+import HomePage from './pages/HomePage/HomePage'
+import AboutPage from './pages/About/AboutPage'
+
 
 function ProtectedRoute({ children }) {
     const { user } = useAuth()
@@ -16,20 +19,18 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
     return (
         <Routes>
-            <Route path="/"         element={<LoginPage />} />
+            <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/search"   element={
-                <ProtectedRoute><SearchPage /></ProtectedRoute>
-            } />
-            <Route path="/projects"   element={
-                <ProtectedRoute><ProjectsPage /></ProtectedRoute>
-            } />
+            <Route path="/search"   element={<SearchPage />} />
+            <Route path="/projects"   element={<ProjectsPage />} />
             <Route path="/projects/:id" element={
                 <ProtectedRoute><ProjectDetail /></ProtectedRoute>
             } />
             <Route path="/projects/:id/dashboard" element={
                 <ProtectedRoute><DashboardPage /></ProtectedRoute>
             } />
+            <Route path="/" element={<HomePage />} />
+            {/* <Route path="/about" element={<AboutPage />} /> */}
             
         </Routes>
     )

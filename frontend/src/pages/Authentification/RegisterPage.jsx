@@ -136,7 +136,7 @@ function RegisterPage() {
 
                 <p className="register-footer">
                     Déjà un compte ?{' '}
-                    <Link to="/">Se connecter</Link>
+                    <Link to="/login">Se connecter</Link>
                 </p>
             </div>
         </div>
