@@ -122,12 +122,18 @@ function ProjectDetail() {
             <div className="detail-container">
 
                 {/* Retour */}
-                <button className="btn-back"
-                    onClick={() => navigate('/projects')}>
-                    <FontAwesomeIcon icon={faArrowLeft} /> Retour aux projets
-                </button>
 
-                
+                <div className="detail-header-actions">
+                    <button className="btn-back"
+                        onClick={() => navigate('/projects')}>
+                        <FontAwesomeIcon icon={faArrowLeft} /> Retour aux projets
+                    </button>
+                    <button
+                        className="btn-dashboard"
+                        onClick={() => navigate(`/projects/${id}/dashboard`)}>
+                        <FontAwesomeIcon icon={faChartBar} /> Dashboard
+                    </button>
+                </div>
 
                 {/* En-tête projet */}
                 <h1 className="detail-title">{project?.nomProjet}</h1>
