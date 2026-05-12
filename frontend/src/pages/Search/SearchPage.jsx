@@ -20,9 +20,6 @@ function SearchPage() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [hasSearched, setHasSearched] = useState(false)
-    // const [stats, setStats] = useState({
-    //     total: 0, crossref: 0, openalex: 0, arxiv: 0
-    // })
     const [publisherFilter, setPublisherFilter] = useState('TOUS')
     const [publishers, setPublishers] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
@@ -59,16 +56,6 @@ function SearchPage() {
             setPublishers(uniquePublishers)
             setPublisherFilter('TOUS')
             setCurrentPage(1)
-
-
-
-            // Calculer les stats par source
-            // setStats({
-            //     total: data.length,
-            //     crossref: data.filter(a => a.source === 'Crossref').length,
-            //     openalex: data.filter(a => a.source === 'OpenAlex').length,
-            //     arxiv: data.filter(a => a.source === 'arXiv').length,
-            // })
         } catch{
             setError('Erreur lors de la recherche. Vérifiez votre connexion.')
         } finally {
@@ -124,12 +111,10 @@ function SearchPage() {
             <Navbar />
 
             <div className="search-container">
+
                 {/* En-tête */}
                 <div className="search-header">
-                    <h1 className="search-title"><FontAwesomeIcon icon={faMagnifyingGlass} /> Recherche d'articles</h1>
-                    {/* <p className="search-subtitle">
-                        Recherchez dans Crossref, OpenAlex et arXiv simultanément
-                    </p> */}
+                    <h1 className="search-title"><FontAwesomeIcon icon={faMagnifyingGlass} className='icon'/> Recherche d'articles</h1>
                 </div>
 
                 {/* Barre de recherche */}
@@ -145,36 +130,6 @@ function SearchPage() {
                 {success && (
                     <div className="alert alert-success">{success}</div>
                 )}
-
-                {/* Stats après recherche */}
-                {/* {hasSearched && !loading && (
-                    <div className="search-stats">
-                        <div className="stat-item stat-total">
-                            <span className="stat-number">
-                                {filteredArticles.length}
-                                {publisherFilter !== 'TOUS' &&
-                                    <span className="stat-filtered">
-                                        /{articles.length}
-                                    </span>}
-                            </span>
-                            <span className="stat-label">
-                                {publisherFilter !== 'TOUS' ? 'Filtrés' : 'Total'}
-                            </span>
-                        </div>
-                        <div className="stat-item stat-crossref">
-                            <span className="stat-number">{stats.crossref}</span>
-                            <span className="stat-label">Crossref</span>
-                        </div>
-                        <div className="stat-item stat-openalex">
-                            <span className="stat-number">{stats.openalex}</span>
-                            <span className="stat-label">OpenAlex</span>
-                        </div>
-                        <div className="stat-item stat-arxiv">
-                            <span className="stat-number">{stats.arxiv}</span>
-                            <span className="stat-label">arXiv</span>
-                        </div>
-                    </div>
-                )} */}
 
                 {/* Filtre par publisher */}
                 {publishers.length > 0 && (
@@ -204,6 +159,91 @@ function SearchPage() {
                                     </span>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+                )}
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <div className="pagination-info">
+                            Page {currentPage} sur {totalPages}
+                            <span className="pagination-total">
+                                ({filteredArticles.length} articles)
+                            </span>
+                        </div>
+
+                        <div className="pagination-controls">
+                            {/* Bouton Première page */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === 1}
+                                title="Première page"
+                            >
+                                «
+                            </button>
+
+                            {/* Bouton Précédent */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(p => p - 1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === 1}
+                                title="Page précédente"
+                            >
+                                ‹
+                            </button>
+
+                            {/* Numéros de pages */}
+                            {getPageNumbers(currentPage, totalPages).map((page, index) =>
+                                page === '...' ? (
+                                    <span key={`dots-${index}`} className="page-dots">
+                                        ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setCurrentPage(page)
+                                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                                        }}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            )}
+
+                            {/* Bouton Suivant */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(p => p + 1)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === totalPages}
+                                title="Page suivante"
+                            >
+                                ›
+                            </button>
+
+                            {/* Bouton Dernière page */}
+                            <button
+                                className="page-btn page-nav"
+                                onClick={() => {
+                                    setCurrentPage(totalPages)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                                disabled={currentPage === totalPages}
+                                title="Dernière page"
+                            >
+                                »
+                            </button>
                         </div>
                     </div>
                 )}

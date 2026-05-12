@@ -1,127 +1,249 @@
-// frontend/src/pages/HomePage.jsx
-import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/useAuth'
+import { useNavigate } from 'react-router-dom'
 import './HomePage.css'
-import Navbar from '../../components/Navbar/Navbar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass, faFolder, faFileExport, faChartBar, faMicroscope, faBook} from '@fortawesome/free-solid-svg-icons'
+import {
+    faRocket, faSearch,
+    faFolder, faFileExport, faCopy,
+    faNoteSticky, faChartBar,
+    faBookOpen
+} from '@fortawesome/free-solid-svg-icons'
+import Navbar from '../../components/Navbar/Navbar'
+
+const features = [
+    {
+        icon: faSearch,
+        color: 'icon-blue',
+        name: 'Recherche intelligente',
+        desc: 'Trouvez des milliers d\'articles scientifiques à partir de simples mots-clés.'
+    },
+    {
+        icon: faFolder,
+        color: 'icon-green',
+        name: 'Gestion de projets',
+        desc: 'Organisez vos articles par projet de recherche avec statuts et annotations.'
+    },
+    {
+        icon: faFileExport,
+        color: 'icon-amber',
+        name: 'Export bibliographique',
+        desc: 'Générez vos références pour LaTeX, Zotero ou Mendeley en un clic.'
+    },
+    {
+        icon: faCopy,
+        color: 'icon-coral',
+        name: 'Déduplication auto',
+        desc: 'Détection automatique des doublons pour des résultats toujours propres.'
+    },
+    {
+        icon: faNoteSticky,
+        color: 'icon-purple',
+        name: 'Annotations et statuts',
+        desc: 'Marquez chaque article : retenu, exclu, à lire ou doublon.'
+    },
+    {
+        icon: faChartBar,
+        color: 'icon-teal',
+        name: 'Dashboard bibliométrique',
+        desc: 'Visualisez la répartition par année, auteur et statut de vos articles.'
+    },
+]
+
+const steps = [
+    {
+        num: 1,
+        label: 'Créez un compte',
+        desc: 'Inscription rapide avec votre profil académique'
+    },
+    {
+        num: 2,
+        label: 'Recherchez',
+        desc: 'Entrez vos mots-clés et obtenez des résultats dédupliqués'
+    },
+    {
+        num: 3,
+        label: 'Organisez',
+        desc: 'Sauvegardez et annotez vos articles dans vos projets'
+    },
+    {
+        num: 4,
+        label: 'Exportez',
+        desc: 'Téléchargez vos références en BibTeX, CSV ou RIS'
+    },
+]
+
+const previewArticles = [
+    {
+        year: 2023,
+        title: 'Deep Learning for Natural Language Processing',
+        meta: 'Smith et al. · 142 citations'
+    },
+    {
+        year: 2024,
+        title: 'Machine Learning in Healthcare: A Review',
+        meta: 'Johnson et al. · 89 citations'
+    },
+    {
+        year: 2024,
+        title: 'Transformer Models for Scientific Text',
+        meta: 'Lee et al. · 56 citations'
+    },
+]
 
 function HomePage() {
-    const { user } = useAuth()
+    const navigate = useNavigate()
 
     return (
-        <div className="homepage">
+        <div className="home-page">
             <Navbar />
-            {/* Hero Section */}
-            <section className="hero">
+            {/* ── HERO ── */}
+            <section className="hero-section">
+                <div className="hero-bg-circle circle1" />
+                <div className="hero-bg-circle circle2" />
+                <div className="hero-bg-circle circle3" />
+
                 <div className="hero-content">
+                    <span className="hero-badge">
+                        <FontAwesomeIcon icon={faBookOpen} />
+                        Application bibliographique académique
+                    </span>
                     <h1 className="hero-title">
-                        Bibliographic Assistant
+                        Recherchez, organisez et exportez vos{' '}
+                        <span>références scientifiques</span>
                     </h1>
                     <p className="hero-subtitle">
-                        Gérez vos références scientifiques en toute simplicité
+                        BiblioApp interroge automatiquement les bases de données
+                        scientifiques, déduplique les résultats et génère vos
+                        fichiers BibTeX, CSV et RIS en un clic.
                     </p>
-                    <p className="hero-description">
-                        Recherchez dans plusieurs sources, organisez vos projets,
-                        et exportez vos bibliographies au format BibTeX, CSV ou RIS.
-                    </p>
-                    <Link 
-                        to={user ? "/projects" : "/register"} 
-                        className="btn-hero"
-                    >
-                        {user ? "Accéder à mes projets →" : "Commencer gratuitement →"}
-                    </Link>
+                    <div className="hero-cta">
+                        <button
+                            className="btn-primary"
+                            onClick={() => navigate('/register')}
+                        >
+                            <FontAwesomeIcon icon={faRocket} />
+                            Commencer gratuitement
+                        </button>
+                        <button
+                            className="btn-secondary"
+                            onClick={() => navigate('/Login')}
+                            >
+                            Se connecter
+                        </button>
+                    </div>
                 </div>
-            </section>
 
-            {/* Features Section */}
-            <section className="features">
-                <h2 className="section-title">Fonctionnalités</h2>
-                <div className="features-grid">
-                    <div className="feature-card">
-                        <div className="feature-icon">
-                            <FontAwesomeIcon icon={faMagnifyingGlass} />
-                        </div>
-                        <h3>Recherche multi-sources</h3>
-                        <p>Interrogez Crossref, OpenAlex et arXiv simultanément</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">
-                            <FontAwesomeIcon icon={faFolder} />
-                        </div>
-                        <h3>Projets organisés</h3>
-                        <p>Créez des projets et classez vos articles par statut</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">
-                            <FontAwesomeIcon icon={faFileExport} />
+                {/* Cartes d'aperçu */}
+                <div className="hero-visual">
+                    <div className="hero-card-stack">
+                        {previewArticles.map((article, index) => (
+                            <div
+                                key={index}
+                                className={`mini-card mini-card-${index + 1}`}
+                            >
+                                <span className="mini-card-type">
+                                    <FontAwesomeIcon icon={faBookOpen} />
+                                    Article · {article.year}
+                                </span>
+                                <p className="mini-card-title">
+                                    {article.title}
+                                </p>
+                                <p className="mini-card-meta">
+                                    {article.meta}
+                                </p>
                             </div>
-                        <h3>Export BibTeX/CSV/RIS</h3>
-                        <p>Compatibilité avec LaTeX, Zotero et Mendeley</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">
-                            <FontAwesomeIcon icon={faChartBar} />
-                        </div>
-                        <h3>Analyse bibliométrique</h3>
-                        <p>Visualisez vos publications par année, auteurs, citations</p>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Sources Section */}
-            <section className="sources">
-                <h2 className="section-title">Sources scientifiques</h2>
-                <div className="sources-grid">
-                    <div className="source-card">
-                        <div className="source-icon">
-                            <FontAwesomeIcon icon={faMicroscope} />
-                        </div>
-                        <h3>Crossref</h3>
-                        <p>API académique majeure</p>
-                    </div>
-                    <div className="source-card">
-                        <div className="source-icon">
-                            <FontAwesomeIcon icon={faBook} />
-                        </div>
-                        <h3>OpenAlex</h3>
-                        <p>Base de données gratuite</p>
-                    </div>
-                    {/* <div className="source-card">
-                        <div className="source-icon">
-                            <FontAwesomeIcon icon={faFileAlt} />
-                        </div>
-                        <h3>arXiv</h3>
-                        <p>Preprints scientifiques</p>
-                    </div> */}
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            <section className="stats">
+            {/* ── STATS ── */}
+            <section className="stats-section">
                 <div className="stats-grid">
-                    <div className="stat-item">
-                        <span className="stat-number">2+</span>
-                        <span className="stat-label">Sources API</span>
+                    <div className="stat-box">
+                        <span className="stat-num">+200</span>
+                        <p className="stat-label">Articles par recherche</p>
                     </div>
-                    <div className="stat-item">
-                        <span className="stat-number">100+</span>
-                        <span className="stat-label">Articles par recherche</span>
+                    <div className="stat-box">
+                        <span className="stat-num">3</span>
+                        <p className="stat-label">Formats d'export</p>
                     </div>
-                    <div className="stat-item">
-                        <span className="stat-number">3+</span>
-                        <span className="stat-label">Formats d'export</span>
+                    <div className="stat-box">
+                        <span className="stat-num">100%</span>
+                        <p className="stat-label">Gratuit et accessible</p>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="cta">
-                <h2>Prêt à organiser vos recherches ?</h2>
-                <Link to="/register" className="btn-cta">
-                    Créer un compte gratuitement
-                </Link>
+            {/* ── FEATURES ── */}
+            <section className="features-section">
+                <h2 className="section-title">
+                    Tout ce dont vous avez besoin pour votre revue de littérature
+                </h2>
+                <p className="section-sub">
+                    6 modules conçus pour les étudiants et chercheurs
+                </p>
+                <div className="features-grid">
+                    {features.map((f, index) => (
+                        <div key={index} className="feature-card">
+                            <div className={`feature-icon ${f.color}`}>
+                                <FontAwesomeIcon icon={f.icon} />
+                            </div>
+                            <p className="feature-name">{f.name}</p>
+                            <p className="feature-desc">{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
             </section>
+
+            {/* ── COMMENT ÇA MARCHE ── */}
+            <section className="steps-section">
+                <h2 className="section-title">Comment ça marche ?</h2>
+                <p className="section-sub">
+                    4 étapes pour une revue de littérature complète
+                </p>
+                <div className="steps-row">
+                    {steps.map((step, index) => (
+                        <div key={index} className="step-item">
+                            <div className="step-connector" />
+                            <div className="step-num">{step.num}</div>
+                            <p className="step-label">{step.label}</p>
+                            <p className="step-desc">{step.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ── CTA FINAL ── */}
+            <section className="cta-section">
+                <h2 className="cta-title">
+                    Prêt à simplifier votre recherche bibliographique ?
+                </h2>
+                <p className="cta-sub">
+                    Rejoignez BiblioApp et commencez votre première
+                    revue de littérature aujourd'hui.
+                </p>
+                <div className="cta-buttons">
+                    <button
+                        className="btn-primary"
+                        onClick={() => navigate('/register')}
+                    >
+                        <FontAwesomeIcon icon={faRocket} />
+                        Créer un compte gratuit
+                    </button>
+                    <button
+                        className="btn-secondary"
+                        onClick={() => navigate('/Login')}
+                    >
+                        Se connecter
+                    </button>
+                </div>
+            </section>
+
+            {/* ── FOOTER ── */}
+            <footer className="home-footer">
+                <p>© 2025 BiblioApp — Application de recherche bibliographique</p>
+            </footer>
+
         </div>
     )
 }

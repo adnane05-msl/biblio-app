@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faBookOpen } from '@fortawesome/free-solid-svg-icons'
 
 import './Navbar.css'
 
@@ -20,7 +20,7 @@ function Navbar() {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                BiblioApp
+                <FontAwesomeIcon icon={faBookOpen} /> BiblioApp
             </div>
 
             <div className="navbar-links">
