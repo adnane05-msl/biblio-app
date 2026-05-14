@@ -6,46 +6,24 @@
 
 /* ── HERO ── */
 .hero-section {
-    max-width: 1100px;
-    margin: 0px auto;
-    padding: 60px 24px;
+    min-height: 420px;
+    background: var(--color-background-primary);
+    border-radius: var(--border-radius-lg);
+    border: 0.5px solid var(--color-border-tertiary);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 48px;
+    padding: 48px 48px 48px 52px;
+    gap: 32px;
     position: relative;
     overflow: hidden;
 }
 
-.hero-bg-circle {
+.hero-bg {
     position: absolute;
-    border-radius: 50%;
+    inset: 0;
     pointer-events: none;
     z-index: 0;
-}
-
-.circle1 {
-    width: 300px;
-    height: 300px;
-    background-color: rgba(37,99,235,0.08);
-    top: -80px;
-    right: 200px;
-}
-
-.circle2 {
-    width: 200px;
-    height: 200px;
-    background-color: rgba(22,163,74,0.07);
-    bottom: -40px;
-    right: 80px;
-}
-
-.circle3 {
-    width: 160px;
-    height: 160px;
-    background-color: rgba(217,119,6,0.07);
-    bottom: 20px;
-    left: -40px;
 }
 
 .hero-content {
@@ -94,42 +72,46 @@
 }
 
 /* ── BOUTONS GLOBAUX ── */
-.btn-primary {
-    background-color: #2563eb;
-    color: #ffffff;
+.btn-primary-hero {
+    background-color: #185FA5;
+    color: #E6F1FB;
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8;
-}
-
-.btn-secondary {
-    background-color: #ffffff;
-    color: #374151;
-    border: 1px solid #d1d5db;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
 }
 
-.btn-secondary:hover {
+.btn-primary-hero:hover {
+    background-color: #0e4a82;
+    transform: translateY(-1px);
+}
+
+.btn-secondary-hero {
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-secondary-hero:hover {
     border-color: #2563eb;
     color: #2563eb;
+    background-color: #f8fafc;
 }
 
 
@@ -156,9 +138,9 @@
     box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 
-.mini-card-1 { top: 0;    left: 20px; z-index: 1; }
-.mini-card-2 { top: 70px; left: 0;    z-index: 2; }
-.mini-card-3 { top: 140px;left: 14px; z-index: 3; }
+.mini-card-1 { top: 0;    left: -20px; z-index: 1; }
+.mini-card-2 { top: 70px; left: -40px;    z-index: 2; }
+.mini-card-3 { top: 140px;left: -14px; z-index: 3; }
 
 .mini-card-type {
     font-size: 10px;
@@ -192,7 +174,6 @@
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
     padding: 32px 24px;
-    
 }
 
 .stats-grid {
@@ -208,6 +189,14 @@
     padding: 16px;
     border: #bfcdda solid 1.5px;
     border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.stat-box:hover {
+    transform: translateY(-4px);
+    border-color: #2563eb;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
 }
 
 .stat-num {
@@ -215,6 +204,11 @@
     font-weight: 700;
     color: #2563eb;
     display: block;
+    transition: transform 0.2s;
+}
+
+.stat-box:hover .stat-num {
+    transform: scale(1.05);
 }
 
 .stat-label {
@@ -393,14 +387,25 @@
     flex-wrap: wrap;
 }
 
-/* ── FOOTER ── */
-.home-footer {
-    background-color: #1e3a5f;
-    color: #93c5fd;
-    text-align: center;
-    padding: 20px;
-    font-size: 13px;
+
+
+/* Responsive */
+@media (max-width: 600px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-left {
+        align-items: center;
+    }
+    
+    .footer-links {
+        justify-content: center;
+        gap: 16px;
+    }
 }
+
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {

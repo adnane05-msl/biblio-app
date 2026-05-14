@@ -1,0 +1,164 @@
+.footer {
+    background-color: #1e3a5f;
+    color: #cbd5e1;
+    margin-top: auto;
+}
+
+/* ── Contenu principal ── */
+.footer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 24px 32px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+}
+
+/* ── Colonne brand ── */
+.footer-brand {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.footer-brand-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.footer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background-color: rgba(37,99,235,0.2);
+    color: #93c5fd;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(37,99,235,0.3);
+}
+
+/* ── Colonnes ── */
+.footer-col-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+    text-decoration: none;
+    cursor: default;
+    transition: color 0.2s;
+}
+
+a.footer-link {
+    cursor: pointer;
+}
+
+a.footer-link:hover {
+    color: #93c5fd;
+}
+
+.footer-link svg {
+    font-size: 12px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+/* ── Bottom bar ── */
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.footer-copy {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.footer-made {
+    font-size: 12px;
+    color: #475569;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+    }
+    .footer-brand-col {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Logo Université */
+.footer-university {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.university-logo {
+    height: 50px;
+    width: auto;
+}
+
+.university-text p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0;
+}
+
+.university-text span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+}

@@ -1,13 +1,15 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../context/useAuth'
 import './HomePage.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-    faRocket, faSearch,
+    faSearch,
     faFolder, faFileExport, faCopy,
     faNoteSticky, faChartBar,
-    faBookOpen
+    faBookOpen, faArrowRight, faGraduationCap, faUserPlus
 } from '@fortawesome/free-solid-svg-icons'
 import Navbar from '../../components/Navbar/Navbar'
+import Footer from '../../components/Footer/Footer'
 
 const features = [
     {
@@ -91,19 +93,23 @@ const previewArticles = [
 
 function HomePage() {
     const navigate = useNavigate()
+    const { user } = useAuth()
+
 
     return (
         <div className="home-page">
             <Navbar />
             {/* ── HERO ── */}
             <section className="hero-section">
-                <div className="hero-bg-circle circle1" />
-                <div className="hero-bg-circle circle2" />
-                <div className="hero-bg-circle circle3" />
+                <svg className="hero-bg" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice">
+                    <circle cx="580" cy="80" r="120" fill="#2563eb" opacity="0.15"/>
+                    <circle cx="620" cy="320" r="90" fill="#16a34a" opacity="0.1"/>
+                    <circle cx="30" cy="30" r="90" fill="#7c3aed" opacity="0.12"/>
+                </svg>
 
                 <div className="hero-content">
                     <span className="hero-badge">
-                        <FontAwesomeIcon icon={faBookOpen} />
+                        <FontAwesomeIcon icon={faGraduationCap} />
                         Application bibliographique académique
                     </span>
                     <h1 className="hero-title">
@@ -115,21 +121,30 @@ function HomePage() {
                         scientifiques, déduplique les résultats et génère vos
                         fichiers BibTeX, CSV et RIS en un clic.
                     </p>
+
+
                     <div className="hero-cta">
-                        <button
-                            className="btn-primary"
-                            onClick={() => navigate('/register')}
-                        >
-                            <FontAwesomeIcon icon={faRocket} />
-                            Commencer gratuitement
-                        </button>
-                        <button
-                            className="btn-secondary"
-                            onClick={() => navigate('/Login')}
-                            >
-                            Se connecter
-                        </button>
+                        {!user ? (
+                            <>
+                                <button to="/register" className="btn-primary-hero">
+                                    <FontAwesomeIcon icon={faUserPlus} />
+                                    Créer mon compte
+                                </button>
+                                <button
+                                    className="btn-secondary-hero"
+                                    onClick={() => navigate('/login')}
+                                >
+                                    Se connecter
+                                </button>
+                            </>
+                        ) : (
+                            <button to="/projects" className="btn-primary-hero">
+                                <FontAwesomeIcon icon={faArrowRight} />
+                                Accéder à mes projets
+                            </button>
+                        )}
                     </div>
+
                 </div>
 
                 {/* Cartes d'aperçu */}
@@ -224,14 +239,14 @@ function HomePage() {
                 </p>
                 <div className="cta-buttons">
                     <button
-                        className="btn-primary"
+                        className="btn-primary-hero"
                         onClick={() => navigate('/register')}
                     >
-                        <FontAwesomeIcon icon={faRocket} />
-                        Créer un compte gratuit
+                        <FontAwesomeIcon icon={faUserPlus} />
+                        Créer un compte
                     </button>
                     <button
-                        className="btn-secondary"
+                        className="btn-secondary-hero"
                         onClick={() => navigate('/Login')}
                     >
                         Se connecter
@@ -239,11 +254,7 @@ function HomePage() {
                 </div>
             </section>
 
-            {/* ── FOOTER ── */}
-            <footer className="home-footer">
-                <p>© 2025 BiblioApp — Application de recherche bibliographique</p>
-            </footer>
-
+            <Footer />
         </div>
     )
 }
