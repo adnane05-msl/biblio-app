@@ -96,7 +96,7 @@ function Footer() {
                         <li>
                             <span className="footer-link">
                                 <FontAwesomeIcon icon={faEnvelope} />
-                                contact@biblioapp.ma
+                                biblioapp@gmail.com
                             </span>
                         </li>
                         <li>
@@ -118,7 +118,6 @@ function Footer() {
                 />
                 <div className="university-text">
                     <p>Faculté des Sciences</p>
-                    <span>Université — Projet de Fin d'Études</span>
                 </div>
             </div>
 

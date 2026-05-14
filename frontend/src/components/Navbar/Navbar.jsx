@@ -1,8 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faBookOpen } from '@fortawesome/free-solid-svg-icons'
-
+import { faUser, faBookOpen, faChevronDown } from '@fortawesome/free-solid-svg-icons'
+import { useState } from 'react'
 import './Navbar.css'
 
 function Navbar() {
@@ -16,6 +16,9 @@ function Navbar() {
     }
 
     const isActive = (path) => location.pathname === path
+
+    const [showMenu, setShowMenu] = useState(false)
+
 
     return (
         <nav className="navbar">
@@ -46,15 +49,46 @@ function Navbar() {
             </div>
 
             <div className="navbar-user">
-                <span className="user-info">
-                    <FontAwesomeIcon icon={faUser} /> {user?.prenom} {user?.nom}
-                </span>
-                <span className="user-specialite">
-                    {user?.specialite}
-                </span>
-                <button className="btn-logout" onClick={handleLogout}>
-                    Déconnexion
-                </button>
+                <div
+                    className="user-menu-trigger"
+                    onClick={() => setShowMenu(!showMenu)}
+                >
+                    <div className="user-avatar">
+                        <FontAwesomeIcon icon={faUser} />
+                    </div>
+                    <div className="user-details">
+                        <span className="user-name">
+                            {user?.prenom} {user?.nom}
+                        </span>
+                        <span className="user-profil">
+                            {user?.profil || 'Profil'}
+                        </span>
+                    </div>
+                    <FontAwesomeIcon
+                        icon={faChevronDown}
+                        className={`chevron ${showMenu ? 'open' : ''}`}
+                    />
+                </div>
+
+                {showMenu && (
+                    <div className="user-dropdown">
+                        <Link
+                            to="/profil"
+                            className="dropdown-item"
+                            onClick={() => setShowMenu(false)}
+                        >
+                            <FontAwesomeIcon icon={faUser} />
+                            Mon profil
+                        </Link>
+                        <div className="dropdown-divider" />
+                        <button
+                            className="dropdown-item dropdown-logout"
+                            onClick={handleLogout}
+                        >
+                            Déconnexion
+                        </button>
+                    </div>
+                )}
             </div>
         </nav>
     )

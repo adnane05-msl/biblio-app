@@ -93,7 +93,7 @@ a.footer-link:hover {
     border-top: 1px solid rgba(255,255,255,0.08);
     padding: 18px 24px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     max-width: 1100px;
     margin: 0 auto;
@@ -129,7 +129,7 @@ a.footer-link:hover {
     padding: 20px 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
     gap: 16px;
     border-top: 1px solid rgba(255,255,255,0.08);
     flex-wrap: wrap;
@@ -146,11 +146,6 @@ a.footer-link:hover {
     font-weight: 500;
     color: #ffffff;
     margin: 0;
-}
-
-.university-text span {
-    font-size: 11px;
-    color: #64748b;
 }
 
 @media (max-width: 480px) {

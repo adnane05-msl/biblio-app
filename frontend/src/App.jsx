@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import './App.css'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import LoginPage from './pages/Authentification/LoginPage'
@@ -9,6 +10,7 @@ import ProjectDetail from './pages/Projets/ProjectDetail'
 import DashboardPage from './pages/Dashboard/DashboardPage'
 import HomePage from './pages/HomePage/HomePage'
 import AboutPage from './pages/About/AboutPage'
+import ProfilPage from './pages/Profil/ProfilPage'
 
 
 function ProtectedRoute({ children }) {
@@ -30,6 +32,7 @@ function AppRoutes() {
                 <ProtectedRoute><DashboardPage /></ProtectedRoute>
             } />
             <Route path="/" element={<HomePage />} />
+            <Route path="/profil" element={<ProfilPage />} />    
             {/* <Route path="/about" element={<AboutPage />} /> */}
             
         </Routes>

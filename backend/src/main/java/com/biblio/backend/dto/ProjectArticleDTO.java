@@ -1,6 +1,5 @@
 package com.biblio.backend.dto;
 
-import com.biblio.backend.model.ProjectArticle;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

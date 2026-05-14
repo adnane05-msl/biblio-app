@@ -1,8 +1,6 @@
 package com.biblio.backend.service;
 
-import com.biblio.backend.dto.LoginRequest;
-import com.biblio.backend.dto.RegisterRequest;
-import com.biblio.backend.dto.UtilisateurDTO;
+import com.biblio.backend.dto.*;
 import com.biblio.backend.model.Utilisateur;
 import com.biblio.backend.repository.UtilisateurRepository;
 import com.biblio.backend.security.JwtService;
@@ -90,5 +88,65 @@ public class UtilisateurService {
 //        return utilisateurRepository.findById(id)
 //                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 //    }
+
+    // Mettre à jour le profil
+    public UtilisateurDTO updateProfil(Long id, UpdateProfilRequest request) {
+
+        Utilisateur user = utilisateurRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Utilisateur non trouvé"));
+
+        user.setNom(request.getNom());
+        user.setPrenom(request.getPrenom());
+        user.setProfil(request.getProfil());
+
+        Utilisateur updated = utilisateurRepository.save(user);
+        String token = jwtService.generateToken(updated.getEmail());
+
+        return new UtilisateurDTO(
+                updated.getId(),
+                updated.getNom(),
+                updated.getPrenom(),
+                updated.getEmail(),
+                updated.getRole(),
+                updated.getProfil(),
+                token
+        );
+    }
+
+    // Changer le mot de passe
+    public void changePassword(Long id, ChangePasswordRequest request) {
+
+        Utilisateur user = utilisateurRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Utilisateur non trouvé"));
+
+        if (!passwordEncoder.matches(
+                request.getAncienMotDePasse(),
+                user.getMotDePasse())) {
+            throw new RuntimeException("Ancien mot de passe incorrect");
+        }
+
+        user.setMotDePasse(
+                passwordEncoder.encode(request.getNouveauMotDePasse()));
+        utilisateurRepository.save(user);
+    }
+
+    // Récupérer un utilisateur par ID
+    public UtilisateurDTO findById(Long id) {
+        Utilisateur user = utilisateurRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Utilisateur non trouvé"));
+
+        return new UtilisateurDTO(
+                user.getId(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getEmail(),
+                user.getRole(),
+                user.getProfil(),
+                null
+        );
+    }
 
 }
