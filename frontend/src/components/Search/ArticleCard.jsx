@@ -7,24 +7,11 @@ function ArticleCard({ article, onSave, projects }) {
     const [expanded, setExpanded] = useState(false)
     const [showSaveMenu, setShowSaveMenu] = useState(false)
 
-    const sourceColors = {
-        Crossref: '#2563eb',
-        OpenAlex: '#16a34a',
-        arXiv: '#dc2626',
-    }
-
-    const sourceColor = sourceColors[article.source] || '#6b7280'
 
     return (
         <div className="article-card">
             <div className="article-card-header">
                 <div className="article-meta-top">
-                    <span
-                        className="article-source"
-                        style={{ backgroundColor: sourceColor }}
-                    >
-                        {article.source}
-                    </span>
                     {article.documentType && (
                         <span className="article-type">{article.documentType}</span>
                     )}

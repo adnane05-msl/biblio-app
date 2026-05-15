@@ -58,7 +58,7 @@ public class ExportService {
                         .append(a.getUrl()).append("},\n");
 
             if (a.getNbCitations() != null)
-                sb.append("  note      = {Citations: ")
+                sb.append("  citations      = {Citations: ")
                         .append(a.getNbCitations()).append("},\n");
 
             if (pa.getNote() != null && !pa.getNote().isEmpty())
@@ -89,7 +89,7 @@ public class ExportService {
         sb.append('\uFEFF');
 
         // Séparateur point-virgule — Excel français l'utilise
-        sb.append("Titre;Auteurs;Annee;DOI;URL;Citations;Statut;Note\n");
+        sb.append("Titre;Auteurs;Annee;DOI;URL;Citations;Resume;Statut;Note\n");
 
         for (ProjectArticle pa : list) {
             Article a = pa.getArticle();
@@ -102,6 +102,7 @@ public class ExportService {
             sb.append(csvField(a.getUrl())).append(";");
             sb.append(a.getNbCitations() != null
                     ? a.getNbCitations() : "").append(";");
+            sb.append(csvField(a.getResume())).append(";");
             sb.append(csvField(pa.getStatut().name())).append(";");
             sb.append(csvField(pa.getNote())).append("\n");
         }

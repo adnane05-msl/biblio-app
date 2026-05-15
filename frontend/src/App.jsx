@@ -32,7 +32,9 @@ function AppRoutes() {
                 <ProtectedRoute><DashboardPage /></ProtectedRoute>
             } />
             <Route path="/" element={<HomePage />} />
-            <Route path="/profil" element={<ProfilPage />} />    
+            <Route path="/profil" element={
+                <ProtectedRoute><ProfilPage /></ProtectedRoute>
+                } />    
             {/* <Route path="/about" element={<AboutPage />} /> */}
             
         </Routes>

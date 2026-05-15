@@ -110,7 +110,7 @@ function HomePage() {
                 <div className="hero-content">
                     <span className="hero-badge">
                         <FontAwesomeIcon icon={faGraduationCap} />
-                        Application bibliographique académique
+                        Application de recherche bibliographique
                     </span>
                     <h1 className="hero-title">
                         Recherchez, organisez et exportez vos{' '}

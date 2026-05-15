@@ -8,8 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faUser, faEnvelope, faLock,
     faFloppyDisk, faKey,
-    faGraduationCap, faCalendar,
-    faShield, faEye, faEyeSlash
+    faGraduationCap,faEye, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons'
 
 const PROFILS = [
@@ -18,7 +17,6 @@ const PROFILS = [
     'Doctorant',
     'Chercheur',
     'Enseignant-Chercheur',
-    'Autre'
 ]
 
 function ProfilPage() {
@@ -150,10 +148,6 @@ function ProfilPage() {
                                 <FontAwesomeIcon icon={faGraduationCap} />
                                 {user?.profil || 'Profil non défini'}
                             </span>
-                            <span className="profil-tag tag-role">
-                                <FontAwesomeIcon icon={faShield} />
-                                {user?.role}
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -229,7 +223,7 @@ function ProfilPage() {
                             <div className="input-group">
                                 <label className="input-label">
                                     <FontAwesomeIcon icon={faGraduationCap} />
-                                    Profil académique
+                                    Profil
                                 </label>
                                 <select
                                     className="input-field"
@@ -248,7 +242,7 @@ function ProfilPage() {
                                 </select>
                             </div>
 
-                            <div className="input-group">
+                            {/* <div className="input-group">
                                 <label className="input-label">
                                     <FontAwesomeIcon icon={faCalendar} />
                                     Membre depuis
@@ -256,13 +250,13 @@ function ProfilPage() {
                                 <input
                                     className="input-field input-disabled"
                                     type="text"
-                                    value={user?.dateInscription
-                                        ? new Date(user.dateInscription)
+                                    value={user?.date_inscription
+                                        ? new Date(user.date_inscription)
                                             .toLocaleDateString('fr-FR')
                                         : '—'}
                                     disabled
                                 />
-                            </div>
+                            </div> */}
 
                             <button
                                 type="submit"
