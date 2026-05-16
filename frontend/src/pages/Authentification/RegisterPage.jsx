@@ -33,10 +33,10 @@ function RegisterPage() {
                 form.prenom,
                 form.email,
                 form.motDePasse,
-                form.profile
+                form.profil
             )
             login(
-                {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
+                {id: data.id, email: data.email, nom: data.nom, prenom: data.prenom, role: data.role, profil: data.profil,},
                 data.token
             )
             navigate('/Projects')

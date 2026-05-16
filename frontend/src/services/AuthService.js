@@ -1,12 +1,12 @@
 import api from './Api'
 
-export const register = async (nom, prenom, email, motDePasse, specialite) => {
+export const register = async (nom, prenom, email, motDePasse, profil) => {
     const response = await api.post('/api/authentification/inscription', {
         nom,
         prenom,
         email,
         motDePasse,
-        specialite,
+        profil,
     })
     return response.data
 }

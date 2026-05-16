@@ -20,7 +20,7 @@ const PROFILS = [
 ]
 
 function ProfilPage() {
-    const { user, login } = useAuth()
+    const { user, updateUser } = useAuth()
 
     // ── État formulaire profil ──
     const [form, setForm] = useState({
@@ -65,14 +65,11 @@ function ProfilPage() {
                 form.prenom, form.profil
             )
             // Mettre à jour le contexte avec les nouvelles infos
-            login({
-                id:     updated.id,
+            updateUser({
                 nom:    updated.nom,
                 prenom: updated.prenom,
-                email:  updated.email,
-                role:   updated.role,
                 profil: updated.profil,
-            }, updated.token)
+            })
 
             setSuccessProfil('Profil mis à jour avec succès !')
             setTimeout(() => setSuccessProfil(''), 3000)

@@ -126,19 +126,25 @@ function HomePage() {
                     <div className="hero-cta">
                         {!user ? (
                             <>
-                                <button to="/register" className="btn-primary-hero">
+                                <button
+                                    className="btn-primary-hero"
+                                    onClick={() => navigate('/register')}
+                                >
                                     <FontAwesomeIcon icon={faUserPlus} />
-                                    Créer mon compte
+                                    Créer un compte
                                 </button>
                                 <button
                                     className="btn-secondary-hero"
-                                    onClick={() => navigate('/login')}
+                                    onClick={() => navigate('/Login')}
                                 >
                                     Se connecter
                                 </button>
                             </>
                         ) : (
-                            <button to="/projects" className="btn-primary-hero">
+                            <button
+                                className="btn-primary-hero"
+                                onClick={() => navigate('/Projects')}
+                            >
                                 <FontAwesomeIcon icon={faArrowRight} />
                                 Accéder à mes projets
                             </button>
