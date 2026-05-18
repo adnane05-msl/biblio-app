@@ -45,3 +45,11 @@ export const updateArticleNote = async (projectArticleId, note) => {
 export const removeArticleFromProject = async (projectArticleId) => {
     await api.delete(`/api/projet-articles/${projectArticleId}`)
 }
+
+//deduplication d'articles dans un projet
+export const deduplicateProject = async (projectId) => {
+    const response = await api.post(
+        `/api/projet-articles/project/${projectId}/deduplicate`
+    )
+    return response.data
+}

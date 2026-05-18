@@ -17,14 +17,16 @@ public class SearchService {
     @Autowired
     private ArxivService arxivService;
 
-    public List<ArticleDTO> search(String query, boolean includeCrossref, boolean includeOpenAlex, boolean includeArxiv) {
+    public List<ArticleDTO> search(String query,
+                                   boolean includeCrossref,
+                                   boolean includeOpenAlex,
+                                   boolean includeArxiv) {
+
         List<ArticleDTO> allResults = new ArrayList<>();
 
-        // Appel parallèle aux différentes sources
         if (includeCrossref) {
             try {
                 allResults.addAll(crossrefService.search(query));
-                System.out.println("Crossref: " + crossrefService.search(query).size() + " articles");
             } catch (Exception e) {
                 System.err.println("Erreur Crossref: " + e.getMessage());
             }
@@ -33,7 +35,6 @@ public class SearchService {
         if (includeOpenAlex) {
             try {
                 allResults.addAll(openAlexService.search(query));
-                System.out.println("OpenAlex: " + openAlexService.search(query).size() + " articles");
             } catch (Exception e) {
                 System.err.println("Erreur OpenAlex: " + e.getMessage());
             }
@@ -42,35 +43,19 @@ public class SearchService {
         if (includeArxiv) {
             try {
                 allResults.addAll(arxivService.search(query));
-                System.out.println("arXiv: " + arxivService.search(query).size() + " articles");
             } catch (Exception e) {
                 System.err.println("Erreur arXiv: " + e.getMessage());
             }
         }
 
-        // Déduplication par DOI (ou titre si pas de DOI)
-        Map<String, ArticleDTO> uniqueMap = new LinkedHashMap<>();
-        for (ArticleDTO article : allResults) {
-            String key = article.getDoi() != null ? article.getDoi() : article.getTitle();
-            if (!uniqueMap.containsKey(key)) {
-                uniqueMap.put(key, article);
-            }
-        }
-
-        // Trier par année (plus récent d'abord)
-        List<ArticleDTO> sortedResults = new ArrayList<>(uniqueMap.values());
-        sortedResults.sort((a, b) -> {
+        // ← Trier par année décroissante seulement
+        allResults.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
             if (a.getYear() == null) return 1;
             if (b.getYear() == null) return -1;
             return b.getYear().compareTo(a.getYear());
         });
 
-        // Limiter à 100 résultats maximum
-        if (sortedResults.size() > 200) {
-            sortedResults = sortedResults.subList(0, 200);
-        }
-
-        return sortedResults;
+        return allResults;
     }
 }

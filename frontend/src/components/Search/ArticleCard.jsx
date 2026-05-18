@@ -3,13 +3,32 @@ import './ArticleCard.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar, faChartColumn, faFloppyDisk, faFile, faUsers, faBook,faLink } from '@fortawesome/free-solid-svg-icons'
 
-function ArticleCard({ article, onSave, projects }) {
+function ArticleCard({ article, onSave, projects, selected, onToggleSelect}) {
     const [expanded, setExpanded] = useState(false)
     const [showSaveMenu, setShowSaveMenu] = useState(false)
 
+    
+    
+
 
     return (
-        <div className="article-card">
+        <div className={`article-card ${selected ? 'selected' : ''}`}>
+            {/* Checkbox sélection */}
+            {onToggleSelect && (
+                <div className="article-select">
+                    <label className="custom-checkbox">
+                        <input
+                            type="checkbox"
+                            checked={selected || false}
+                            onChange={() => onToggleSelect(article)}
+                            onClick={e => e.stopPropagation()}
+                        />
+                        <span className="checkmark">
+                            {selected ? '✅' : '☐'}
+                        </span>
+                    </label>
+                </div>
+            )}
             <div className="article-card-header">
                 <div className="article-meta-top">
                     {article.documentType && (

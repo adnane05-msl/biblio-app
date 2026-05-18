@@ -10,8 +10,7 @@ import com.biblio.backend.repository.ProjectArticleRepository;
 import com.biblio.backend.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,5 +137,43 @@ public class ProjectArticleService {
         dto.setNote(pa.getNote());
         dto.setDateAjout(pa.getDateAjout());
         return dto;
+    }
+
+    public int deduplicateProject(Long projectId) {
+        List<ProjectArticle> list =
+                projectArticleRepository.findByProjectId(projectId);
+
+        // Grouper par DOI ou titre
+        Map<String, List<ProjectArticle>> grouped =
+                new LinkedHashMap<>();
+
+        for (ProjectArticle pa : list) {
+            String key = pa.getArticle().getDoi() != null
+                    && !pa.getArticle().getDoi().isEmpty()
+                    ? pa.getArticle().getDoi().toLowerCase().trim()
+                    : pa.getArticle().getTitre() != null
+                    ? pa.getArticle().getTitre().toLowerCase().trim()
+                    : String.valueOf(pa.getId());
+
+            grouped.computeIfAbsent(key,
+                    k -> new ArrayList<>()).add(pa);
+        }
+
+        // Supprimer les doublons — garder le premier
+        int removed = 0;
+        for (Map.Entry<String, List<ProjectArticle>> entry
+                : grouped.entrySet()) {
+            List<ProjectArticle> duplicates = entry.getValue();
+            if (duplicates.size() > 1) {
+                // Garder le premier, supprimer les autres
+                for (int i = 1; i < duplicates.size(); i++) {
+                    projectArticleRepository.deleteById(
+                            duplicates.get(i).getId());
+                    removed++;
+                }
+            }
+        }
+
+        return removed;
     }
 }

@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faSort,
     faCalendar, faFile,
-    faBuilding, faXmark
+    faBuilding, faXmark, faFloppyDisk, faFolder
 } from '@fortawesome/free-solid-svg-icons'
 
 const SORT_OPTIONS = [
@@ -34,6 +34,11 @@ function SearchPage() {
     const [success,         setSuccess]         = useState('')
     const [hasSearched,     setHasSearched]     = useState(false)
     const [currentPage,     setCurrentPage]     = useState(1)
+    const [selectedArticles, setSelectedArticles] = useState([])
+    const [showBulkMenu,     setShowBulkMenu]     = useState(false)
+    const [bulkLoading,      setBulkLoading]      = useState(false)
+    const [selectAllMode, setSelectAllMode] = useState(false)
+
 
     // ── Filtres ──
     const [sortBy,          setSortBy]          = useState('pertinence')
@@ -54,6 +59,8 @@ function SearchPage() {
                 .catch(() => {})
         }
     }, [user])
+
+    
 
     const handleSearch = async (query) => {
         setLoading(true)
@@ -199,6 +206,51 @@ function SearchPage() {
         if (current >= total - 2)
             return [1, '...', total-3, total-2, total-1, total]
         return [1, '...', current-1, current, current+1, '...', total]
+    }
+
+    //deduplication des articles sélectionnés basée sur DOI ou titre
+
+    const toggleSelect = (article) => {
+        setSelectAllMode(false)  // ← AJOUTE CETTE LIGNE
+        setSelectedArticles(prev => {
+            const key = article.doi || article.title
+            const exists = prev.find(a => (a.doi || a.title) === key)
+            if (exists) {
+                return prev.filter(a => (a.doi || a.title) !== key)
+            }
+            return [...prev, article]
+        })
+    }
+
+    const isSelected = (article) => {
+        const key = article.doi || article.title
+        return selectedArticles.some(
+            a => (a.doi || a.title) === key)
+    }
+
+    const handleBulkSave = async (projectId) => {
+        setBulkLoading(true)
+        setShowBulkMenu(false)
+        let saved = 0
+        let skipped = 0
+
+        for (const article of selectedArticles) {
+            try {
+                await saveArticleToProject(article, projectId)
+                saved++
+            } catch {
+                skipped++
+            }
+        }
+
+        // 🔥 AJOUTE CES 2 LIGNES pour désélectionner automatiquement
+        setSelectedArticles([])
+        setSelectAllMode(false)  // Désactive le mode "Tous sélectionnés"
+
+        setSuccess(`✅ ${saved} article(s) sauvegardé(s)${
+            skipped > 0 ? ` (${skipped} déjà existant(s))` : ''}`)
+        setTimeout(() => setSuccess(''), 4000)
+        setBulkLoading(false)
     }
 
     return (
@@ -460,6 +512,89 @@ function SearchPage() {
                                 </div>
                             )}
 
+                            {/* ── Barre de sélection multiple ── */}
+                            {!loading && paginatedArticles.length > 0 && (
+                                <div className="selection-bar">
+                                    <div className="select-controls">
+                                        {/* Bouton pour sélectionner TOUS les résultats */}
+                                        <button
+                                            className={`btn-select-all ${selectAllMode ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (selectAllMode) {
+                                                    // Désélectionner tout
+                                                    setSelectAllMode(false)
+                                                    setSelectedArticles([])
+                                                } else {
+                                                    // Sélectionner TOUS les articles filtrés
+                                                    setSelectAllMode(true)
+                                                    setSelectedArticles(filteredArticles)
+                                                }
+                                            }}
+                                        >
+                                            {selectAllMode ? (
+                                                <>✅ Tous sélectionnés ({filteredArticles.length})</>
+                                            ) : (
+                                                <>☐ Sélectionner tous les résultats ({filteredArticles.length})</>
+                                            )}
+                                        </button>
+
+                                        {/* Afficher le nombre sélectionné */}
+                                        {selectedArticles.length > 0 && (
+                                            <span className="selected-count">
+                                                {selectedArticles.length} article(s) sélectionné(s)
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Boutons d'action groupée */}
+                                    {selectedArticles.length > 0 && (
+                                        <div className="bulk-actions">
+                                            <div className="bulk-save-wrapper">
+                                                <button
+                                                    className="btn-bulk-save"
+                                                    onClick={() => setShowBulkMenu(!showBulkMenu)}
+                                                    disabled={bulkLoading}
+                                                >
+                                                    <FontAwesomeIcon icon={faFloppyDisk} />
+                                                    {bulkLoading ? 'Sauvegarde...' : `Sauvegarder (${selectedArticles.length})`}
+                                                </button>
+
+                                                {showBulkMenu && (
+                                                    <div className="bulk-menu">
+                                                        <p className="bulk-menu-title">Choisir un projet :</p>
+                                                        {projects.length > 0 ? (
+                                                            projects.map(p => (
+                                                                <button
+                                                                    key={p.id}
+                                                                    className="bulk-menu-item"
+                                                                    onClick={() => handleBulkSave(p.id)}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faFolder} />
+                                                                    {p.nomProjet}
+                                                                </button>
+                                                            ))
+                                                        ) : (
+                                                            <p className="bulk-menu-empty">Aucun projet disponible</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                className="btn-clear-selection"
+                                                onClick={() => {
+                                                    setSelectedArticles([])
+                                                    setSelectAllMode(false)
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faXmark} />
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Liste articles */}
                             {!loading && paginatedArticles.length > 0 && (
                                 <div className="articles-list">
@@ -470,6 +605,8 @@ function SearchPage() {
                                             article={article}
                                             onSave={handleSave}
                                             projects={projects}
+                                            onToggleSelect={toggleSelect}
+                                            isSelected={isSelected(article)}
                                         />
                                     ))}
                                 </div>

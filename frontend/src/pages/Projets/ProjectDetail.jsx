@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { getProjectById } from '../../services/ProjectServices'
+import { deduplicateProject } from '../../services/ProjectArticleServices'
 import {
     getArticlesByProject,
     updateArticleStatut,
@@ -12,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Navbar from '../../components/Navbar/Navbar'
 import './ProjectDetail.css'
 import {faTrash, faNoteSticky,faCircleCheck, faCircleXmark,faBookOpen, faArrowLeft,faMagnifyingGlass,faUsers,faChartBar,faCalendar,faLink} from '@fortawesome/free-solid-svg-icons'
-import {faFileCode,faFileCsv,faFileAlt,faDownload} from '@fortawesome/free-solid-svg-icons'
+import {faFileCode,faFileCsv,faFileAlt,faDownload,faCopy} from '@fortawesome/free-solid-svg-icons'
 
 
 const STATUTS = [
@@ -34,6 +35,7 @@ function ProjectDetail() {
     const [editingNote, setEditingNote] = useState(null)
     const [noteText, setNoteText] = useState('')
     const [filterStatut, setFilterStatut] = useState('TOUS')
+    const [dedupLoading, setDedupLoading] = useState(false)
 
     useEffect(() => {
         const load = async () => {
@@ -116,6 +118,29 @@ function ProjectDetail() {
         </div>
     )
 
+    //deduplication d'articles dans le projet
+
+    const handleDeduplicate = async () => {
+        if (!window.confirm(
+            'Supprimer automatiquement les doublons de ce projet ?'))
+            return
+
+        setDedupLoading(true)
+        try {
+            const result = await deduplicateProject(id)
+            setSuccess(result.message)
+            // Recharger les articles
+            const arts = await getArticlesByProject(id)
+            setArticles(arts)
+            setTimeout(() => setSuccess(''), 3000)
+        } catch {
+            setError('Erreur lors de la déduplication')
+            setTimeout(() => setError(''), 3000)
+        } finally {
+            setDedupLoading(false)
+        }
+    }
+
     return (
         <div className="detail-page">
             <Navbar />
@@ -168,7 +193,7 @@ function ProjectDetail() {
                 </div>
 
                 {/* Boutons Export */}
-                {articles.length > 0 && (
+                {/* {articles.length > 0 && (
                     <div className="export-section">
                         <span className="export-label">
                             <FontAwesomeIcon icon={faDownload} /> Exporter :
@@ -195,7 +220,39 @@ function ProjectDetail() {
                             <FontAwesomeIcon icon={faFileAlt} /> RIS
                         </button>
                     </div>
-                )}
+                )} */}
+
+                {articles.length > 0 && (
+                <div className="export-section">
+                    <span className="export-label">
+                        <FontAwesomeIcon icon={faDownload} /> Exporter :
+                    </span>
+                    <button className="btn-export btn-bibtex"
+                        onClick={() => exportBibtex(id)}>
+                        <FontAwesomeIcon icon={faFileCode} /> BibTeX
+                    </button>
+                    <button className="btn-export btn-csv"
+                        onClick={() => exportCsv(id)}>
+                        <FontAwesomeIcon icon={faFileCsv} /> CSV
+                    </button>
+                    <button className="btn-export btn-ris"
+                        onClick={() => exportRis(id)}>
+                        <FontAwesomeIcon icon={faFileAlt} /> RIS
+                    </button>
+
+                    {/* ← Nouveau bouton déduplication */}
+                    <button
+                        className="btn-export btn-dedup"
+                        onClick={handleDeduplicate}
+                        disabled={dedupLoading}
+                        title="Supprimer les doublons automatiquement"
+                    >
+                        <FontAwesomeIcon icon={faCopy} />
+                        {dedupLoading ? 'En cours...' : 'Dédupliquer'}
+                    </button>
+                </div>
+            )}
+            
 
                 {/* Alertes */}
                 {error && (
