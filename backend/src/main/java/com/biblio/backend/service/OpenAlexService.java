@@ -54,6 +54,14 @@ public class OpenAlexService {
                 article.setCitations(item.path("cited_by_count").asInt());
                 article.setSource("OpenAlex");
 
+                // Résumé
+                String abstractText = item.path("abstract").asText();
+                if (abstractText == null || abstractText.isBlank()) {
+                    abstractText = item.path("abstract_inverted_index").isMissingNode()
+                            ? null : reconstructAbstract(item.path("abstract_inverted_index"));
+                }
+                article.setAbstractText(cleanAbstract(abstractText));
+
                 if (article.getDoi() != null && !article.getDoi().isEmpty()) {
                     article.setUrl("https://doi.org/" + article.getDoi());
                 }
@@ -66,5 +74,29 @@ public class OpenAlexService {
         }
 
         return results;
+    }
+
+    private String cleanAbstract(String text) {
+        if (text == null || text.isBlank()) return null;
+        return text
+                .replaceAll("<[^>]+>", " ")  // supprimer toutes les balises XML/HTML
+                .replaceAll("\\s+", " ")      // nettoyer les espaces multiples
+                .trim();
+    }
+
+    // OpenAlex stocke le résumé en index inversé {mot: [positions]}
+    // Cette méthode reconstruit le texte original
+    private String reconstructAbstract(JsonNode invertedIndex) {
+        try {
+            java.util.TreeMap<Integer, String> positionMap = new java.util.TreeMap<>();
+            invertedIndex.fields().forEachRemaining(entry -> {
+                String word = entry.getKey();
+                entry.getValue().forEach(pos ->
+                        positionMap.put(pos.asInt(), word));
+            });
+            return String.join(" ", positionMap.values());
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

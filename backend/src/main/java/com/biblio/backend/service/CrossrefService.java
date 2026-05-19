@@ -66,7 +66,7 @@ public class CrossrefService {
 
                 article.setPublisher(item.path("publisher").asText());
                 article.setDoi(item.path("DOI").asText());
-                article.setAbstractText(item.path("abstract").asText());
+                article.setAbstractText(cleanAbstract(item.path("abstract").asText()));
                 article.setDocumentType(item.path("type").asText());
                 article.setCitations(item.path("is-referenced-by-count").asInt());
                 article.setSource("Crossref");
@@ -83,5 +83,13 @@ public class CrossrefService {
         }
 
         return results;
+    }
+
+    private String cleanAbstract(String text) {
+        if (text == null || text.isBlank()) return null;
+        return text
+                .replaceAll("<[^>]+>", " ")  // supprimer toutes les balises XML/HTML
+                .replaceAll("\\s+", " ")      // nettoyer les espaces multiples
+                .trim();
     }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { searchArticles } from '../../services/SearchServices'
 import { getProjectsByUser } from '../../services/ProjectServices'
@@ -16,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 const SORT_OPTIONS = [
-    { value: 'pertinence', label: 'Pertinence' },
+    { value: 'Recommandé', label: 'Recommandé' },
     { value: 'year_desc',  label: 'Année (récent)' },
     { value: 'year_asc',   label: 'Année (ancien)' },
     { value: 'citations',  label: 'Citations' },
@@ -37,11 +37,11 @@ function SearchPage() {
     const [selectedArticles, setSelectedArticles] = useState([])
     const [showBulkMenu,     setShowBulkMenu]     = useState(false)
     const [bulkLoading,      setBulkLoading]      = useState(false)
-    const [selectAllMode, setSelectAllMode] = useState(false)
+    const selectAllRef = useRef(null)
 
 
     // ── Filtres ──
-    const [sortBy,          setSortBy]          = useState('pertinence')
+    const [sortBy,          setSortBy]          = useState('Recommandé')
     const [yearMin,         setYearMin]         = useState('')
     const [yearMax,         setYearMax]         = useState('')
     const [selectedTypes,   setSelectedTypes]   = useState([])
@@ -91,7 +91,7 @@ function SearchPage() {
             // Calculer plage d'années
             const years = data
                 .map(a => a.year)
-                .filter(y => y != null)
+                .filter(y => y != null && y > 0)
             if (years.length > 0) {
                 setYearRange({
                     min: Math.min(...years),
@@ -106,7 +106,7 @@ function SearchPage() {
     }
 
     const resetFilters = () => {
-        setSortBy('pertinence')
+        setSortBy('Recommandé')
         setYearMin('')
         setYearMax('')
         setSelectedTypes([])
@@ -211,7 +211,6 @@ function SearchPage() {
     //deduplication des articles sélectionnés basée sur DOI ou titre
 
     const toggleSelect = (article) => {
-        setSelectAllMode(false)  // ← AJOUTE CETTE LIGNE
         setSelectedArticles(prev => {
             const key = article.doi || article.title
             const exists = prev.find(a => (a.doi || a.title) === key)
@@ -222,11 +221,20 @@ function SearchPage() {
         })
     }
 
-    const isSelected = (article) => {
-        const key = article.doi || article.title
-        return selectedArticles.some(
-            a => (a.doi || a.title) === key)
-    }
+    const isAllSelected = filteredArticles.length > 0 &&
+        filteredArticles.every(a =>
+            selectedArticles.some(s =>
+                (s.doi || s.title) === (a.doi || a.title)
+            )
+        )
+
+    const isIndeterminate = !isAllSelected && selectedArticles.length > 0
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = isIndeterminate
+        }
+    }, [isIndeterminate])
 
     const handleBulkSave = async (projectId) => {
         setBulkLoading(true)
@@ -243,15 +251,42 @@ function SearchPage() {
             }
         }
 
-        // 🔥 AJOUTE CES 2 LIGNES pour désélectionner automatiquement
+        //pour désélectionner automatiquement
         setSelectedArticles([])
-        setSelectAllMode(false)  // Désactive le mode "Tous sélectionnés"
 
         setSuccess(`✅ ${saved} article(s) sauvegardé(s)${
             skipped > 0 ? ` (${skipped} déjà existant(s))` : ''}`)
         setTimeout(() => setSuccess(''), 4000)
         setBulkLoading(false)
     }
+
+
+    const selectAll = () => {
+        if (isAllSelected) {
+            // Désélectionner tous les articles filtrés
+            const filteredKeys = new Set(
+                filteredArticles.map(a => a.doi || a.title)
+            )
+            setSelectedArticles(prev =>
+                prev.filter(a => !filteredKeys.has(a.doi || a.title))
+            )
+        } else {
+            // Sélectionner tous les articles filtrés (toutes pages)
+            const existing = new Set(
+                selectedArticles.map(a => a.doi || a.title)
+            )
+            const toAdd = filteredArticles.filter(
+                a => !existing.has(a.doi || a.title)
+            )
+            setSelectedArticles(prev => [...prev, ...toAdd])
+        }
+    }
+
+    const isSelected = (article) => {
+        const key = article.doi || article.title
+        return selectedArticles.some(a => (a.doi || a.title) === key)
+    }
+
 
     return (
         <div className="search-page">
@@ -292,12 +327,20 @@ function SearchPage() {
                     </div>
                 )}
 
+                {/* ── Loading centré ── */}
+                {loading && (
+                    <div className="loading-state">
+                        <div className="loading-spinner" />
+                        <p>Recherche en cours...</p>
+                    </div>
+                )}
+
                 {/* ── Layout sidebar + articles ── */}
                 {hasSearched && (
                     <div className="search-layout">
 
                         {/* ── SIDEBAR ── */}
-                        <aside className="search-sidebar">
+                        {!loading && <aside className="search-sidebar">
 
                             {/* Stats */}
                             <div className="sidebar-card">
@@ -439,7 +482,7 @@ function SearchPage() {
                                     </select>
                                 </div>
                             )}
-                        </aside>
+                        </aside>}
 
                         {/* ── ZONE ARTICLES ── */}
                         <div className="search-results">
@@ -477,14 +520,6 @@ function SearchPage() {
                                 </div>
                             )}
 
-                            {/* Loading */}
-                            {loading && (
-                                <div className="loading-state">
-                                    <div className="loading-spinner" />
-                                    <p>Recherche en cours...</p>
-                                </div>
-                            )}
-
                             {/* Aucun résultat */}
                             {!loading && hasSearched &&
                                 filteredArticles.length === 0 && (
@@ -513,40 +548,30 @@ function SearchPage() {
                             )}
 
                             {/* ── Barre de sélection multiple ── */}
-                            {!loading && paginatedArticles.length > 0 && (
+                            {!loading && filteredArticles.length > 0 && (
                                 <div className="selection-bar">
-                                    <div className="select-controls">
-                                        {/* Bouton pour sélectionner TOUS les résultats */}
-                                        <button
-                                            className={`btn-select-all ${selectAllMode ? 'active' : ''}`}
-                                            onClick={() => {
-                                                if (selectAllMode) {
-                                                    // Désélectionner tout
-                                                    setSelectAllMode(false)
-                                                    setSelectedArticles([])
-                                                } else {
-                                                    // Sélectionner TOUS les articles filtrés
-                                                    setSelectAllMode(true)
-                                                    setSelectedArticles(filteredArticles)
-                                                }
-                                            }}
-                                        >
-                                            {selectAllMode ? (
-                                                <>✅ Tous sélectionnés ({filteredArticles.length})</>
-                                            ) : (
-                                                <>☐ Sélectionner tous les résultats ({filteredArticles.length})</>
-                                            )}
-                                        </button>
+                                    <div className="selection-left">
+                                        <label className="select-all-label">
+                                            <input
+                                                type="checkbox"
+                                                ref={selectAllRef}
+                                                checked={isAllSelected}
+                                                onChange={selectAll}
+                                            />
+                                            {isAllSelected
+                                                ? `Tout désélectionner`
+                                                : isIndeterminate
+                                                    ? `Sélectionner tout`
+                                                    : `Tout sélectionner`}
+                                        </label>
 
-                                        {/* Afficher le nombre sélectionné */}
                                         {selectedArticles.length > 0 && (
-                                            <span className="selected-count">
-                                                {selectedArticles.length} article(s) sélectionné(s)
+                                            <span className="selected-badge">
+                                                {selectedArticles.length} sélectionné(s)
                                             </span>
                                         )}
                                     </div>
 
-                                    {/* Boutons d'action groupée */}
                                     {selectedArticles.length > 0 && (
                                         <div className="bulk-actions">
                                             <div className="bulk-save-wrapper">
@@ -556,12 +581,16 @@ function SearchPage() {
                                                     disabled={bulkLoading}
                                                 >
                                                     <FontAwesomeIcon icon={faFloppyDisk} />
-                                                    {bulkLoading ? 'Sauvegarde...' : `Sauvegarder (${selectedArticles.length})`}
+                                                    {bulkLoading
+                                                        ? 'Sauvegarde...'
+                                                        : `Sauvegarder (${selectedArticles.length})`}
                                                 </button>
 
                                                 {showBulkMenu && (
                                                     <div className="bulk-menu">
-                                                        <p className="bulk-menu-title">Choisir un projet :</p>
+                                                        <p className="bulk-menu-title">
+                                                            Choisir un projet :
+                                                        </p>
                                                         {projects.length > 0 ? (
                                                             projects.map(p => (
                                                                 <button
@@ -574,7 +603,9 @@ function SearchPage() {
                                                                 </button>
                                                             ))
                                                         ) : (
-                                                            <p className="bulk-menu-empty">Aucun projet disponible</p>
+                                                            <p className="bulk-menu-empty">
+                                                                Aucun projet disponible
+                                                            </p>
                                                         )}
                                                     </div>
                                                 )}
@@ -582,10 +613,7 @@ function SearchPage() {
 
                                             <button
                                                 className="btn-clear-selection"
-                                                onClick={() => {
-                                                    setSelectedArticles([])
-                                                    setSelectAllMode(false)
-                                                }}
+                                                onClick={() => setSelectedArticles([])}
                                             >
                                                 <FontAwesomeIcon icon={faXmark} />
                                                 Annuler
@@ -606,7 +634,7 @@ function SearchPage() {
                                             onSave={handleSave}
                                             projects={projects}
                                             onToggleSelect={toggleSelect}
-                                            isSelected={isSelected(article)}
+                                            selected={isSelected(article)}
                                         />
                                     ))}
                                 </div>

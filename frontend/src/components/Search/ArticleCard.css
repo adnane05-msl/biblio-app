@@ -210,6 +210,7 @@
 
 .article-select {
     margin-bottom: 10px;
+    
 }
 
 .article-select input[type="checkbox"] {
@@ -220,30 +221,11 @@
 }
 
 /* Style personnalisé pour la checkbox */
-.custom-checkbox {
-    display: flex;
-    align-items: center;
+.article-checkbox {
+    width: 17px;
+    height: 17px;
+    accent-color: #2563eb;
     cursor: pointer;
-    user-select: none;
-}
-
-.custom-checkbox input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.checkmark {
-    font-size: 18px;
-    color: #9ca3af;
-    transition: color 0.2s;
-}
-
-.custom-checkbox input:checked ~ .checkmark {
-    color: #2563eb;
-}
-
-.custom-checkbox:hover .checkmark {
-    color: #2563eb;
+    flex-shrink: 0;
+    margin: 0;
 }

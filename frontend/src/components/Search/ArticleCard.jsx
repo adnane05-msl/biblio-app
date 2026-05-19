@@ -7,34 +7,36 @@ function ArticleCard({ article, onSave, projects, selected, onToggleSelect}) {
     const [expanded, setExpanded] = useState(false)
     const [showSaveMenu, setShowSaveMenu] = useState(false)
 
+    const cleanAbstract = (text) => {
+        if (!text) return ''
+        return text
+            .replace(/<[^>]+>/g, ' ')  // supprimer toutes les balises HTML/XML
+            .replace(/\s+/g, ' ')       // nettoyer les espaces multiples
+            .trim()
+    }
+
     
     
 
 
     return (
         <div className={`article-card ${selected ? 'selected' : ''}`}>
-            {/* Checkbox sélection */}
-            {onToggleSelect && (
-                <div className="article-select">
-                    <label className="custom-checkbox">
+            <div className="article-card-header">
+                <div className="article-meta-top">
+                    {/* Checkbox sélection */}
+                    {onToggleSelect && (
                         <input
                             type="checkbox"
+                            className="article-checkbox"
                             checked={selected || false}
                             onChange={() => onToggleSelect(article)}
                             onClick={e => e.stopPropagation()}
                         />
-                        <span className="checkmark">
-                            {selected ? '✅' : '☐'}
-                        </span>
-                    </label>
-                </div>
-            )}
-            <div className="article-card-header">
-                <div className="article-meta-top">
+                    )}
                     {article.documentType && (
                         <span className="article-type">{article.documentType}</span>
                     )}
-                    {article.year && (
+                    {article.year && article.year > 0 && (
                         <span className="article-year"><FontAwesomeIcon icon={faCalendar} /> {article.year}</span>
                     )}
                     {article.citations != null && (
@@ -115,7 +117,7 @@ function ArticleCard({ article, onSave, projects, selected, onToggleSelect}) {
             {article.abstractText && (
                 <div className="article-abstract">
                     <p className={`abstract-text ${expanded ? 'expanded' : ''}`}>
-                        {article.abstractText}
+                        {cleanAbstract(article.abstractText)}
                     </p>
                     <button
                         className="btn-toggle-abstract"
