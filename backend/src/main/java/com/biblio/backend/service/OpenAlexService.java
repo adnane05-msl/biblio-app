@@ -79,8 +79,8 @@ public class OpenAlexService {
     private String cleanAbstract(String text) {
         if (text == null || text.isBlank()) return null;
         return text
-                .replaceAll("<[^>]+>", " ")  // supprimer toutes les balises XML/HTML
-                .replaceAll("\\s+", " ")      // nettoyer les espaces multiples
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("\\s+", " ")
                 .trim();
     }
 
