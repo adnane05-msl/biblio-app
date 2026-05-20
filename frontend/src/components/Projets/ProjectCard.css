@@ -71,6 +71,7 @@
     font-size: 13px;
     cursor: pointer;
     transition: background-color 0.2s;
+    
 }
 
 .btn-edit:hover {
@@ -92,3 +93,5 @@
 .btn-delete:hover {
     background-color: #fee2e2;
 }
+
+

@@ -21,12 +21,12 @@ public class Source {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nomSource;  // "Crossref", "OpenAlex", "arXiv"
+    private String nomSource;  // les sources: "Crossref", "OpenAlex", "arXiv"
 
     @Column(name = "url_api")
-    private String urlApi;     // URL de l'API
+    private String urlApi;     // URL de L'API
 
-    private Boolean active = true;  // Source activée ou non
+    private Boolean active = true;  // Source Activée ou non
 
     @Column(name = "date_ajout")
     private LocalDateTime dateAjout = LocalDateTime.now();
