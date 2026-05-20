@@ -89,14 +89,23 @@ public class OpenAlexService {
     private String reconstructAbstract(JsonNode invertedIndex) {
         try {
             java.util.TreeMap<Integer, String> positionMap = new java.util.TreeMap<>();
-            invertedIndex.fields().forEachRemaining(entry -> {
+
+            // properties() retourne un Set, on itère directement
+            for (java.util.Map.Entry<String, JsonNode> entry : invertedIndex.properties()) {
                 String word = entry.getKey();
-                entry.getValue().forEach(pos ->
-                        positionMap.put(pos.asInt(), word));
-            });
+                JsonNode positions = entry.getValue();
+                for (JsonNode pos : positions) {
+                    positionMap.put(pos.asInt(), word);
+                }
+            }
+
             return String.join(" ", positionMap.values());
         } catch (Exception e) {
             return null;
         }
     }
+
+
+
+
 }
