@@ -36,10 +36,14 @@ public class ProjectArticle {
     @Column(name = "date_ajout")
     private LocalDateTime dateAjout = LocalDateTime.now();
 
+//   on le verifer apres
 //    @PrePersist
 //    public void prePersist() {
 //        this.dateAjout = LocalDateTime.now();
 //    }
+
+
+// Statut des articles
 
     public enum Statut {
         A_LIRE,
