@@ -72,12 +72,9 @@ public class ProjectArticleController {
     public ResponseEntity<Map<String, Object>> deduplicate(
             @PathVariable Long projectId) {
         try {
-            int removed = projectArticleService
+            Map<String, Object> result = projectArticleService
                     .deduplicateProject(projectId);
-            return ResponseEntity.ok(Map.of(
-                    "message", removed + " doublon(s) supprimé(s)",
-                    "removed", removed
-            ));
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));

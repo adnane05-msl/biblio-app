@@ -12,9 +12,8 @@ import java.util.Optional;
 @Repository
 public interface ProjectArticleRepository extends JpaRepository<ProjectArticle, Long> {
     List<ProjectArticle> findByProject(Project project);
-    List<ProjectArticle> findByProjectId(Long projectId);
+    List<ProjectArticle> findByProject_Id(Long projectId);
     Optional<ProjectArticle> findByProjectAndArticle(Project project, Article article);
     void deleteByProjectAndArticle(Project project, Article article);
-    long countByProjectIdAndStatut(Long projectId, ProjectArticle.Statut statut);
-
+    long countByProject_IdAndStatut(Long projectId, ProjectArticle.Statut statut);
 }

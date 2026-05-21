@@ -21,7 +21,7 @@ public class DashboardService {
 
     public DashboardDTO getDashboard(Long projectId) {
         List<ProjectArticle> list =
-                projectArticleRepository.findByProjectId(projectId);
+                projectArticleRepository.findByProject_Id(projectId);
 
         DashboardDTO dto = new DashboardDTO();
 

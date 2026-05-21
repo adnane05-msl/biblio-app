@@ -18,8 +18,8 @@ public class UtilisateurService {
     private final JwtService jwtService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository,
-                              PasswordEncoder passwordEncoder,
-                              JwtService jwtService) {
+                            PasswordEncoder passwordEncoder,
+                            JwtService jwtService) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;

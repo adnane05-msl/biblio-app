@@ -122,20 +122,15 @@ function ProjectDetail() {
     }
 
     const handleDeduplicate = async () => {
-        if (!window.confirm('Supprimer automatiquement les doublons de ce projet ?'))
+        if (!window.confirm('Supprimer définitivement les doublons de ce projet ?'))
             return
         setDedupLoading(true)
         try {
             const result = await deduplicateProject(id)
             const arts = await getArticlesByProject(id)
             setArticles(arts)
-            const doublons = arts.filter(a => a.statut === 'DOUBLON').length
-            if (doublons === 0) {
-                setSuccess('Aucun doublon détecté dans ce projet.')
-            } else {
-                setSuccess(result.message || `${doublons} doublon(s) détecté(s) et marqué(s).`)
-                setFilterStatut('DOUBLON')
-            }
+            setFilterStatut('TOUS')
+            setSuccess(result.message || 'Déduplication terminée.')
             setTimeout(() => setSuccess(''), 4000)
         } catch {
             setError('Erreur lors de la déduplication')

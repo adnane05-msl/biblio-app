@@ -22,7 +22,7 @@ public class ExportService {
     // ================================
     public String exportBibtex(Long projectId) {
         List<ProjectArticle> list =
-                projectArticleRepository.findByProjectId(projectId);
+                projectArticleRepository.findByProject_Id(projectId);
 
         StringBuilder sb = new StringBuilder();
         sb.append("% BibTeX export — BiblioApp\n\n");
@@ -81,7 +81,7 @@ public class ExportService {
     // ================================
     public String exportCsv(Long projectId) {
         List<ProjectArticle> list =
-                projectArticleRepository.findByProjectId(projectId);
+                projectArticleRepository.findByProject_Id(projectId);
 
         StringBuilder sb = new StringBuilder();
 
@@ -115,7 +115,7 @@ public class ExportService {
     // ================================
     public String exportRis(Long projectId) {
         List<ProjectArticle> list =
-                projectArticleRepository.findByProjectId(projectId);
+                projectArticleRepository.findByProject_Id(projectId);
 
         StringBuilder sb = new StringBuilder();
 

@@ -84,7 +84,7 @@ public class ProjectArticleService {
 
     // Récupérer tous les articles d'un projet
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
-        return projectArticleRepository.findByProjectId(projectId)
+        return projectArticleRepository.findByProject_Id(projectId)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -139,13 +139,11 @@ public class ProjectArticleService {
         return dto;
     }
 
-    public int deduplicateProject(Long projectId) {
+    public Map<String, Object> deduplicateProject(Long projectId) {
         List<ProjectArticle> list =
-                projectArticleRepository.findByProjectId(projectId);
+                projectArticleRepository.findByProject_Id(projectId);
 
-        // Grouper par DOI ou titre
-        Map<String, List<ProjectArticle>> grouped =
-                new LinkedHashMap<>();
+        Map<String, List<ProjectArticle>> grouped = new LinkedHashMap<>();
 
         for (ProjectArticle pa : list) {
             String key = pa.getArticle().getDoi() != null
@@ -155,25 +153,26 @@ public class ProjectArticleService {
                     ? pa.getArticle().getTitre().toLowerCase().trim()
                     : String.valueOf(pa.getId());
 
-            grouped.computeIfAbsent(key,
-                    k -> new ArrayList<>()).add(pa);
+            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
         }
 
-        // Supprimer les doublons — garder le premier
         int removed = 0;
-        for (Map.Entry<String, List<ProjectArticle>> entry
-                : grouped.entrySet()) {
-            List<ProjectArticle> duplicates = entry.getValue();
+        for (List<ProjectArticle> duplicates : grouped.values()) {
             if (duplicates.size() > 1) {
-                // Garder le premier, supprimer les autres
                 for (int i = 1; i < duplicates.size(); i++) {
-                    projectArticleRepository.deleteById(
-                            duplicates.get(i).getId());
+                    projectArticleRepository.deleteById(duplicates.get(i).getId());
                     removed++;
                 }
             }
         }
 
-        return removed;
+        Map<String, Object> result = new HashMap<>();
+        result.put("removed", removed);
+        if (removed == 0) {
+            result.put("message", "Aucun doublon détecté dans ce projet.");
+        } else {
+            result.put("message", removed + " doublon(s) supprimé(s) avec succès.");
+        }
+        return result;
     }
 }
