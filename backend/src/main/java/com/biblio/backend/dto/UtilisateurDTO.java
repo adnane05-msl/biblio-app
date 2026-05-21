@@ -12,5 +12,8 @@ public class UtilisateurDTO {
     private String email;
     private String role;
     private String profil;
+
+    private boolean emailVerified;
+
     private String token;
 }

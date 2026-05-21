@@ -13,4 +13,5 @@ public class RegisterRequest {
     private String profil;
     private String email;
     private String motDePasse;
+    private String verificationCode;
 }

@@ -7,7 +7,6 @@ import com.biblio.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 import java.util.Optional;
 
 @Service
@@ -16,19 +15,27 @@ public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final VerificationService verificationService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository,
-                            PasswordEncoder passwordEncoder,
-                            JwtService jwtService) {
+                              PasswordEncoder passwordEncoder,
+                              JwtService jwtService,
+                              VerificationService verificationService) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.verificationService = verificationService;
     }
 
     public UtilisateurDTO register(RegisterRequest request) {
         // Vérifier si l'email existe déjà
         if (utilisateurRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Cet email est déjà utilisé");
+        }
+
+        // Vérifier que le code a été validé
+        if (!verificationService.isEmailVerified(request.getEmail())) {
+            throw new RuntimeException("Veuillez d'abord vérifier votre email avec le code envoyé");
         }
 
         // Créer le nouvel utilisateur
@@ -39,8 +46,13 @@ public class UtilisateurService {
         user.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         user.setRole("USER");
         user.setProfil(request.getProfil());
+        user.setEmailVerified(true); // Marquer comme vérifié
 
         Utilisateur savedUser = utilisateurRepository.save(user);
+
+        // Nettoyer le code de vérification
+        verificationService.clearVerificationCode(request.getEmail());
+
         String token = jwtService.generateToken(savedUser.getEmail());
 
         // Convertir en DTO
@@ -51,6 +63,7 @@ public class UtilisateurService {
                 savedUser.getEmail(),
                 savedUser.getRole(),
                 savedUser.getProfil(),
+                savedUser.isEmailVerified(),
                 token
         );
     }
@@ -79,15 +92,10 @@ public class UtilisateurService {
                 user.getEmail(),
                 user.getRole(),
                 user.getProfil(),
+                user.isEmailVerified(),
                 token
         );
     }
-
-    // Trouver un utilisateur par ID
-//    public Utilisateur findById(Long id) {
-//        return utilisateurRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-//    }
 
     // Mettre à jour le profil
     public UtilisateurDTO updateProfil(Long id, UpdateProfilRequest request) {
@@ -110,6 +118,7 @@ public class UtilisateurService {
                 updated.getEmail(),
                 updated.getRole(),
                 updated.getProfil(),
+                updated.isEmailVerified(),
                 token
         );
     }
@@ -145,6 +154,7 @@ public class UtilisateurService {
                 user.getEmail(),
                 user.getRole(),
                 user.getProfil(),
+                user.isEmailVerified(),
                 null
         );
     }

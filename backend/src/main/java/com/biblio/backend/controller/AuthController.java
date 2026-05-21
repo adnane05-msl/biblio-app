@@ -3,7 +3,11 @@ package com.biblio.backend.controller;
 import com.biblio.backend.dto.LoginRequest;
 import com.biblio.backend.dto.RegisterRequest;
 import com.biblio.backend.dto.UtilisateurDTO;
+import com.biblio.backend.dto.EmailRequest;
+import com.biblio.backend.dto.VerifyCodeRequest;
+import com.biblio.backend.dto.ApiResponse;
 import com.biblio.backend.service.UtilisateurService;
+import com.biblio.backend.service.VerificationService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,29 +16,54 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/authentification")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
-    @Autowired
+
+    // ✅ PAS de @Autowired ici — l'injection se fait par constructeur
     private final UtilisateurService utilisateurService;
 
-    @Setter
-    @Getter
-    private LoginRequest request;
+    @Autowired
+    private VerificationService verificationService;
 
     public AuthController(UtilisateurService utilisateurService) {
         this.utilisateurService = utilisateurService;
     }
 
-
     @PostMapping("/inscription")
     public ResponseEntity<UtilisateurDTO> register(@RequestBody RegisterRequest request) {
+        System.out.println("=== REGISTER CONTROLLER ===");
+        System.out.println("Email: " + request.getEmail());
+        System.out.println("Nom: " + request.getNom());
+        System.out.println("VerificationCode: " + request.getVerificationCode());
         return ResponseEntity.ok(utilisateurService.register(request));
     }
 
-
     @PostMapping("/SeConnecter")
     public ResponseEntity<UtilisateurDTO> login(@RequestBody LoginRequest request) {
-        this.request = request;
         return ResponseEntity.ok(utilisateurService.login(request));
     }
+
+    @PostMapping("/envoyer-code")
+    public ResponseEntity<ApiResponse> sendVerificationCode(@RequestBody EmailRequest request) {
+        boolean sent = verificationService.sendVerificationCode(request.getEmail());
+        if (sent) {
+            return ResponseEntity.ok(new ApiResponse(true, "Code envoyé avec succès"));
+        } else {
+            return ResponseEntity.status(500)
+                    .body(new ApiResponse(false, "Erreur lors de l'envoi du code"));
+        }
+    }
+
+    @PostMapping("/verifier-code")
+    public ResponseEntity<ApiResponse> verifyCode(@RequestBody VerifyCodeRequest request) {
+        boolean verified = verificationService.verifyCode(request.getEmail(), request.getCode());
+        if (verified) {
+            return ResponseEntity.ok(new ApiResponse(true, "Code vérifié avec succès"));
+        } else {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse(false, "Code invalide ou expiré"));
+        }
+    }
+
 
 }
