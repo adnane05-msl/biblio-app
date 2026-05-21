@@ -143,7 +143,8 @@ public class ProjectArticleService {
         List<ProjectArticle> list =
                 projectArticleRepository.findByProject_Id(projectId);
 
-        Map<String, List<ProjectArticle>> grouped = new LinkedHashMap<>();
+        Map<String, List<ProjectArticle>> grouped =
+                new LinkedHashMap<>();
 
         for (ProjectArticle pa : list) {
             String key = pa.getArticle().getDoi() != null
@@ -153,26 +154,30 @@ public class ProjectArticleService {
                     ? pa.getArticle().getTitre().toLowerCase().trim()
                     : String.valueOf(pa.getId());
 
-            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
+            grouped.computeIfAbsent(key,
+                    k -> new ArrayList<>()).add(pa);
         }
 
-        int removed = 0;
+        int marked = 0;
         for (List<ProjectArticle> duplicates : grouped.values()) {
             if (duplicates.size() > 1) {
+                // Garder le premier — marquer les autres comme DOUBLON
                 for (int i = 1; i < duplicates.size(); i++) {
-                    projectArticleRepository.deleteById(duplicates.get(i).getId());
-                    removed++;
+                    ProjectArticle pa = duplicates.get(i);
+                    if (pa.getStatut() != ProjectArticle.Statut.DOUBLON) {
+                        pa.setStatut(ProjectArticle.Statut.DOUBLON);
+                        projectArticleRepository.save(pa);
+                        marked++;
+                    }
                 }
             }
         }
 
         Map<String, Object> result = new HashMap<>();
-        result.put("removed", removed);
-        if (removed == 0) {
-            result.put("message", "Aucun doublon détecté dans ce projet.");
-        } else {
-            result.put("message", removed + " doublon(s) supprimé(s) avec succès.");
-        }
+        result.put("marked", marked);
+        result.put("message", marked == 0
+                ? "Aucun doublon détecté dans ce projet."
+                : marked + " doublon(s) détecté(s) et marqué(s).");
         return result;
     }
 }

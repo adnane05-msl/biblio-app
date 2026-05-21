@@ -20,12 +20,19 @@ import {
     faFileAlt, faCopy
 } from '@fortawesome/free-solid-svg-icons'
 
-const STATUTS = [
-    { value: 'A_LIRE', label: 'À lire', color: '#6b7280' },
-    { value: 'RETENU', label: 'Retenu', color: '#16a34a' },
-    { value: 'EXCLU', label: 'Exclu', color: '#dc2626' },
+const STATUTS_MANUEL = [
+    { value: 'A_LIRE',  label: 'À lire',  color: '#6b7280' },
+    { value: 'RETENU',  label: 'Retenu',  color: '#16a34a' },
+    { value: 'EXCLU',   label: 'Exclu',   color: '#dc2626' },
+]
+
+const STATUTS_DISPLAY = [
+    { value: 'A_LIRE',  label: 'À lire',  color: '#6b7280' },
+    { value: 'RETENU',  label: 'Retenu',  color: '#16a34a' },
+    { value: 'EXCLU',   label: 'Exclu',   color: '#dc2626' },
     { value: 'DOUBLON', label: 'Doublon', color: '#d97706' },
 ]
+
 
 function ProjectDetail() {
     const { id } = useParams()
@@ -122,15 +129,24 @@ function ProjectDetail() {
     }
 
     const handleDeduplicate = async () => {
-        if (!window.confirm('Supprimer définitivement les doublons de ce projet ?'))
+        if (!window.confirm(
+            'Détecter automatiquement les doublons dans ce projet ?'))
             return
+
         setDedupLoading(true)
         try {
             const result = await deduplicateProject(id)
+
+            // Recharger les articles
             const arts = await getArticlesByProject(id)
             setArticles(arts)
-            setFilterStatut('TOUS')
-            setSuccess(result.message || 'Déduplication terminée.')
+
+            // Si des doublons détectés → filtrer automatiquement
+            if (result.marked > 0) {
+                setFilterStatut('DOUBLON')
+            }
+
+            setSuccess(result.message)
             setTimeout(() => setSuccess(''), 4000)
         } catch {
             setError('Erreur lors de la déduplication')
@@ -248,8 +264,14 @@ function ProjectDetail() {
                             <FontAwesomeIcon icon={faChartBar} /> Dashboard analytique
                         </button>
                         {articles.length > 0 && (
-                            <button className="btn-export btn-dedup" onClick={handleDeduplicate} disabled={dedupLoading}>
-                                <FontAwesomeIcon icon={faCopy} /> {dedupLoading ? 'Analyse en cours...' : 'Détecter les doublons'}
+                            <button
+                                className="btn-export btn-dedup"
+                                onClick={handleDeduplicate}
+                                disabled={dedupLoading}
+                                title="Détecter et marquer les doublons automatiquement"
+                            >
+                                <FontAwesomeIcon icon={faCopy} />
+                                {dedupLoading ? 'Détection...' : 'Détecter les doublons'}
                             </button>
                         )}
                     </div>
@@ -281,7 +303,7 @@ function ProjectDetail() {
                 ) : (
                     <div className="saved-articles-list">
                         {filteredArticles.map(article => {
-                            const statutInfo = STATUTS.find(s => s.value === article.statut)
+                            // const statutInfo = STATUTS_MANUEL.find(s => s.value === article.statut)
                             return (
                                 <div key={article.id} className="saved-article-card">
                                     <div className="saved-card-header">
@@ -300,12 +322,30 @@ function ProjectDetail() {
                                         <select
                                             className="statut-select"
                                             value={article.statut}
-                                            style={{ borderColor: statutInfo?.color, color: statutInfo?.color }}
-                                            onChange={(e) => handleStatutChange(article.id, e.target.value)}
+                                            style={{
+                                                borderColor: STATUTS_DISPLAY.find(
+                                                    s => s.value === article.statut)?.color,
+                                                color: STATUTS_DISPLAY.find(
+                                                    s => s.value === article.statut)?.color,
+                                                // Si DOUBLON → désactiver le select
+                                                pointerEvents: article.statut === 'DOUBLON'
+                                                    ? 'none' : 'auto',
+                                                opacity: article.statut === 'DOUBLON' ? 0.7 : 1,
+                                            }}
+                                            onChange={(e) => handleStatutChange(
+                                                article.id, e.target.value)}
+                                            disabled={article.statut === 'DOUBLON'}
                                         >
-                                            {STATUTS.map(s => (
-                                                <option key={s.value} value={s.value}>{s.label}</option>
-                                            ))}
+                                            {article.statut === 'DOUBLON' ? (
+                                                // Si doublon → afficher seulement le label doublon
+                                                <option value="DOUBLON">🔁 Doublon</option>
+                                            ) : (
+                                                STATUTS_MANUEL.map(s => (
+                                                    <option key={s.value} value={s.value}>
+                                                        {s.label}
+                                                    </option>
+                                                ))
+                                            )}
                                         </select>
                                     </div>
 
