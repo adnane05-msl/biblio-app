@@ -8,8 +8,8 @@ import com.biblio.backend.dto.VerifyCodeRequest;
 import com.biblio.backend.dto.ApiResponse;
 import com.biblio.backend.service.UtilisateurService;
 import com.biblio.backend.service.VerificationService;
-import lombok.Getter;
-import lombok.Setter;
+// import lombok.Getter;
+// import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
-    // ✅ PAS de @Autowired ici — l'injection se fait par constructeur
     private final UtilisateurService utilisateurService;
 
     @Autowired

@@ -16,4 +16,6 @@ public interface ProjectArticleRepository extends JpaRepository<ProjectArticle, 
     Optional<ProjectArticle> findByProjectAndArticle(Project project, Article article);
     void deleteByProjectAndArticle(Project project, Article article);
     long countByProject_IdAndStatut(Long projectId, ProjectArticle.Statut statut);
+    List<ProjectArticle> findByArticle(Article article);
+
 }

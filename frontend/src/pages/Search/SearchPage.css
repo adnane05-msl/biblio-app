@@ -574,6 +574,94 @@
     border: 1px solid #bfdbfe;
 }
 
+/* Barre de progression pour la sauvegarde en masse */
+.bulk-progress-bar {
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+}
+
+.bulk-progress-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.bulk-progress-info svg {
+    color: #3498db;
+}
+
+.bulk-progress-track {
+    background: #e0e0e0;
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.bulk-progress-fill {
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Amélioration des messages d'alerte */
+.alert-success {
+    white-space: pre-line;
+    background: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.alert button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-size: 1rem;
+}
+
+/* Désactivation des boutons pendant le chargement */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Menu de sauvegarde en masse amélioré */
+.bulk-menu-divider {
+    margin: 0.5rem 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+}
+
+.bulk-menu-save-all {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+}
+
+.bulk-menu-save-all:hover {
+    background: #c8e6c9 !important;
+}
 
 /* ── Responsive ── */
 @media (max-width: 768px) {

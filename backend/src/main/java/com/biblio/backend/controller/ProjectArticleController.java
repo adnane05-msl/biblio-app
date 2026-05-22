@@ -15,69 +15,52 @@ public class ProjectArticleController {
 
     private final ProjectArticleService projectArticleService;
 
-    public ProjectArticleController(
-            ProjectArticleService projectArticleService) {
+    public ProjectArticleController(ProjectArticleService projectArticleService) {
         this.projectArticleService = projectArticleService;
     }
 
-    // Sauvegarder un article dans un projet
+    // Sauvegarder un article — ne retourne JAMAIS d'erreur 4xx/5xx
+    // Si l'article existe déjà dans le projet, retourne le DTO existant (200)
     @PostMapping("/save")
-    public ResponseEntity<?> saveArticle(
-            @RequestBody SaveArticleRequest request) {
+    public ResponseEntity<ProjectArticleDTO> saveArticle(@RequestBody SaveArticleRequest request) {
         try {
-            ProjectArticleDTO dto =
-                    projectArticleService.saveArticle(request);
+            ProjectArticleDTO dto = projectArticleService.saveArticle(request);
             return ResponseEntity.ok(dto);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Erreur saveArticle: " + e.getMessage());
+            return ResponseEntity.ok().build();
         }
     }
 
-    // Récupérer tous les articles d'un projet
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<ProjectArticleDTO>> getByProject(
-            @PathVariable Long projectId) {
-        return ResponseEntity.ok(
-                projectArticleService.getArticlesByProject(projectId));
+    public ResponseEntity<List<ProjectArticleDTO>> getByProject(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectArticleService.getArticlesByProject(projectId));
     }
 
-    // Changer le statut
     @PutMapping("/{id}/statut")
     public ResponseEntity<ProjectArticleDTO> updateStatut(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(
-                projectArticleService.updateStatut(id, body.get("statut")));
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(projectArticleService.updateStatut(id, body.get("statut")));
     }
 
-    // Modifier la note
     @PutMapping("/{id}/note")
     public ResponseEntity<ProjectArticleDTO> updateNote(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(
-                projectArticleService.updateNote(id, body.get("note")));
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(projectArticleService.updateNote(id, body.get("note")));
     }
 
-    // Supprimer un article d'un projet
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeArticle(@PathVariable Long id) {
         projectArticleService.removeArticle(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Déduplication dans un projet
     @PostMapping("/project/{projectId}/deduplicate")
-    public ResponseEntity<Map<String, Object>> deduplicate(
-            @PathVariable Long projectId) {
+    public ResponseEntity<Map<String, Object>> deduplicate(@PathVariable Long projectId) {
         try {
-            Map<String, Object> result = projectArticleService
-                    .deduplicateProject(projectId);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", e.getMessage()));
+            return ResponseEntity.ok(projectArticleService.deduplicateProject(projectId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

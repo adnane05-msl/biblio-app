@@ -39,7 +39,7 @@ public class Project {
     private Utilisateur utilisateur;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectArticle> projectArticles = new ArrayList<>();
 
     @PrePersist
