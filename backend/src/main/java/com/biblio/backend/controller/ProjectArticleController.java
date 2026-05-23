@@ -53,4 +53,9 @@ public class ProjectArticleController {
         projectArticleService.removeArticle(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/project/{projectId}/deduplicate")
+    public ResponseEntity<Map<String, Object>> deduplicate(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectArticleService.deduplicate(projectId));
+    }
 }

@@ -10,6 +10,7 @@ import com.biblio.backend.repository.ProjectArticleRepository;
 import com.biblio.backend.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,5 +117,46 @@ public class ProjectArticleService {
         dto.setNote(pa.getNote());
         dto.setDateAjout(pa.getDateAjout());
         return dto;
+    }
+
+    public Map<String, Object> deduplicate(Long projectId) {
+        List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
+
+        // Grouper par DOI (puis par titre normalisé si pas de DOI)
+        Map<String, List<ProjectArticle>> groups = new LinkedHashMap<>();
+
+        for (ProjectArticle pa : list) {
+            String key;
+            String doi = pa.getArticle().getDoi();
+            if (doi != null && !doi.trim().isEmpty()) {
+                key = "doi:" + doi.trim().toLowerCase();
+            } else {
+                String titre = pa.getArticle().getTitre();
+                key = "titre:" + (titre != null ? titre.trim().toLowerCase() : "");
+            }
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
+        }
+
+        int marked = 0;
+        for (List<ProjectArticle> group : groups.values()) {
+            if (group.size() > 1) {
+                // Garder le premier, marquer les autres DOUBLON
+                for (int i = 1; i < group.size(); i++) {
+                    ProjectArticle pa = group.get(i);
+                    if (pa.getStatut() != ProjectArticle.Statut.DOUBLON) {
+                        pa.setStatut(ProjectArticle.Statut.DOUBLON);
+                        projectArticleRepository.save(pa);
+                        marked++;
+                    }
+                }
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("marked", marked);
+        result.put("message", marked > 0
+                ? marked + " doublon(s) détecté(s) et marqué(s)"
+                : "Aucun doublon détecté");
+        return result;
     }
 }
