@@ -10,17 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(
-        name = "article_projet",
-        // CORRECTION : contrainte unique en base pour bloquer les doublons même en cas de
-        // race condition (deux requêtes simultanées pour le même article+projet)
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_project_article",
-                        columnNames = {"id_projet", "id_article"}
-                )
-        }
-)
+@Table(name = "article_projet")
 public class ProjectArticle {
 
     @Id

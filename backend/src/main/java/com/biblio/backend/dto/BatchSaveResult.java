@@ -11,7 +11,7 @@ import java.util.List;
 public class BatchSaveResult {
     private int total;
     private int saved;
-    private int existing;
+//    private int existing;
     private int failed;
     private List<String> errors;
 }

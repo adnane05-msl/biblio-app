@@ -10,7 +10,6 @@ import com.biblio.backend.model.ProjectArticle;
 import com.biblio.backend.repository.ArticleRepository;
 import com.biblio.backend.repository.ProjectArticleRepository;
 import com.biblio.backend.repository.ProjectRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,49 +33,25 @@ public class ProjectArticleService {
         this.articleRepository = articleRepository;
     }
 
-    // ================================================================
     // SAVE UNITAIRE
-    // ================================================================
 
     @Transactional
     public ProjectArticleDTO saveArticle(SaveArticleRequest request) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-
         Article article = findOrCreateArticle(request);
-
-        Optional<ProjectArticle> existing =
-                projectArticleRepository.findByProjectAndArticle(project, article);
-        if (existing.isPresent()) {
-            return convertToDTO(existing.get());
-        }
-
         ProjectArticle pa = new ProjectArticle();
         pa.setProject(project);
         pa.setArticle(article);
         pa.setStatut(ProjectArticle.Statut.A_LIRE);
         pa.setDateAjout(LocalDateTime.now());
 
-        try {
-            return convertToDTO(projectArticleRepository.save(pa));
-        } catch (DataIntegrityViolationException e) {
-            return projectArticleRepository
-                    .findByProjectAndArticle(project, article)
-                    .map(this::convertToDTO)
-                    .orElseThrow(() -> new RuntimeException("Erreur inattendue lors de la sauvegarde"));
-        }
+        return convertToDTO(projectArticleRepository.save(pa));
     }
-
-    // ================================================================
-    // SAVE EN LOT — CORRECTION PRINCIPALE DU BUG
-    // Toute la liste est traitée dans UNE SEULE transaction, en séquentiel.
-    // Cela élimine les race conditions entre requêtes parallèles du frontend.
-    // ================================================================
 
     @Transactional
     public BatchSaveResult saveArticlesBatch(BatchSaveRequest request) {
         int saved = 0;
-        int existing = 0;
         int failed = 0;
         List<String> errors = new ArrayList<>();
 
@@ -88,56 +63,38 @@ public class ProjectArticleService {
             try {
                 Article article = findOrCreateArticle(articleRequest);
 
-                Optional<ProjectArticle> existingLink =
-                        projectArticleRepository.findByProjectAndArticle(project, article);
-
-                if (existingLink.isPresent()) {
-                    existing++;
-                    continue;
-                }
-
                 ProjectArticle pa = new ProjectArticle();
                 pa.setProject(project);
                 pa.setArticle(article);
                 pa.setStatut(ProjectArticle.Statut.A_LIRE);
                 pa.setDateAjout(LocalDateTime.now());
 
-                try {
-                    projectArticleRepository.save(pa);
-                    saved++;
-                } catch (DataIntegrityViolationException e) {
-                    existing++;
-                }
+                projectArticleRepository.save(pa);
+                saved++;
 
             } catch (Exception e) {
                 failed++;
                 String titre = articleRequest.getTitre();
-                errors.add("Echec pour \""
-                        + (titre != null && titre.length() > 60 ? titre.substring(0, 60) + "..." : titre)
-                        + "\" : " + e.getMessage());
-                System.err.println("Batch save error: " + e.getMessage());
+                errors.add("Echec pour \"" + (titre != null && titre.length() > 60 ? titre.substring(0, 60) + "..." : titre) + "\" : " + e.getMessage());
             }
         }
 
         return new BatchSaveResult(
                 request.getArticles().size(),
                 saved,
-                existing,
                 failed,
                 errors
         );
     }
 
-    // ================================================================
     // FIND OR CREATE ARTICLE
-    // ================================================================
 
     private Article findOrCreateArticle(SaveArticleRequest request) {
         String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
         String titre = request.getTitre() != null ? request.getTitre().trim() : null;
         Integer annee = request.getAnnee();
 
-        // 1. Chercher par DOI — identifiant universel fiable
+        // Chercher par DOI
         if (doi != null && !doi.isEmpty()) {
             Optional<Article> byDoi = articleRepository.findByDoi(doi);
             if (byDoi.isPresent()) {
@@ -145,7 +102,7 @@ public class ProjectArticleService {
             }
         }
 
-        // 2. Chercher par titre + année (les deux doivent correspondre)
+        // Chercher par titre + année
         if (titre != null && !titre.isEmpty() && annee != null) {
             Optional<Article> byTitre = articleRepository.findByTitre(titre);
             if (byTitre.isPresent() && annee.equals(byTitre.get().getAnnee())) {
@@ -153,7 +110,7 @@ public class ProjectArticleService {
             }
         }
 
-        // 3. Créer un nouvel article
+        // Créer un nouvel article — TOUJOURS, même sans titre ni DOI
         return createArticle(request, doi, titre);
     }
 
@@ -182,7 +139,16 @@ public class ProjectArticleService {
 
     private Article createArticle(SaveArticleRequest request, String doi, String titre) {
         Article article = new Article();
-        article.setTitre(titre != null && !titre.isEmpty() ? truncate(titre, 2000) : "Titre non disponible");
+
+        // Titre unique même si null — utiliser DOI ou un UUID pour éviter les fusions
+        if (titre != null && !titre.isEmpty()) {
+            article.setTitre(truncate(titre, 2000));
+        } else if (doi != null && !doi.isEmpty()) {
+            article.setTitre("Article " + doi);
+        } else {
+            article.setTitre("Article sans titre - " + java.util.UUID.randomUUID().toString().substring(0, 8));
+        }
+
         article.setAuteurs(truncate(request.getAuteurs(), 2000));
         article.setAnnee(request.getAnnee());
         article.setDoi(doi != null && !doi.isEmpty() ? truncate(doi, 500) : null);
@@ -195,9 +161,7 @@ public class ProjectArticleService {
         return articleRepository.save(article);
     }
 
-    // ================================================================
     // CRUD CLASSIQUE
-    // ================================================================
 
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
         return projectArticleRepository.findByProject_Id(projectId)
@@ -266,9 +230,7 @@ public class ProjectArticleService {
         return result;
     }
 
-    // ================================================================
     // HELPERS
-    // ================================================================
 
     private String truncate(String value, int maxLength) {
         if (value == null) return null;

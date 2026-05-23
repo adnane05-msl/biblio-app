@@ -338,7 +338,7 @@ function ProjectDetail() {
                                         >
                                             {article.statut === 'DOUBLON' ? (
                                                 // Si doublon → afficher seulement le label doublon
-                                                <option value="DOUBLON">🔁 Doublon</option>
+                                                <option value="DOUBLON">Doublon</option>
                                             ) : (
                                                 STATUTS_MANUEL.map(s => (
                                                     <option key={s.value} value={s.value}>

@@ -69,26 +69,27 @@ function SearchPage() {
 
         try {
             const data = await searchArticles(query)
-            // Garder uniquement les articles avec DOI pour garantir la sauvegarde
-            const filtered = data.filter(a =>
-                a.doi &&
-                a.doi.trim() !== '' &&
-                a.doi.trim().toLowerCase() !== 'null' &&
-                a.doi.trim().toLowerCase() !== 'undefined'
+
+            // Filtrer les articles sans titre réel
+            const saveable = data.filter(a => 
+                a.title && 
+                a.title.trim() !== '' && 
+                a.title.trim() !== 'Titre non disponible'
             )
-            setArticles(filtered)
+
+            setArticles(saveable)
 
             const types = [...new Set(
-                filtered.map(a => a.documentType).filter(t => t && t.trim() !== '')
+                saveable.map(a => a.documentType).filter(t => t && t.trim() !== '')
             )].sort()
             setAvailableTypes(types)
 
             const pubs = [...new Set(
-                filtered.map(a => a.publisher).filter(p => p && p.trim() !== '')
+                saveable.map(a => a.publisher).filter(p => p && p.trim() !== '')
             )].sort()
             setPublishers(pubs)
 
-            const years = filtered.map(a => a.year).filter(y => y != null && y > 0)
+            const years = saveable.map(a => a.year).filter(y => y != null && y > 0)
             if (years.length > 0) {
                 setYearRange({ min: Math.min(...years), max: Math.max(...years) })
             }
