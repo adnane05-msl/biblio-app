@@ -4,6 +4,7 @@ import com.biblio.backend.dto.ArticleDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SearchService {
@@ -48,14 +49,35 @@ public class SearchService {
             }
         }
 
-        // ← Trier par année décroissante seulement
-        allResults.sort((a, b) -> {
+        // Nettoyer les DOI invalides avant de filtrer
+        allResults.forEach(a -> {
+            if (a.getDoi() != null) {
+                String doi = a.getDoi().trim();
+                // Crossref retourne parfois "null" comme string ou un DOI vide
+                if (doi.isEmpty()
+                        || doi.equalsIgnoreCase("null")
+                        || doi.equalsIgnoreCase("undefined")
+                        || doi.equals("https://doi.org/")
+                        || doi.equals("http://doi.org/")) {
+                    a.setDoi(null);
+                }
+            }
+        });
+
+        // Garder uniquement les articles avec DOI valide
+        // Les articles sans DOI ne peuvent pas être sauvegardés de façon fiable
+        List<ArticleDTO> withDoi = allResults.stream()
+                .filter(a -> a.getDoi() != null && !a.getDoi().trim().isEmpty())
+                .collect(Collectors.toList());
+
+        // Trier par année décroissante
+        withDoi.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
             if (a.getYear() == null) return 1;
             if (b.getYear() == null) return -1;
             return b.getYear().compareTo(a.getYear());
         });
 
-        return allResults;
+        return withDoi;
     }
 }

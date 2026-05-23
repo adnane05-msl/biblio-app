@@ -15,4 +15,6 @@ public class SaveArticleRequest {
     private String source;
     private String journal;
     private String documentType;
+    // CORRECTION : publisher ajouté pour ne pas perdre l'info
+    private String publisher;
 }

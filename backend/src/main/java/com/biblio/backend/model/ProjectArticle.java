@@ -5,16 +5,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "article_projet")
+@Table(
+        name = "article_projet",
+        // CORRECTION : contrainte unique en base pour bloquer les doublons même en cas de
+        // race condition (deux requêtes simultanées pour le même article+projet)
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_project_article",
+                        columnNames = {"id_projet", "id_article"}
+                )
+        }
+)
 public class ProjectArticle {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,20 +38,18 @@ public class ProjectArticle {
     @Enumerated(EnumType.STRING)
     private Statut statut = Statut.A_LIRE;
 
-    @Column(length = 100)
+    @Column(length = 1000)
     private String note;
 
     @Column(name = "date_ajout")
-    private LocalDateTime dateAjout = LocalDateTime.now();
+    private LocalDateTime dateAjout;
 
-//   on le verifer apres
-//    @PrePersist
-//    public void prePersist() {
-//        this.dateAjout = LocalDateTime.now();
-//    }
-
-
-// Statut des articles
+    @PrePersist
+    public void prePersist() {
+        if (this.dateAjout == null) {
+            this.dateAjout = LocalDateTime.now();
+        }
+    }
 
     public enum Statut {
         A_LIRE,

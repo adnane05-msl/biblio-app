@@ -19,26 +19,41 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    // CORRECTION : length augmenté de façon à éviter toute troncature silencieuse
+    @Column(nullable = false, length = 2000)
     private String titre;
 
-    @Column(length = 100)
+    // CORRECTION : était 100 → troncature causait des faux-positifs dans findByTitre/findByDoi
+    @Column(length = 2000)
     private String auteurs;
 
     private Integer annee;
 
+    // CORRECTION : length explicite pour les DOI longs
+    @Column(length = 500)
     private String doi;
 
     @Column(length = 5000)
     private String resume;
 
+    @Column(length = 2000)
     private String url;
 
     @Column(name = "nb_citations")
     private Integer nbCitations;
 
-    @Column(name = "mot_cles")
+    @Column(name = "mot_cles", length = 1000)
     private String motCles;
+
+    // CORRECTION : journal et source ajoutés au modèle pour éviter la perte d'info
+    @Column(length = 500)
+    private String journal;
+
+    @Column(length = 100)
+    private String documentType;
+
+    @Column(length = 100)
+    private String sourceNom;
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private List<ProjectArticle> projectArticles = new ArrayList<>();

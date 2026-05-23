@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { searchArticles } from '../../services/SearchServices'
 import { getProjectsByUser } from '../../services/ProjectServices'
-import { saveArticleToProject } from '../../services/ProjectArticleServices'
+import { saveArticleToProject, saveArticlesToProject } from '../../services/ProjectArticleServices'
 import Navbar from '../../components/Navbar/Navbar'
 import Footer from '../../components/Footer/Footer'
 import SearchBar from '../../components/Search/SearchBar'
@@ -69,19 +69,26 @@ function SearchPage() {
 
         try {
             const data = await searchArticles(query)
-            setArticles(data)
+            // Garder uniquement les articles avec DOI pour garantir la sauvegarde
+            const filtered = data.filter(a =>
+                a.doi &&
+                a.doi.trim() !== '' &&
+                a.doi.trim().toLowerCase() !== 'null' &&
+                a.doi.trim().toLowerCase() !== 'undefined'
+            )
+            setArticles(filtered)
 
             const types = [...new Set(
-                data.map(a => a.documentType).filter(t => t && t.trim() !== '')
+                filtered.map(a => a.documentType).filter(t => t && t.trim() !== '')
             )].sort()
             setAvailableTypes(types)
 
             const pubs = [...new Set(
-                data.map(a => a.publisher).filter(p => p && p.trim() !== '')
+                filtered.map(a => a.publisher).filter(p => p && p.trim() !== '')
             )].sort()
             setPublishers(pubs)
 
-            const years = data.map(a => a.year).filter(y => y != null && y > 0)
+            const years = filtered.map(a => a.year).filter(y => y != null && y > 0)
             if (years.length > 0) {
                 setYearRange({ min: Math.min(...years), max: Math.max(...years) })
             }
@@ -100,6 +107,7 @@ function SearchPage() {
         setPublisherFilter('TOUS')
     }
 
+    // ── Sauvegarde unitaire (clic sur un article individuel) ──
     const handleSave = async (article, projectId) => {
         try {
             await saveArticleToProject(article, projectId)
@@ -187,26 +195,40 @@ function SearchPage() {
         }
     }, [isIndeterminate])
 
-    // Sauvegarde en masse : tous les articles sont sauvegardés
-    // Le backend retourne silencieusement le DTO existant si l'article est déjà dans le projet
+    // ── CORRECTION PRINCIPALE : sauvegarde en lot via un seul appel API ──
+    // Avant : N requêtes parallèles → race conditions → articles perdus
+    // Après : 1 seule requête avec tous les articles → séquentiel en backend → 0 perte
     const handleBulkSave = async (projectId) => {
         setBulkLoading(true)
         setShowBulkMenu(false)
 
-        let saved = 0
-        for (const article of selectedArticles) {
-            try {
-                await saveArticleToProject(article, projectId)
-                saved++
-            } catch {
-                // erreur réseau réelle uniquement
-            }
-        }
+        try {
+            const result = await saveArticlesToProject(selectedArticles, projectId)
+            // result = { total, saved, existing, failed, errors }
 
-        setSelectedArticles([])
-        setSuccess(`✅ ${saved} article(s) sauvegardé(s) dans le projet`)
-        setTimeout(() => setSuccess(''), 4000)
-        setBulkLoading(false)
+            setSelectedArticles([])
+
+            if (result.failed > 0) {
+                // Certains articles ont échoué : on affiche le détail
+                setError(
+                    `⚠️ ${result.failed} article(s) n'ont pas pu être sauvegardés sur ${result.total}. ` +
+                    `${result.saved} nouveaux, ${result.existing} déjà présents.`
+                )
+                setTimeout(() => setError(''), 6000)
+            } else {
+                // Tout s'est bien passé
+                const msg = result.existing > 0
+                    ? `✅ ${result.saved} article(s) sauvegardé(s). ${result.existing} déjà présent(s) dans le projet.`
+                    : `✅ ${result.saved} article(s) sauvegardé(s) dans le projet.`
+                setSuccess(msg)
+                setTimeout(() => setSuccess(''), 4000)
+            }
+        } catch {
+            setError('Erreur réseau lors de la sauvegarde. Réessayez.')
+            setTimeout(() => setError(''), 4000)
+        } finally {
+            setBulkLoading(false)
+        }
     }
 
     const selectAll = () => {

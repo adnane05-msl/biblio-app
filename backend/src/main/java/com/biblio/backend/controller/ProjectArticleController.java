@@ -1,5 +1,7 @@
 package com.biblio.backend.controller;
 
+import com.biblio.backend.dto.BatchSaveRequest;
+import com.biblio.backend.dto.BatchSaveResult;
 import com.biblio.backend.dto.ProjectArticleDTO;
 import com.biblio.backend.dto.SaveArticleRequest;
 import com.biblio.backend.service.ProjectArticleService;
@@ -19,8 +21,7 @@ public class ProjectArticleController {
         this.projectArticleService = projectArticleService;
     }
 
-    // Sauvegarder un article — ne retourne JAMAIS d'erreur 4xx/5xx
-    // Si l'article existe déjà dans le projet, retourne le DTO existant (200)
+    // Save unitaire (gardé pour compatibilité)
     @PostMapping("/save")
     public ResponseEntity<ProjectArticleDTO> saveArticle(@RequestBody SaveArticleRequest request) {
         try {
@@ -28,7 +29,22 @@ public class ProjectArticleController {
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.err.println("Erreur saveArticle: " + e.getMessage());
-            return ResponseEntity.ok().build();
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // NOUVEAU : Save en lot — utiliser cet endpoint depuis le frontend
+    // pour sauvegarder tous les articles sélectionnés en une seule requête.
+    @PostMapping("/save-batch")
+    public ResponseEntity<BatchSaveResult> saveArticlesBatch(@RequestBody BatchSaveRequest request) {
+        try {
+            BatchSaveResult result = projectArticleService.saveArticlesBatch(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("Erreur saveArticlesBatch: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
-    @Query("SELECT a FROM Article a WHERE LOWER(TRIM(a.doi)) = LOWER(TRIM(:doi))")
+    @Query("SELECT a FROM Article a WHERE a.doi IS NOT NULL AND TRIM(a.doi) != '' AND LOWER(TRIM(a.doi)) = LOWER(TRIM(:doi))")
     Optional<Article> findByDoi(@Param("doi") String doi);
 
     @Query("SELECT a FROM Article a WHERE LOWER(TRIM(a.titre)) = LOWER(TRIM(:titre))")
