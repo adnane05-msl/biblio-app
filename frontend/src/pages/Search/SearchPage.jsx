@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { searchArticles } from '../../services/SearchServices'
 import { getProjectsByUser } from '../../services/ProjectServices'
-import { saveArticleToProject, saveArticlesToProject } from '../../services/ProjectArticleServices'
+import { saveArticleToProject } from '../../services/ProjectArticleServices'
 import Navbar from '../../components/Navbar/Navbar'
 import Footer from '../../components/Footer/Footer'
 import SearchBar from '../../components/Search/SearchBar'
@@ -39,14 +39,12 @@ function SearchPage() {
     const [bulkLoading,      setBulkLoading]      = useState(false)
     const selectAllRef = useRef(null)
 
-    // ── Filtres ──
     const [sortBy,          setSortBy]          = useState('Recommandé')
     const [yearMin,         setYearMin]         = useState('')
     const [yearMax,         setYearMax]         = useState('')
     const [selectedTypes,   setSelectedTypes]   = useState([])
     const [publisherFilter, setPublisherFilter] = useState('TOUS')
 
-    // ── Données dérivées pour les filtres ──
     const [availableTypes,  setAvailableTypes]  = useState([])
     const [publishers,      setPublishers]      = useState([])
     const [yearRange,       setYearRange]       = useState({ min: 2000, max: 2025 })
@@ -70,26 +68,26 @@ function SearchPage() {
         try {
             const data = await searchArticles(query)
 
-            // Filtrer les articles sans titre réel
-            const saveable = data.filter(a => 
-                a.title && 
-                a.title.trim() !== '' && 
-                a.title.trim() !== 'Titre non disponible'
+            // Filtrer : garder uniquement les articles avec un titre réel
+            const validArticles = data.filter(a =>
+                a.title &&
+                a.title.trim() !== '' &&
+                a.title.trim().toLowerCase() !== 'titre non disponible'
             )
 
-            setArticles(saveable)
+            setArticles(validArticles)
 
             const types = [...new Set(
-                saveable.map(a => a.documentType).filter(t => t && t.trim() !== '')
+                validArticles.map(a => a.documentType).filter(t => t && t.trim() !== '')
             )].sort()
             setAvailableTypes(types)
 
             const pubs = [...new Set(
-                saveable.map(a => a.publisher).filter(p => p && p.trim() !== '')
+                validArticles.map(a => a.publisher).filter(p => p && p.trim() !== '')
             )].sort()
             setPublishers(pubs)
 
-            const years = saveable.map(a => a.year).filter(y => y != null && y > 0)
+            const years = validArticles.map(a => a.year).filter(y => y != null && y > 0)
             if (years.length > 0) {
                 setYearRange({ min: Math.min(...years), max: Math.max(...years) })
             }
@@ -108,7 +106,6 @@ function SearchPage() {
         setPublisherFilter('TOUS')
     }
 
-    // ── Sauvegarde unitaire (clic sur un article individuel) ──
     const handleSave = async (article, projectId) => {
         try {
             await saveArticleToProject(article, projectId)
@@ -144,10 +141,17 @@ function SearchPage() {
         }
 
         switch (sortBy) {
-            case 'year_desc': result.sort((a, b) => (b.year || 0) - (a.year || 0)); break
-            case 'year_asc':  result.sort((a, b) => (a.year || 0) - (b.year || 0)); break
-            case 'citations': result.sort((a, b) => (b.citations || 0) - (a.citations || 0)); break
-            default: break
+            case 'year_desc':
+                result.sort((a, b) => (b.year || 0) - (a.year || 0))
+                break
+            case 'year_asc':
+                result.sort((a, b) => (a.year || 0) - (b.year || 0))
+                break
+            case 'citations':
+                result.sort((a, b) => (b.citations || 0) - (a.citations || 0))
+                break
+            default:
+                break
         }
 
         return result
@@ -178,7 +182,9 @@ function SearchPage() {
         setSelectedArticles(prev => {
             const key = article.doi || article.title
             const exists = prev.find(a => (a.doi || a.title) === key)
-            if (exists) return prev.filter(a => (a.doi || a.title) !== key)
+            if (exists) {
+                return prev.filter(a => (a.doi || a.title) !== key)
+            }
             return [...prev, article]
         })
     }
@@ -196,40 +202,26 @@ function SearchPage() {
         }
     }, [isIndeterminate])
 
-    // ── CORRECTION PRINCIPALE : sauvegarde en lot via un seul appel API ──
-    // Avant : N requêtes parallèles → race conditions → articles perdus
-    // Après : 1 seule requête avec tous les articles → séquentiel en backend → 0 perte
+    // Sauvegarde groupée : sauvegarde tous les articles, ignore silencieusement les erreurs
     const handleBulkSave = async (projectId) => {
+        const total = selectedArticles.length
         setBulkLoading(true)
         setShowBulkMenu(false)
+        let saved = 0
 
-        try {
-            const result = await saveArticlesToProject(selectedArticles, projectId)
-            // result = { total, saved, existing, failed, errors }
-
-            setSelectedArticles([])
-
-            if (result.failed > 0) {
-                // Certains articles ont échoué : on affiche le détail
-                setError(
-                    `⚠️ ${result.failed} article(s) n'ont pas pu être sauvegardés sur ${result.total}. ` +
-                    `${result.saved} nouveaux, ${result.existing} déjà présents.`
-                )
-                setTimeout(() => setError(''), 6000)
-            } else {
-                // Tout s'est bien passé
-                const msg = result.existing > 0
-                    ? `✅ ${result.saved} article(s) sauvegardé(s). ${result.existing} déjà présent(s) dans le projet.`
-                    : `✅ ${result.saved} article(s) sauvegardé(s) dans le projet.`
-                setSuccess(msg)
-                setTimeout(() => setSuccess(''), 4000)
+        for (const article of selectedArticles) {
+            try {
+                await saveArticleToProject(article, projectId)
+                saved++
+            } catch {
+                // Ignorer l'erreur et continuer avec l'article suivant
             }
-        } catch {
-            setError('Erreur réseau lors de la sauvegarde. Réessayez.')
-            setTimeout(() => setError(''), 4000)
-        } finally {
-            setBulkLoading(false)
         }
+
+        setSelectedArticles([])
+        setSuccess(`✅ ${saved} article(s) sauvegardé(s) sur ${total}`)
+        setTimeout(() => setSuccess(''), 4000)
+        setBulkLoading(false)
     }
 
     const selectAll = () => {
@@ -304,8 +296,12 @@ function SearchPage() {
                                         </span>
                                     </div>
                                 </div>
+
                                 {activeFiltersCount > 0 && (
-                                    <button className="btn-reset-filters" onClick={() => { resetFilters(); setCurrentPage(1) }}>
+                                    <button
+                                        className="btn-reset-filters"
+                                        onClick={() => { resetFilters(); setCurrentPage(1) }}
+                                    >
                                         <FontAwesomeIcon icon={faXmark} />
                                         Effacer les filtres ({activeFiltersCount})
                                     </button>
@@ -319,16 +315,28 @@ function SearchPage() {
                                 <div className="year-inputs">
                                     <div className="year-input-group">
                                         <label>De</label>
-                                        <input type="number" className="year-input" placeholder={yearRange.min}
-                                            value={yearMin} min={yearRange.min} max={yearRange.max}
-                                            onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }} />
+                                        <input
+                                            type="number"
+                                            className="year-input"
+                                            placeholder={yearRange.min}
+                                            value={yearMin}
+                                            min={yearRange.min}
+                                            max={yearRange.max}
+                                            onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }}
+                                        />
                                     </div>
                                     <span className="year-separator">—</span>
                                     <div className="year-input-group">
                                         <label>À</label>
-                                        <input type="number" className="year-input" placeholder={yearRange.max}
-                                            value={yearMax} min={yearRange.min} max={yearRange.max}
-                                            onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }} />
+                                        <input
+                                            type="number"
+                                            className="year-input"
+                                            placeholder={yearRange.max}
+                                            value={yearMax}
+                                            min={yearRange.min}
+                                            max={yearRange.max}
+                                            onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }}
+                                        />
                                     </div>
                                 </div>
                                 <div className="year-hint">Disponible : {yearRange.min} — {yearRange.max}</div>
@@ -342,9 +350,11 @@ function SearchPage() {
                                     <div className="type-list">
                                         {availableTypes.map(type => (
                                             <label key={type} className="type-checkbox">
-                                                <input type="checkbox"
+                                                <input
+                                                    type="checkbox"
                                                     checked={selectedTypes.includes(type)}
-                                                    onChange={() => toggleType(type)} />
+                                                    onChange={() => toggleType(type)}
+                                                />
                                                 <span className="type-name">{type}</span>
                                                 <span className="type-count">
                                                     {articles.filter(a => a.documentType === type).length}
@@ -360,8 +370,11 @@ function SearchPage() {
                                     <div className="sidebar-section-title">
                                         <FontAwesomeIcon icon={faBuilding} /> Éditeur
                                     </div>
-                                    <select className="publisher-select" value={publisherFilter}
-                                        onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}>
+                                    <select
+                                        className="publisher-select"
+                                        value={publisherFilter}
+                                        onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}
+                                    >
                                         <option value="TOUS">Tous les éditeurs</option>
                                         {publishers.map(p => (
                                             <option key={p} value={p}>
@@ -384,8 +397,11 @@ function SearchPage() {
                                     </span>
                                     <div className="sort-control">
                                         <FontAwesomeIcon icon={faSort} />
-                                        <select className="sort-select" value={sortBy}
-                                            onChange={e => { setSortBy(e.target.value); setCurrentPage(1) }}>
+                                        <select
+                                            className="sort-select"
+                                            value={sortBy}
+                                            onChange={e => { setSortBy(e.target.value); setCurrentPage(1) }}
+                                        >
                                             {SORT_OPTIONS.map(opt => (
                                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                                             ))}
@@ -399,11 +415,15 @@ function SearchPage() {
                                     <p className="empty-icon">📭</p>
                                     <p className="empty-title">Aucun résultat</p>
                                     <p className="empty-subtitle">
-                                        {activeFiltersCount > 0 ? 'Essayez d\'élargir vos filtres' : 'Essayez avec d\'autres mots-clés'}
+                                        {activeFiltersCount > 0
+                                            ? 'Essayez d\'élargir vos filtres'
+                                            : 'Essayez avec d\'autres mots-clés'}
                                     </p>
                                     {activeFiltersCount > 0 && (
-                                        <button className="btn-reset-filters-center"
-                                            onClick={() => { resetFilters(); setCurrentPage(1) }}>
+                                        <button
+                                            className="btn-reset-filters-center"
+                                            onClick={() => { resetFilters(); setCurrentPage(1) }}
+                                        >
                                             Effacer les filtres
                                         </button>
                                     )}
@@ -414,12 +434,19 @@ function SearchPage() {
                                 <div className="selection-bar">
                                     <div className="selection-left">
                                         <label className="select-all-label">
-                                            <input type="checkbox" ref={selectAllRef}
-                                                checked={isAllSelected} onChange={selectAll} />
-                                            {isAllSelected ? 'Tout désélectionner'
-                                                : isIndeterminate ? 'Sélectionner tout'
-                                                : 'Tout sélectionner'}
+                                            <input
+                                                type="checkbox"
+                                                ref={selectAllRef}
+                                                checked={isAllSelected}
+                                                onChange={selectAll}
+                                            />
+                                            {isAllSelected
+                                                ? 'Tout désélectionner'
+                                                : isIndeterminate
+                                                    ? 'Sélectionner tout'
+                                                    : 'Tout sélectionner'}
                                         </label>
+
                                         {selectedArticles.length > 0 && (
                                             <span className="selected-badge">
                                                 {selectedArticles.length} sélectionné(s)
@@ -430,9 +457,11 @@ function SearchPage() {
                                     {selectedArticles.length > 0 && (
                                         <div className="bulk-actions">
                                             <div className="bulk-save-wrapper">
-                                                <button className="btn-bulk-save"
+                                                <button
+                                                    className="btn-bulk-save"
                                                     onClick={() => setShowBulkMenu(!showBulkMenu)}
-                                                    disabled={bulkLoading}>
+                                                    disabled={bulkLoading}
+                                                >
                                                     <FontAwesomeIcon icon={faFloppyDisk} />
                                                     {bulkLoading
                                                         ? 'Sauvegarde...'
@@ -444,8 +473,11 @@ function SearchPage() {
                                                         <p className="bulk-menu-title">Choisir un projet :</p>
                                                         {projects.length > 0 ? (
                                                             projects.map(p => (
-                                                                <button key={p.id} className="bulk-menu-item"
-                                                                    onClick={() => handleBulkSave(p.id)}>
+                                                                <button
+                                                                    key={p.id}
+                                                                    className="bulk-menu-item"
+                                                                    onClick={() => handleBulkSave(p.id)}
+                                                                >
                                                                     <FontAwesomeIcon icon={faFolder} />
                                                                     {p.nomProjet}
                                                                 </button>
@@ -457,9 +489,12 @@ function SearchPage() {
                                                 )}
                                             </div>
 
-                                            <button className="btn-clear-selection"
-                                                onClick={() => setSelectedArticles([])}>
-                                                <FontAwesomeIcon icon={faXmark} /> Annuler
+                                            <button
+                                                className="btn-clear-selection"
+                                                onClick={() => setSelectedArticles([])}
+                                            >
+                                                <FontAwesomeIcon icon={faXmark} />
+                                                Annuler
                                             </button>
                                         </div>
                                     )}
@@ -488,31 +523,39 @@ function SearchPage() {
                                         <span className="pagination-total">({filteredArticles.length} articles)</span>
                                     </div>
                                     <div className="pagination-controls">
-                                        <button className="page-btn page-nav"
+                                        <button
+                                            className="page-btn page-nav"
                                             onClick={() => { setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                            disabled={currentPage === 1}>«</button>
-                                        <button className="page-btn page-nav"
+                                            disabled={currentPage === 1}
+                                        >«</button>
+                                        <button
+                                            className="page-btn page-nav"
                                             onClick={() => { setCurrentPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                            disabled={currentPage === 1}>‹</button>
+                                            disabled={currentPage === 1}
+                                        >‹</button>
 
                                         {getPageNumbers(currentPage, totalPages).map((page, index) =>
                                             page === '...' ? (
                                                 <span key={`dots-${index}`} className="page-dots">...</span>
                                             ) : (
-                                                <button key={page}
+                                                <button
+                                                    key={page}
                                                     className={`page-btn ${currentPage === page ? 'active' : ''}`}
-                                                    onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-                                                    {page}
-                                                </button>
+                                                    onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                                                >{page}</button>
                                             )
                                         )}
 
-                                        <button className="page-btn page-nav"
+                                        <button
+                                            className="page-btn page-nav"
                                             onClick={() => { setCurrentPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                            disabled={currentPage === totalPages}>›</button>
-                                        <button className="page-btn page-nav"
+                                            disabled={currentPage === totalPages}
+                                        >›</button>
+                                        <button
+                                            className="page-btn page-nav"
                                             onClick={() => { setCurrentPage(totalPages); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                            disabled={currentPage === totalPages}>»</button>
+                                            disabled={currentPage === totalPages}
+                                        >»</button>
                                     </div>
                                 </div>
                             )}
@@ -524,7 +567,9 @@ function SearchPage() {
                     <div className="empty-state">
                         <p className="empty-icon">🔬</p>
                         <p className="empty-title">Prêt à rechercher</p>
-                        <p className="empty-subtitle">Entrez des mots-clés pour trouver des articles scientifiques</p>
+                        <p className="empty-subtitle">
+                            Entrez des mots-clés pour trouver des articles scientifiques
+                        </p>
                     </div>
                 )}
             </div>

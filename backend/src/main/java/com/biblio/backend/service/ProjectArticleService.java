@@ -1,7 +1,5 @@
 package com.biblio.backend.service;
 
-import com.biblio.backend.dto.BatchSaveRequest;
-import com.biblio.backend.dto.BatchSaveResult;
 import com.biblio.backend.dto.ProjectArticleDTO;
 import com.biblio.backend.dto.SaveArticleRequest;
 import com.biblio.backend.model.Article;
@@ -11,10 +9,8 @@ import com.biblio.backend.repository.ArticleRepository;
 import com.biblio.backend.repository.ProjectArticleRepository;
 import com.biblio.backend.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,135 +29,50 @@ public class ProjectArticleService {
         this.articleRepository = articleRepository;
     }
 
-    // SAVE UNITAIRE
-
-    @Transactional
     public ProjectArticleDTO saveArticle(SaveArticleRequest request) {
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        Article article = findOrCreateArticle(request);
-        ProjectArticle pa = new ProjectArticle();
-        pa.setProject(project);
-        pa.setArticle(article);
-        pa.setStatut(ProjectArticle.Statut.A_LIRE);
-        pa.setDateAjout(LocalDateTime.now());
-
-        return convertToDTO(projectArticleRepository.save(pa));
-    }
-
-    @Transactional
-    public BatchSaveResult saveArticlesBatch(BatchSaveRequest request) {
-        int saved = 0;
-        int failed = 0;
-        List<String> errors = new ArrayList<>();
 
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
-        for (SaveArticleRequest articleRequest : request.getArticles()) {
-            articleRequest.setProjectId(request.getProjectId());
-            try {
-                Article article = findOrCreateArticle(articleRequest);
-
-                ProjectArticle pa = new ProjectArticle();
-                pa.setProject(project);
-                pa.setArticle(article);
-                pa.setStatut(ProjectArticle.Statut.A_LIRE);
-                pa.setDateAjout(LocalDateTime.now());
-
-                projectArticleRepository.save(pa);
-                saved++;
-
-            } catch (Exception e) {
-                failed++;
-                String titre = articleRequest.getTitre();
-                errors.add("Echec pour \"" + (titre != null && titre.length() > 60 ? titre.substring(0, 60) + "..." : titre) + "\" : " + e.getMessage());
-            }
-        }
-
-        return new BatchSaveResult(
-                request.getArticles().size(),
-                saved,
-                failed,
-                errors
-        );
-    }
-
-    // FIND OR CREATE ARTICLE
-
-    private Article findOrCreateArticle(SaveArticleRequest request) {
-        String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
-        String titre = request.getTitre() != null ? request.getTitre().trim() : null;
-        Integer annee = request.getAnnee();
-
-        // Chercher par DOI
+        // Chercher si l'article existe déjà en base (par DOI d'abord, puis titre)
+        Article article = null;
+        String doi = request.getDoi() != null ? request.getDoi().trim() : null;
         if (doi != null && !doi.isEmpty()) {
-            Optional<Article> byDoi = articleRepository.findByDoi(doi);
-            if (byDoi.isPresent()) {
-                return enrichAndSave(byDoi.get(), request, doi);
+            article = articleRepository.findByDoi(doi).orElse(null);
+        }
+        String titre = request.getTitre() != null ? request.getTitre().trim() : null;
+        if (article == null && titre != null && !titre.isEmpty()) {
+            article = articleRepository.findByTitre(titre).orElse(null);
+        }
+
+        // Créer l'article s'il n'existe pas encore
+        if (article == null) {
+            article = new Article();
+            // Titre de secours si null ou vide
+            if (titre == null || titre.isEmpty()) {
+                titre = doi != null && !doi.isEmpty()
+                        ? "Article " + doi
+                        : "Article sans titre";
             }
+            article.setTitre(titre);
+            article.setAuteurs(request.getAuteurs());
+            article.setAnnee(request.getAnnee());
+            article.setDoi(doi != null && !doi.isEmpty() ? doi : null);
+            article.setResume(request.getResume());
+            article.setUrl(request.getUrl());
+            article.setNbCitations(request.getNbCitations());
+            article = articleRepository.save(article);
         }
 
-        // Chercher par titre + année
-        if (titre != null && !titre.isEmpty() && annee != null) {
-            Optional<Article> byTitre = articleRepository.findByTitre(titre);
-            if (byTitre.isPresent() && annee.equals(byTitre.get().getAnnee())) {
-                return enrichAndSave(byTitre.get(), request, doi);
-            }
-        }
+        // Toujours créer le lien article <-> projet (aucune vérification doublon)
+        ProjectArticle projectArticle = new ProjectArticle();
+        projectArticle.setProject(project);
+        projectArticle.setArticle(article);
+        projectArticle.setStatut(ProjectArticle.Statut.A_LIRE);
 
-        // Créer un nouvel article — TOUJOURS, même sans titre ni DOI
-        return createArticle(request, doi, titre);
+        ProjectArticle saved = projectArticleRepository.save(projectArticle);
+        return convertToDTO(saved);
     }
-
-    private Article enrichAndSave(Article found, SaveArticleRequest request, String doi) {
-        boolean updated = false;
-        if ((found.getDoi() == null || found.getDoi().isEmpty()) && doi != null && !doi.isEmpty()) {
-            found.setDoi(doi); updated = true;
-        }
-        if ((found.getResume() == null || found.getResume().isBlank())
-                && request.getResume() != null && !request.getResume().isBlank()) {
-            found.setResume(truncate(request.getResume(), 5000)); updated = true;
-        }
-        if (found.getNbCitations() == null && request.getNbCitations() != null) {
-            found.setNbCitations(request.getNbCitations()); updated = true;
-        }
-        if ((found.getUrl() == null || found.getUrl().isBlank())
-                && request.getUrl() != null && !request.getUrl().isBlank()) {
-            found.setUrl(truncate(request.getUrl(), 2000)); updated = true;
-        }
-        if ((found.getJournal() == null || found.getJournal().isBlank())
-                && request.getJournal() != null && !request.getJournal().isBlank()) {
-            found.setJournal(truncate(request.getJournal(), 500)); updated = true;
-        }
-        return updated ? articleRepository.save(found) : found;
-    }
-
-    private Article createArticle(SaveArticleRequest request, String doi, String titre) {
-        Article article = new Article();
-
-        // Titre unique même si null — utiliser DOI ou un UUID pour éviter les fusions
-        if (titre != null && !titre.isEmpty()) {
-            article.setTitre(truncate(titre, 2000));
-        } else if (doi != null && !doi.isEmpty()) {
-            article.setTitre("Article " + doi);
-        } else {
-            article.setTitre("Article sans titre - " + java.util.UUID.randomUUID().toString().substring(0, 8));
-        }
-
-        article.setAuteurs(truncate(request.getAuteurs(), 2000));
-        article.setAnnee(request.getAnnee());
-        article.setDoi(doi != null && !doi.isEmpty() ? truncate(doi, 500) : null);
-        article.setResume(truncate(request.getResume(), 5000));
-        article.setUrl(truncate(request.getUrl(), 2000));
-        article.setNbCitations(request.getNbCitations());
-        article.setJournal(truncate(request.getJournal(), 500));
-        article.setDocumentType(truncate(request.getDocumentType(), 100));
-        article.setSourceNom(truncate(request.getSource(), 100));
-        return articleRepository.save(article);
-    }
-
-    // CRUD CLASSIQUE
 
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
         return projectArticleRepository.findByProject_Id(projectId)
@@ -171,14 +82,16 @@ public class ProjectArticleService {
     }
 
     public ProjectArticleDTO updateStatut(Long projectArticleId, String statut) {
-        ProjectArticle pa = projectArticleRepository.findById(projectArticleId)
+        ProjectArticle pa = projectArticleRepository
+                .findById(projectArticleId)
                 .orElseThrow(() -> new RuntimeException("Lien article-projet non trouvé"));
         pa.setStatut(ProjectArticle.Statut.valueOf(statut));
         return convertToDTO(projectArticleRepository.save(pa));
     }
 
     public ProjectArticleDTO updateNote(Long projectArticleId, String note) {
-        ProjectArticle pa = projectArticleRepository.findById(projectArticleId)
+        ProjectArticle pa = projectArticleRepository
+                .findById(projectArticleId)
                 .orElseThrow(() -> new RuntimeException("Lien article-projet non trouvé"));
         pa.setNote(note);
         return convertToDTO(projectArticleRepository.save(pa));
@@ -186,55 +99,6 @@ public class ProjectArticleService {
 
     public void removeArticle(Long projectArticleId) {
         projectArticleRepository.deleteById(projectArticleId);
-    }
-
-    @Transactional
-    public Map<String, Object> deduplicateProject(Long projectId) {
-        List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
-        Map<String, List<ProjectArticle>> grouped = new LinkedHashMap<>();
-
-        for (ProjectArticle pa : list) {
-            String doi = pa.getArticle().getDoi();
-            String key;
-            if (doi != null && !doi.trim().isEmpty()) {
-                key = "doi:" + doi.toLowerCase().trim();
-            } else if (pa.getArticle().getTitre() != null) {
-                key = "titre:" + pa.getArticle().getTitre()
-                        .toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", " ").trim();
-            } else {
-                key = "id:" + pa.getId();
-            }
-            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
-        }
-
-        int marked = 0;
-        for (List<ProjectArticle> duplicates : grouped.values()) {
-            if (duplicates.size() > 1) {
-                duplicates.sort(Comparator
-                        .comparing((ProjectArticle p) -> p.getStatut() == ProjectArticle.Statut.RETENU ? 0 : 1)
-                        .thenComparing(p -> p.getDateAjout() != null ? p.getDateAjout() : LocalDateTime.MIN));
-                for (int i = 1; i < duplicates.size(); i++) {
-                    ProjectArticle pa = duplicates.get(i);
-                    if (pa.getStatut() != ProjectArticle.Statut.DOUBLON) {
-                        pa.setStatut(ProjectArticle.Statut.DOUBLON);
-                        projectArticleRepository.save(pa);
-                        marked++;
-                    }
-                }
-            }
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("marked", marked);
-        result.put("message", marked == 0 ? "Aucun doublon détecté." : marked + " doublon(s) détecté(s) et marqué(s).");
-        return result;
-    }
-
-    // HELPERS
-
-    private String truncate(String value, int maxLength) {
-        if (value == null) return null;
-        return value.length() > maxLength ? value.substring(0, maxLength - 3) + "..." : value;
     }
 
     private ProjectArticleDTO convertToDTO(ProjectArticle pa) {
@@ -248,8 +112,6 @@ public class ProjectArticleService {
         dto.setResume(pa.getArticle().getResume());
         dto.setUrl(pa.getArticle().getUrl());
         dto.setNbCitations(pa.getArticle().getNbCitations());
-        dto.setJournal(pa.getArticle().getJournal());
-        dto.setSource(pa.getArticle().getSourceNom());
         dto.setStatut(pa.getStatut().name());
         dto.setNote(pa.getNote());
         dto.setDateAjout(pa.getDateAjout());
