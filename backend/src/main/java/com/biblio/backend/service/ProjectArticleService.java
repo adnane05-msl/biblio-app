@@ -49,7 +49,6 @@ public class ProjectArticleService {
         // Créer l'article s'il n'existe pas encore
         if (article == null) {
             article = new Article();
-            // Titre de secours si null ou vide
             if (titre == null || titre.isEmpty()) {
                 titre = doi != null && !doi.isEmpty()
                         ? "Article " + doi
@@ -66,9 +65,30 @@ public class ProjectArticleService {
             article.setUrl(request.getUrl());
             article.setNbCitations(request.getNbCitations());
             article = articleRepository.save(article);
+        } else {
+            // Article déjà en base : toujours mettre à jour avec les valeurs fraîches
+            if (request.getDocumentType() != null) {
+                article.setDocumentType(request.getDocumentType());
+            }
+            if (request.getJournal() != null) {
+                article.setJournal(request.getJournal());
+            }
+            if (request.getAuteurs() != null) {
+                article.setAuteurs(request.getAuteurs());
+            }
+            if (request.getResume() != null) {
+                article.setResume(request.getResume());
+            }
+            if (request.getNbCitations() != null) {
+                article.setNbCitations(request.getNbCitations());
+            }
+            if (request.getUrl() != null) {
+                article.setUrl(request.getUrl());
+            }
+            article = articleRepository.save(article);
         }
 
-        // Toujours créer le lien article <-> projet (aucune vérification doublon)
+        // Toujours créer le lien article <-> projet
         ProjectArticle projectArticle = new ProjectArticle();
         projectArticle.setProject(project);
         projectArticle.setArticle(article);
@@ -128,7 +148,6 @@ public class ProjectArticleService {
     public Map<String, Object> deduplicate(Long projectId) {
         List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
 
-        // Grouper par DOI (puis par titre normalisé si pas de DOI)
         Map<String, List<ProjectArticle>> groups = new LinkedHashMap<>();
 
         for (ProjectArticle pa : list) {
@@ -146,7 +165,6 @@ public class ProjectArticleService {
         int marked = 0;
         for (List<ProjectArticle> group : groups.values()) {
             if (group.size() > 1) {
-                // Garder le premier, marquer les autres DOUBLON
                 for (int i = 1; i < group.size(); i++) {
                     ProjectArticle pa = group.get(i);
                     if (pa.getStatut() != ProjectArticle.Statut.DOUBLON) {
