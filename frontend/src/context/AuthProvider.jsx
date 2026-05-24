@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
         setUser(userData)
     }
 
-    // ← Nouvelle fonction
+    // Nouvelle fonction
     const updateUser = (userData) => {
         const updated = { ...user, ...userData }
         localStorage.setItem('user', JSON.stringify(updated))
