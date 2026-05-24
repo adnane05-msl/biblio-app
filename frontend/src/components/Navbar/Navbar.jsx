@@ -43,6 +43,7 @@ function Navbar() {
                     Mes Projets
                 </Link>
                 
+                
                 {/* <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>
                     À propos
                 </Link> */}

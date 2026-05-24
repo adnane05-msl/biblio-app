@@ -69,7 +69,7 @@ function DashboardPage() {
         </div>
     )
 
-    // Préparer données pour BarChart années
+    // Préparer Données pour BarChart années
     const yearData = data?.articlesByYear
         ? Object.entries(data.articlesByYear).map(([year, count]) => ({
             year: parseInt(year),

@@ -33,7 +33,7 @@ function Footer() {
                     </p>
                 </div>
 
-                {/* ── Colonne 2 : Navigation ── */}
+                {/* ── Colonne 2 : Navigation ─ */}
                 <div className="footer-col">
                     <h4 className="footer-col-title">Navigation</h4>
                     <ul className="footer-links">
