@@ -345,13 +345,16 @@ function ProjectDetail() {
                     </div>
                 </div>
 
-                {/* TOOLBAR ROW 2 : Actions (Export, Dashboard, Dédup) */}
+                {/*  Export + Outils séparés */}
                 {articles.length > 0 && (
-                    <div className="detail-toolbar detail-toolbar-actions">
-                        <div className="toolbar-section toolbar-section-export">
-                            <span className="toolbar-section-label">
-                                <FontAwesomeIcon icon={faDownload} /> Exporter
-                            </span>
+                    <div className="detail-toolbar-actions-row">
+
+                        {/* Carte Export */}
+                        <div className="toolbar-card">
+                            <div className="toolbar-card-header">
+                                <FontAwesomeIcon icon={faDownload} />
+                                <span>EXPORTER</span>
+                            </div>
                             <div className="export-actions">
                                 <button className="btn-export btn-bibtex" onClick={() => exportBibtex(id)}>
                                     <FontAwesomeIcon icon={faFileCode} /> BibTeX
@@ -365,23 +368,30 @@ function ProjectDetail() {
                             </div>
                         </div>
 
-                        <div className="toolbar-section-divider" />
-
-                        <div className="toolbar-section toolbar-section-tools">
-                            <button className="btn-dashboard" onClick={() => navigate(`/projects/${id}/dashboard`)}>
-                                <FontAwesomeIcon icon={faChartBar} /> Dashboard
-                            </button>
-                            <button
-                                className="btn-export btn-dedup"
-                                onClick={handleDeduplicate}
-                                disabled={dedupLoading}
-                            >
-                                <FontAwesomeIcon icon={faCopy} />
-                                {dedupLoading ? 'Détection...' : 'Détecter doublons'}
-                            </button>
+                        {/* Carte Outils du projet */}
+                        <div className="toolbar-card">
+                            <div className="toolbar-card-header">
+                                <FontAwesomeIcon icon={faChartBar} />
+                                <span>OUTILS DU PROJET</span>
+                            </div>
+                            <div className="tools-actions">
+                                <button className="btn-tool btn-tool-dashboard"
+                                    onClick={() => navigate(`/projects/${id}/dashboard`)}>
+                                    <FontAwesomeIcon icon={faChartBar} /> Voir le dashboard
+                                </button>
+                                <button
+                                    className="btn-tool btn-tool-dedup"
+                                    onClick={handleDeduplicate}
+                                    disabled={dedupLoading}
+                                >
+                                    <FontAwesomeIcon icon={faCopy} />
+                                    {dedupLoading ? 'Détection...' : 'Détecter les doublons'}
+                                </button>
+                            </div>
                         </div>
+
                     </div>
-                )}
+                )}                
 
                 {/* Messages */}
                 {error && (

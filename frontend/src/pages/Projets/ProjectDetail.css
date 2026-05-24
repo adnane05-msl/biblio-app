@@ -864,6 +864,82 @@
     font-size: 16px;
 }
 
+
+
+/* ── TOOLBAR ACTIONS ROW (2 cartes côte à côte) ── */
+.detail-toolbar-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.toolbar-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.toolbar-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.tools-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-tool {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: all 0.2s;
+    border: 1px solid;
+}
+
+.btn-tool-dashboard {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+.btn-tool-dashboard:hover { background-color: #dbeafe; }
+
+.btn-tool-dedup {
+    background-color: #faf5ff;
+    color: #7c3aed;
+    border-color: #ddd6fe;
+}
+.btn-tool-dedup:hover:not(:disabled) { background-color: #ede9fe; }
+.btn-tool-dedup:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .detail-toolbar-actions-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .detail-hero-title { font-size: 24px; }
