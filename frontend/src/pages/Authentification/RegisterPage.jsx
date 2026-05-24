@@ -8,7 +8,7 @@ function RegisterPage() {
     const navigate = useNavigate()
     const { login } = useAuth()
 
-    // Étape 1: formulaire inscription (sans email car déjà saisi)
+    // ÉTAPE 1: formulaire inscription (sans email car déjà saisi)
     const [form, setForm] = useState({
         nom: '',
         prenom: '',
