@@ -58,6 +58,9 @@ public class ProjectArticleService {
             article.setTitre(titre);
             article.setAuteurs(request.getAuteurs());
             article.setAnnee(request.getAnnee());
+            article.setJournal(request.getJournal());
+            article.setDocumentType(request.getDocumentType());
+            article.setSourceNom(request.getSource());
             article.setDoi(doi != null && !doi.isEmpty() ? doi : null);
             article.setResume(request.getResume());
             article.setUrl(request.getUrl());
@@ -109,6 +112,9 @@ public class ProjectArticleService {
         dto.setTitre(pa.getArticle().getTitre());
         dto.setAuteurs(pa.getArticle().getAuteurs());
         dto.setAnnee(pa.getArticle().getAnnee());
+        dto.setDocumentType(pa.getArticle().getDocumentType());
+        dto.setJournal(pa.getArticle().getJournal());
+        dto.setSource(pa.getArticle().getSourceNom());
         dto.setDoi(pa.getArticle().getDoi());
         dto.setResume(pa.getArticle().getResume());
         dto.setUrl(pa.getArticle().getUrl());

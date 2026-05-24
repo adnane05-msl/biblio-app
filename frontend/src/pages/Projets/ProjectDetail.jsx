@@ -520,12 +520,9 @@ function ProjectDetail() {
 
                                                 {/* Type de document */}
                                                 {article.documentType && (
-                                                    <span className="article-type-badge">
-                                                        {article.documentType}
-                                                    </span>
+                                                    <span className="article-type">{article.documentType}</span>
                                                 )}
                                                 
-
                                                 {/* Année */}
                                                 {article.annee && (
                                                     <span className="article-year">

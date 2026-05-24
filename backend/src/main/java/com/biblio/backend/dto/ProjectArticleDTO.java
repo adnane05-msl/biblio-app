@@ -18,6 +18,7 @@ public class ProjectArticleDTO {
     private String resume;
     private String url;
     private Integer nbCitations;
+    private String documentType;
     private String source;
     private String journal;
     private String statut;

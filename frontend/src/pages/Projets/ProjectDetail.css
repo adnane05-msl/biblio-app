@@ -573,6 +573,13 @@
     border-radius: 20px;
     text-transform: capitalize;
 }
+.article-type {
+    font-size: 12px;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
 
 
 .article-year {
