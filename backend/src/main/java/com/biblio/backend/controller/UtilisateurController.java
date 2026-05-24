@@ -28,7 +28,7 @@ public class UtilisateurController {
                 utilisateurService.findById(id));
     }
 
-    // Mettre à jour le profil
+    // Mettre à jour le Profil
     @PutMapping("/{id}/profil")
     public ResponseEntity<UtilisateurDTO> updateProfil(
             @PathVariable Long id,
@@ -37,7 +37,7 @@ public class UtilisateurController {
                 utilisateurService.updateProfil(id, request));
     }
 
-    // Changer le mot de passe
+    // Changer le Mot de Passe
     @PutMapping("/{id}/password")
     public ResponseEntity<?> changePassword(
             @PathVariable Long id,

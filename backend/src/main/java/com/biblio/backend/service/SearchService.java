@@ -49,7 +49,8 @@ public class SearchService {
             }
         }
 
-        // Nettoyer les DOI invalides avant de filtrer
+        // Nettoyer les DOI Invalides avant de filtrer
+
         allResults.forEach(a -> {
             if (a.getDoi() != null) {
                 String doi = a.getDoi().trim();
