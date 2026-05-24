@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { getProjectById } from '../../services/ProjectServices'
 import { deduplicateProject } from '../../services/ProjectArticleServices'
 import {
@@ -17,7 +17,8 @@ import {
     faTrash, faNoteSticky, faCircleCheck, faCircleXmark,
     faBookOpen, faArrowLeft, faMagnifyingGlass, faUsers,
     faChartBar, faCalendar, faLink, faFileCode, faFileCsv,
-    faFileAlt, faCopy, faFilter, faXmark
+    faFileAlt, faCopy, faSort, faChevronLeft, faChevronRight,
+    faAnglesLeft, faAnglesRight
 } from '@fortawesome/free-solid-svg-icons'
 
 const STATUTS_MANUEL = [
@@ -33,6 +34,17 @@ const STATUTS_DISPLAY = [
     { value: 'DOUBLON', label: 'Doublon', color: '#d97706' },
 ]
 
+const ARTICLES_PER_PAGE = 10
+
+const SORT_OPTIONS = [
+    { value: 'date_desc', label: 'Date ajout (récent)' },
+    { value: 'date_asc',  label: 'Date ajout (ancien)' },
+    { value: 'year_desc', label: 'Année (récent)' },
+    { value: 'year_asc',  label: 'Année (ancien)' },
+    { value: 'citations', label: 'Citations' },
+    { value: 'titre',     label: 'Titre (A-Z)' },
+]
+
 function ProjectDetail() {
     const { id } = useParams()
     const navigate = useNavigate()
@@ -46,12 +58,10 @@ function ProjectDetail() {
     const [noteText, setNoteText] = useState('')
     const [filterStatut, setFilterStatut] = useState('TOUS')
     const [dedupLoading, setDedupLoading] = useState(false)
-
-    // ── Sélection ──
-    const [selectedIds, setSelectedIds] = useState([])
-    const [showFilterMenu, setShowFilterMenu] = useState(false)
-    const [removeLoading, setRemoveLoading] = useState(false)
-    const selectAllRef = useRef(null)
+    const [expandedAbstracts, setExpandedAbstracts] = useState({})
+    const [currentPage, setCurrentPage] = useState(1)
+    const [sortBy, setSortBy] = useState('date_desc')
+    const [filterKey, setFilterKey] = useState('')  // tracks last filter+sort combo
 
     useEffect(() => {
         const load = async () => {
@@ -71,78 +81,10 @@ function ProjectDetail() {
         load()
     }, [id, navigate])
 
-    // ── Changer le filtre et vider la sélection en même temps ──
-    const changeFilter = (statut) => {
-        setFilterStatut(statut)
-        setSelectedIds([])
-    }
+    // Derive the effective page: reset to 1 when filter or sort changes
+    const comboKey = `${filterStatut}__${sortBy}`
+    const effectivePage = comboKey !== filterKey ? 1 : currentPage
 
-    const filteredArticles = filterStatut === 'TOUS'
-        ? articles
-        : articles.filter(a => a.statut === filterStatut)
-
-    // ── Logique sélection ──
-    const isAllSelected = filteredArticles.length > 0 &&
-        filteredArticles.every(a => selectedIds.includes(a.id))
-    const isIndeterminate = !isAllSelected && selectedIds.length > 0 &&
-        filteredArticles.some(a => selectedIds.includes(a.id))
-
-    useEffect(() => {
-        if (selectAllRef.current) {
-            selectAllRef.current.indeterminate = isIndeterminate
-        }
-    }, [isIndeterminate])
-
-    const toggleSelect = (articleId) => {
-        setSelectedIds(prev =>
-            prev.includes(articleId)
-                ? prev.filter(i => i !== articleId)
-                : [...prev, articleId]
-        )
-    }
-
-    const toggleSelectAll = () => {
-        if (isAllSelected) {
-            // Désélectionner uniquement ceux de la vue filtrée
-            const filteredIds = new Set(filteredArticles.map(a => a.id))
-            setSelectedIds(prev => prev.filter(i => !filteredIds.has(i)))
-        } else {
-            const filteredIds = filteredArticles.map(a => a.id)
-            setSelectedIds(prev => [...new Set([...prev, ...filteredIds])])
-        }
-    }
-
-    const clearSelection = () => setSelectedIds([])
-
-    // ── Action : Retirer les articles sélectionnés ──
-    const handleBulkRemove = async () => {
-        if (!window.confirm(`Retirer ${selectedIds.length} article(s) du projet ?`)) return
-        setRemoveLoading(true)
-        let removed = 0
-        for (const articleId of selectedIds) {
-            try {
-                await removeArticleFromProject(articleId)
-                removed++
-            } catch { /* ignorer */ }
-        }
-        setArticles(prev => prev.filter(a => !selectedIds.includes(a.id)))
-        setSelectedIds([])
-        setSuccess(`${removed} article(s) retiré(s) du projet.`)
-        setTimeout(() => setSuccess(''), 3000)
-        setRemoveLoading(false)
-    }
-
-    // ── Action : Filtrer par statut des sélectionnés ──
-    const handleFilterBySelected = (statut) => {
-        changeFilter(statut)
-        setShowFilterMenu(false)
-    }
-
-    // ── Statut unique des articles sélectionnés (pour le menu filtrer) ──
-    const selectedArticles = articles.filter(a => selectedIds.includes(a.id))
-    const statutsInSelection = [...new Set(selectedArticles.map(a => a.statut))]
-
-    // ── Handlers existants ──
     const handleStatutChange = async (articleId, statut) => {
         try {
             await updateArticleStatut(articleId, statut)
@@ -177,13 +119,66 @@ function ProjectDetail() {
         try {
             await removeArticleFromProject(articleId)
             setArticles(prev => prev.filter(a => a.id !== articleId))
-            setSelectedIds(prev => prev.filter(i => i !== articleId))
             setSuccess('Article retiré du projet !')
             setTimeout(() => setSuccess(''), 2000)
         } catch {
             setError('Erreur lors de la suppression')
             setTimeout(() => setError(''), 3000)
         }
+    }
+
+    const toggleAbstract = (articleId) => {
+        setExpandedAbstracts(prev => ({ ...prev, [articleId]: !prev[articleId] }))
+    }
+
+    const cleanAbstract = (text) => {
+        if (!text) return ''
+        return text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    }
+
+    // Filtering
+    const filteredArticles = filterStatut === 'TOUS'
+        ? articles
+        : articles.filter(a => a.statut === filterStatut)
+
+    // Sorting
+    const sortedArticles = [...filteredArticles].sort((a, b) => {
+        switch (sortBy) {
+            case 'date_asc':
+                return new Date(a.dateAjout || 0) - new Date(b.dateAjout || 0)
+            case 'date_desc':
+                return new Date(b.dateAjout || 0) - new Date(a.dateAjout || 0)
+            case 'year_desc':
+                return (b.annee || 0) - (a.annee || 0)
+            case 'year_asc':
+                return (a.annee || 0) - (b.annee || 0)
+            case 'citations':
+                return (b.nbCitations || 0) - (a.nbCitations || 0)
+            case 'titre':
+                return (a.titre || '').localeCompare(b.titre || '')
+            default:
+                return 0
+        }
+    })
+
+    // Pagination — use effectivePage (resets to 1 when filter/sort changes)
+    const totalPages = Math.ceil(sortedArticles.length / ARTICLES_PER_PAGE)
+    const paginatedArticles = sortedArticles.slice(
+        (effectivePage - 1) * ARTICLES_PER_PAGE,
+        effectivePage * ARTICLES_PER_PAGE
+    )
+
+    const getPageNumbers = (current, total) => {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+        if (current <= 3) return [1, 2, 3, 4, '...', total]
+        if (current >= total - 2) return [1, '...', total - 3, total - 2, total - 1, total]
+        return [1, '...', current - 1, current, current + 1, '...', total]
+    }
+
+    const goToPage = (page) => {
+        setFilterKey(comboKey)
+        setCurrentPage(page)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const stats = {
@@ -194,11 +189,6 @@ function ProjectDetail() {
         doublons: articles.filter(a => a.statut === 'DOUBLON').length,
     }
 
-    const cleanAbstract = (text) => {
-        if (!text) return ''
-        return text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-    }
-
     const handleDeduplicate = async () => {
         if (!window.confirm('Détecter automatiquement les doublons dans ce projet ?')) return
         setDedupLoading(true)
@@ -206,7 +196,7 @@ function ProjectDetail() {
             const result = await deduplicateProject(id)
             const arts = await getArticlesByProject(id)
             setArticles(arts)
-            if (result.marked > 0) changeFilter('DOUBLON')
+            if (result.marked > 0) setFilterStatut('DOUBLON')
             setSuccess(result.message)
             setTimeout(() => setSuccess(''), 4000)
         } catch {
@@ -277,7 +267,6 @@ function ProjectDetail() {
 
             {/* Main Content */}
             <div className="detail-container">
-
                 {/* Toolbar */}
                 <div className="detail-toolbar">
                     <div className="toolbar-row">
@@ -287,12 +276,12 @@ function ProjectDetail() {
                                 <button
                                     key={s}
                                     className={`filter-btn ${filterStatut === s ? 'active' : ''}`}
-                                    onClick={() => changeFilter(s)}
+                                    onClick={() => setFilterStatut(s)}
                                 >
                                     {s === 'TOUS' ? 'Tous'
                                         : s === 'A_LIRE' ? 'À lire'
-                                        : s === 'RETENU' ? 'Retenus'
-                                        : s === 'EXCLU' ? 'Exclus' : 'Doublons'}
+                                            : s === 'RETENU' ? 'Retenus'
+                                                : s === 'EXCLU' ? 'Exclus' : 'Doublons'}
                                     {s !== 'TOUS' && (
                                         <span className="filter-count">
                                             {articles.filter(a => a.statut === s).length}
@@ -343,100 +332,6 @@ function ProjectDetail() {
                 )}
                 {success && <div className="alert alert-success">{success}</div>}
 
-                {/* ── BARRE DE SÉLECTION ── */}
-                {filteredArticles.length > 0 && (
-                    <div className="selection-bar">
-                        <div className="selection-left">
-                            <label className="select-all-label">
-                                <input
-                                    type="checkbox"
-                                    ref={selectAllRef}
-                                    checked={isAllSelected}
-                                    onChange={toggleSelectAll}
-                                />
-                                {isAllSelected
-                                    ? 'Tout désélectionner'
-                                    : isIndeterminate
-                                        ? 'Sélectionner tout'
-                                        : 'Tout sélectionner'}
-                            </label>
-
-                            {selectedIds.length > 0 && (
-                                <span className="selected-badge">
-                                    {selectedIds.length} sélectionné(s)
-                                </span>
-                            )}
-                        </div>
-
-                        {selectedIds.length > 0 && (
-                            <div className="bulk-actions">
-
-                                {/* Bouton Filtrer par statut */}
-                                <div className="bulk-filter-wrapper">
-                                    <button
-                                        className="btn-bulk-filter"
-                                        onClick={() => setShowFilterMenu(!showFilterMenu)}
-                                    >
-                                        <FontAwesomeIcon icon={faFilter} />
-                                        Filtrer par statut
-                                    </button>
-
-                                    {showFilterMenu && (
-                                        <div className="bulk-menu">
-                                            <p className="bulk-menu-title">
-                                                Afficher uniquement les articles avec le statut :
-                                            </p>
-                                            {statutsInSelection.map(statut => {
-                                                const info = STATUTS_DISPLAY.find(s => s.value === statut)
-                                                const count = selectedArticles.filter(a => a.statut === statut).length
-                                                return (
-                                                    <button
-                                                        key={statut}
-                                                        className="bulk-menu-item"
-                                                        onClick={() => handleFilterBySelected(statut)}
-                                                    >
-                                                        <span
-                                                            className="statut-dot"
-                                                            style={{ backgroundColor: info?.color }}
-                                                        />
-                                                        {info?.label} ({count})
-                                                    </button>
-                                                )
-                                            })}
-                                            <div className="bulk-menu-divider" />
-                                            <button
-                                                className="bulk-menu-item"
-                                                onClick={() => { changeFilter('TOUS'); setShowFilterMenu(false) }}
-                                            >
-                                                Voir tous les articles
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Bouton Retirer */}
-                                <button
-                                    className="btn-bulk-remove"
-                                    onClick={handleBulkRemove}
-                                    disabled={removeLoading}
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                    {removeLoading ? 'Retrait...' : `Retirer (${selectedIds.length})`}
-                                </button>
-
-                                {/* Annuler sélection */}
-                                <button
-                                    className="btn-clear-selection"
-                                    onClick={clearSelection}
-                                >
-                                    <FontAwesomeIcon icon={faXmark} />
-                                    Annuler
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
                 {/* Articles List */}
                 {articles.length === 0 ? (
                     <div className="empty-state">
@@ -451,141 +346,247 @@ function ProjectDetail() {
                             <FontAwesomeIcon icon={faMagnifyingGlass} /> Aller à la recherche
                         </button>
                     </div>
-                ) : filteredArticles.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-icon-wrapper">
-                            <FontAwesomeIcon icon={faFilter} />
-                        </div>
-                        <h2 className="empty-title">Aucun article pour ce filtre</h2>
-                        <p className="empty-subtitle">Essayez un autre statut</p>
-                        <button className="btn-go-search" onClick={() => changeFilter('TOUS')}>
-                            Voir tous les articles
-                        </button>
-                    </div>
                 ) : (
-                    <div className="saved-articles-list">
-                        {filteredArticles.map(article => (
-                            <div
-                                key={article.id}
-                                className={`saved-article-card ${selectedIds.includes(article.id) ? 'selected' : ''}`}
-                            >
-                                <div className="saved-card-header">
-                                    <div className="saved-card-meta">
-                                        {/* Checkbox sélection */}
-                                        <input
-                                            type="checkbox"
-                                            className="article-checkbox"
-                                            checked={selectedIds.includes(article.id)}
-                                            onChange={() => toggleSelect(article.id)}
-                                            onClick={e => e.stopPropagation()}
-                                        />
-                                        {article.annee && (
-                                            <span className="saved-year">
-                                                <FontAwesomeIcon icon={faCalendar} /> {article.annee}
-                                            </span>
-                                        )}
-                                        {article.nbCitations != null && (
-                                            <span className="saved-citations">
-                                                <FontAwesomeIcon icon={faChartBar} /> {article.nbCitations} citations
-                                            </span>
-                                        )}
-                                    </div>
-                                    <select
-                                        className="statut-select"
-                                        value={article.statut}
-                                        style={{
-                                            borderColor: STATUTS_DISPLAY.find(s => s.value === article.statut)?.color,
-                                            color: STATUTS_DISPLAY.find(s => s.value === article.statut)?.color,
-                                            pointerEvents: article.statut === 'DOUBLON' ? 'none' : 'auto',
-                                            opacity: article.statut === 'DOUBLON' ? 0.7 : 1,
-                                        }}
-                                        onChange={(e) => handleStatutChange(article.id, e.target.value)}
-                                        disabled={article.statut === 'DOUBLON'}
-                                    >
-                                        {article.statut === 'DOUBLON' ? (
-                                            <option value="DOUBLON">Doublon</option>
-                                        ) : (
-                                            STATUTS_MANUEL.map(s => (
-                                                <option key={s.value} value={s.value}>{s.label}</option>
-                                            ))
-                                        )}
-                                    </select>
+                    <>
+                        {/* Results toolbar */}
+                        <div className="results-toolbar">
+                            <span className="results-count">
+                                <strong>{sortedArticles.length}</strong>
+                                {' '}article{sortedArticles.length > 1 ? 's' : ''}
+                                {filterStatut !== 'TOUS' && ` (filtre: ${filterStatut === 'A_LIRE' ? 'À lire' : filterStatut === 'RETENU' ? 'Retenus' : filterStatut === 'EXCLU' ? 'Exclus' : 'Doublons'})`}
+                            </span>
+                            <div className="sort-control">
+                                <FontAwesomeIcon icon={faSort} />
+                                <select
+                                    className="sort-select"
+                                    value={sortBy}
+                                    onChange={e => setSortBy(e.target.value)}
+                                >
+                                    {SORT_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {sortedArticles.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-icon-wrapper">
+                                    <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                </div>
+                                <h2 className="empty-title">Aucun article pour ce filtre</h2>
+                                <p className="empty-subtitle">Essayez un autre filtre de statut</p>
+                                <button className="btn-go-search" onClick={() => setFilterStatut('TOUS')}>
+                                    Voir tous les articles
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="saved-articles-list">
+                                    {paginatedArticles.map(article => {
+                                        const isExpanded = expandedAbstracts[article.id]
+                                        const abstract = cleanAbstract(article.resume)
+                                        return (
+                                            <div key={article.id} className="article-card-detail">
+
+                                                {/* Header: meta + statut select */}
+                                                <div className="article-card-header-detail">
+                                                    <div className="article-meta-top">
+                                                        {article.annee && (
+                                                            <span className="article-year">
+                                                                <FontAwesomeIcon icon={faCalendar} /> {article.annee}
+                                                            </span>
+                                                        )}
+                                                        {article.nbCitations != null && (
+                                                            <span className="article-citations">
+                                                                <FontAwesomeIcon icon={faChartBar} /> {article.nbCitations} citations
+                                                            </span>
+                                                        )}
+                                                        <span
+                                                            className="statut-badge"
+                                                            style={{
+                                                                backgroundColor: `${STATUTS_DISPLAY.find(s => s.value === article.statut)?.color}18`,
+                                                                color: STATUTS_DISPLAY.find(s => s.value === article.statut)?.color,
+                                                                border: `1px solid ${STATUTS_DISPLAY.find(s => s.value === article.statut)?.color}40`,
+                                                            }}
+                                                        >
+                                                            {STATUTS_DISPLAY.find(s => s.value === article.statut)?.label || article.statut}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="article-actions-top">
+                                                        <select
+                                                            className="statut-select-inline"
+                                                            value={article.statut}
+                                                            style={{
+                                                                borderColor: STATUTS_DISPLAY.find(s => s.value === article.statut)?.color,
+                                                                color: STATUTS_DISPLAY.find(s => s.value === article.statut)?.color,
+                                                            }}
+                                                            onChange={e => handleStatutChange(article.id, e.target.value)}
+                                                            disabled={article.statut === 'DOUBLON'}
+                                                        >
+                                                            {article.statut === 'DOUBLON' ? (
+                                                                <option value="DOUBLON">Doublon</option>
+                                                            ) : (
+                                                                STATUTS_MANUEL.map(s => (
+                                                                    <option key={s.value} value={s.value}>{s.label}</option>
+                                                                ))
+                                                            )}
+                                                        </select>
+
+                                                        <button className="btn-remove-inline" onClick={() => handleRemove(article.id)} title="Retirer du projet">
+                                                            <FontAwesomeIcon icon={faTrash} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Title */}
+                                                <h3 className="article-title-detail">
+                                                    {article.url ? (
+                                                        <a href={article.url} target="_blank" rel="noreferrer">
+                                                            {article.titre || 'Titre non disponible'}
+                                                        </a>
+                                                    ) : (
+                                                        article.titre || 'Titre non disponible'
+                                                    )}
+                                                </h3>
+
+                                                {/* Authors */}
+                                                {article.auteurs && (
+                                                    <p className="article-authors-detail">
+                                                        <FontAwesomeIcon icon={faUsers} /> {article.auteurs}
+                                                    </p>
+                                                )}
+
+                                                {/* DOI */}
+                                                {article.doi && (
+                                                    <p className="article-doi-detail">
+                                                        <FontAwesomeIcon icon={faLink} /> DOI :&nbsp;
+                                                        <a href={`https://doi.org/${article.doi}`} target="_blank" rel="noreferrer">
+                                                            {article.doi}
+                                                        </a>
+                                                    </p>
+                                                )}
+
+                                                {/* Abstract */}
+                                                {abstract && (
+                                                    <div className="article-abstract-detail">
+                                                        <p className={`abstract-text-detail ${isExpanded ? 'expanded' : ''}`}>
+                                                            {abstract}
+                                                        </p>
+                                                        <button
+                                                            className="btn-toggle-abstract"
+                                                            onClick={() => toggleAbstract(article.id)}
+                                                        >
+                                                            {isExpanded ? '▲ Réduire' : '▼ Voir le résumé'}
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Note Section */}
+                                                {editingNote === article.id ? (
+                                                    <div className="note-editor">
+                                                        <textarea
+                                                            className="note-textarea"
+                                                            value={noteText}
+                                                            onChange={e => setNoteText(e.target.value)}
+                                                            placeholder="Votre note..."
+                                                            rows={3}
+                                                        />
+                                                        <div className="note-actions">
+                                                            <button className="btn-save-note" onClick={() => handleSaveNote(article.id)}>
+                                                                <FontAwesomeIcon icon={faCircleCheck} /> Sauvegarder
+                                                            </button>
+                                                            <button className="btn-cancel-note" onClick={() => setEditingNote(null)}>
+                                                                <FontAwesomeIcon icon={faCircleXmark} /> Annuler
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="note-display">
+                                                        {article.note && <p className="note-text">📝 {article.note}</p>}
+                                                        <button className="btn-add-note" onClick={() => {
+                                                            setEditingNote(article.id)
+                                                            setNoteText(article.note || '')
+                                                        }}>
+                                                            <FontAwesomeIcon icon={faNoteSticky} />
+                                                            {article.note ? ' Modifier la note' : ' Ajouter une note'}
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Footer */}
+                                                <div className="saved-card-footer">
+                                                    <span className="saved-date">
+                                                        Ajouté le {article.dateAjout
+                                                            ? new Date(article.dateAjout).toLocaleDateString('fr-FR')
+                                                            : '—'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
 
-                                <h3 className="saved-title">
-                                    {article.url ? (
-                                        <a href={article.url} target="_blank" rel="noreferrer">{article.titre}</a>
-                                    ) : article.titre}
-                                </h3>
-
-                                {article.auteurs && (
-                                    <p className="saved-authors">
-                                        <FontAwesomeIcon icon={faUsers} /> {article.auteurs}
-                                    </p>
-                                )}
-
-                                {article.doi && (
-                                    <p className="saved-doi">
-                                        <FontAwesomeIcon icon={faLink} /> DOI :
-                                        <a href={`https://doi.org/${article.doi}`} target="_blank" rel="noreferrer">
-                                            {article.doi}
-                                        </a>
-                                    </p>
-                                )}
-
-                                {article.resume && (
-                                    <p className="saved-resume">
-                                        {cleanAbstract(article.resume).length > 200
-                                            ? cleanAbstract(article.resume).substring(0, 200) + '...'
-                                            : cleanAbstract(article.resume)}
-                                    </p>
-                                )}
-
-                                {/* Note */}
-                                {editingNote === article.id ? (
-                                    <div className="note-editor">
-                                        <textarea
-                                            className="note-textarea"
-                                            value={noteText}
-                                            onChange={e => setNoteText(e.target.value)}
-                                            placeholder="Votre note..."
-                                            rows={3}
-                                        />
-                                        <div className="note-actions">
-                                            <button className="btn-save-note" onClick={() => handleSaveNote(article.id)}>
-                                                <FontAwesomeIcon icon={faCircleCheck} /> Sauvegarder
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="pagination">
+                                        <div className="pagination-info">
+                                            Page {effectivePage} sur {totalPages}
+                                            <span className="pagination-total">({sortedArticles.length} articles)</span>
+                                        </div>
+                                        <div className="pagination-controls">
+                                            <button
+                                                className="page-btn page-nav"
+                                                onClick={() => goToPage(1)}
+                                                disabled={effectivePage === 1}
+                                                title="Première page"
+                                            >
+                                                <FontAwesomeIcon icon={faAnglesLeft} />
                                             </button>
-                                            <button className="btn-cancel-note" onClick={() => setEditingNote(null)}>
-                                                <FontAwesomeIcon icon={faCircleXmark} /> Annuler
+                                            <button
+                                                className="page-btn page-nav"
+                                                onClick={() => goToPage(effectivePage - 1)}
+                                                disabled={effectivePage === 1}
+                                                title="Page précédente"
+                                            >
+                                                <FontAwesomeIcon icon={faChevronLeft} />
+                                            </button>
+
+                                            {getPageNumbers(effectivePage, totalPages).map((page, index) =>
+                                                page === '...' ? (
+                                                    <span key={`dots-${index}`} className="page-dots">...</span>
+                                                ) : (
+                                                    <button
+                                                        key={page}
+                                                        className={`page-btn ${effectivePage === page ? 'active' : ''}`}
+                                                        onClick={() => goToPage(page)}
+                                                    >{page}</button>
+                                                )
+                                            )}
+
+                                            <button
+                                                className="page-btn page-nav"
+                                                onClick={() => goToPage(effectivePage + 1)}
+                                                disabled={effectivePage === totalPages}
+                                                title="Page suivante"
+                                            >
+                                                <FontAwesomeIcon icon={faChevronRight} />
+                                            </button>
+                                            <button
+                                                className="page-btn page-nav"
+                                                onClick={() => goToPage(totalPages)}
+                                                disabled={effectivePage === totalPages}
+                                                title="Dernière page"
+                                            >
+                                                <FontAwesomeIcon icon={faAnglesRight} />
                                             </button>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="note-display">
-                                        {article.note && <p className="note-text">📝 {article.note}</p>}
-                                        <button className="btn-add-note" onClick={() => {
-                                            setEditingNote(article.id)
-                                            setNoteText(article.note || '')
-                                        }}>
-                                            <FontAwesomeIcon icon={faNoteSticky} />
-                                            {article.note ? ' Modifier la note' : ' Ajouter une note'}
-                                        </button>
-                                    </div>
                                 )}
-
-                                <div className="saved-card-footer">
-                                    <span className="saved-date">
-                                        Ajouté le {article.dateAjout
-                                            ? new Date(article.dateAjout).toLocaleDateString('fr-FR')
-                                            : '—'}
-                                    </span>
-                                    <button className="btn-remove" onClick={() => handleRemove(article.id)}>
-                                        <FontAwesomeIcon icon={faTrash} /> Retirer
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            </>
+                        )}
+                    </>
                 )}
             </div>
 
