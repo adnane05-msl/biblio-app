@@ -19,6 +19,7 @@ function Navbar() {
 
     const [showMenu, setShowMenu] = useState(false)
 
+    if (!user) return null  // ✅ ligne ajoutée
 
     return (
         <nav className="navbar">
@@ -42,11 +43,6 @@ function Navbar() {
                 >
                     Mes Projets
                 </Link>
-                
-                
-                {/* <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>
-                    À propos
-                </Link> */}
             </div>
 
             <div className="navbar-user">

@@ -71,6 +71,11 @@ const steps = [
         label: 'Exportez',
         desc: 'Téléchargez vos références en BibTeX, CSV ou RIS'
     },
+    {
+        num: 5,                                    // ← ÉTAPE 5 AJOUTÉE
+        label: 'Analysez',                         // ← ou "Dashboard"
+        desc: 'Visualisez vos statistiques et l\'impact de vos recherches'
+    },
 ]
 
 const previewArticles = [
@@ -220,7 +225,7 @@ function HomePage() {
             <section className="steps-section">
                 <h2 className="section-title">Comment ça marche ?</h2>
                 <p className="section-sub">
-                    4 étapes pour une revue de littérature complète
+                    5 étapes pour une revue de littérature complète
                 </p>
                 <div className="steps-row">
                     {steps.map((step, index) => (

@@ -38,7 +38,7 @@ public class VerificationService {
 
     private void sendEmail(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("imranehamama@gmail.com");
+        message.setFrom("biblioapp.support@gmail.com");
         message.setTo(toEmail);
         message.setSubject("✅ Code de vérification - BiblioApp");
         message.setText("Bienvenue sur BiblioApp !\n\n" +
