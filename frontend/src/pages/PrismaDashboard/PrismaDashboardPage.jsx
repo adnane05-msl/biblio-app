@@ -66,8 +66,8 @@ function PrismaDashboardPage() {
             label: 'Identification',
             value: data.totalIdentifies,
             description: 'Articles identifiés depuis les sources',
-            sub: 'Crossref + OpenAlex'
         },
+        
         {
             id: 'deduplication',
             icon: faCopy,
@@ -76,7 +76,7 @@ function PrismaDashboardPage() {
             value: data.totalDoublons,
             description: 'Doublons détectés et supprimés',
             sub: `Reste : ${data.apresDeduplication} articles`,
-            removed: true
+            // removed: true
         },
         {
             id: 'apres-dedup',
@@ -95,7 +95,7 @@ function PrismaDashboardPage() {
             value: data.totalExclus,
             description: 'Articles exclus après lecture',
             sub: 'Non pertinents',
-            removed: true
+            // removed: true
         },
         {
             id: 'retenus',
@@ -144,14 +144,14 @@ function PrismaDashboardPage() {
                     <div className="summary-arrow">→</div>
                     <div className="summary-card">
                         <span className="summary-num amber">
-                            -{data.totalDoublons}
+                            {data.totalDoublons}
                         </span>
                         <span className="summary-lbl">Doublons</span>
                     </div>
                     <div className="summary-arrow">→</div>
                     <div className="summary-card">
                         <span className="summary-num red">
-                            -{data.totalExclus}
+                            {data.totalExclus}
                         </span>
                         <span className="summary-lbl">Exclus</span>
                     </div>
@@ -178,7 +178,7 @@ function PrismaDashboardPage() {
                                         {step.label}
                                     </div>
                                     <div className="step-value">
-                                        {step.removed ? '-' : ''}{step.value}
+                                        {step.value}
                                         <span className="step-unit"> articles</span>
                                     </div>
                                     <div className="step-desc">

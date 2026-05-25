@@ -232,7 +232,7 @@ function ProjectDetail() {
         const arts = await getArticlesByProject(id)
         setArticles(arts)
         setSelectedArticles([])
-        setSuccess(`✅ ${updated} article(s) mis à jour`)
+        setSuccess(` ${updated} article(s) mis à jour`)
         setTimeout(() => setSuccess(''), 3000)
         setBulkLoading(false)
     }
@@ -251,7 +251,7 @@ function ProjectDetail() {
         const arts = await getArticlesByProject(id)
         setArticles(arts)
         setSelectedArticles([])
-        setSuccess(`✅ ${removed} article(s) retiré(s)`)
+        setSuccess(` ${removed} article(s) retiré(s)`)
         setTimeout(() => setSuccess(''), 3000)
         setBulkLoading(false)
     }
