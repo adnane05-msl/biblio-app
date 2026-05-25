@@ -18,54 +18,61 @@ public class ExportController {
         this.exportService = exportService;
     }
 
-    // Export BibTeX
     @GetMapping("/bibtex/{projectId}")
     public ResponseEntity<byte[]> exportBibtex(
-            @PathVariable Long projectId) {
+            @PathVariable Long projectId,
+            @RequestParam(name = "statut", required = false, defaultValue = "TOUS") String statut) {
 
-        String content = exportService.exportBibtex(projectId);
+        System.out.println("=== EXPORT BIBTEX — projectId=" + projectId + " statut=" + statut + " ===");
+        String content = exportService.exportBibtex(projectId, statut);
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        String filename = buildFilename("references", statut, "bib");
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"references.bib\"")
-                .contentType(MediaType.parseMediaType(
-                        "application/x-bibtex"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("application/x-bibtex"))
                 .contentLength(bytes.length)
                 .body(bytes);
     }
 
-    // Export CSV
     @GetMapping("/csv/{projectId}")
     public ResponseEntity<byte[]> exportCsv(
-            @PathVariable Long projectId) {
+            @PathVariable Long projectId,
+            @RequestParam(name = "statut", required = false, defaultValue = "TOUS") String statut) {
 
-        String content = exportService.exportCsv(projectId);
+        System.out.println("=== EXPORT CSV — projectId=" + projectId + " statut=" + statut + " ===");
+        String content = exportService.exportCsv(projectId, statut);
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        String filename = buildFilename("articles", statut, "csv");
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"articles.csv\"")
-                .contentType(MediaType.parseMediaType(
-                        "text/csv; charset=UTF-8"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                 .contentLength(bytes.length)
                 .body(bytes);
     }
 
-    // Export RIS
     @GetMapping("/ris/{projectId}")
     public ResponseEntity<byte[]> exportRis(
-            @PathVariable Long projectId) {
+            @PathVariable Long projectId,
+            @RequestParam(name = "statut", required = false, defaultValue = "TOUS") String statut) {
 
-        String content = exportService.exportRis(projectId);
+        System.out.println("=== EXPORT RIS — projectId=" + projectId + " statut=" + statut + " ===");
+        String content = exportService.exportRis(projectId, statut);
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        String filename = buildFilename("references", statut, "ris");
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"references.ris\"")
-                .contentType(MediaType.parseMediaType(
-                        "application/x-research-info-systems"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("application/x-research-info-systems"))
                 .contentLength(bytes.length)
                 .body(bytes);
+    }
+
+    private String buildFilename(String base, String statut, String extension) {
+        if (statut == null || statut.isBlank() || statut.equalsIgnoreCase("TOUS")) {
+            return base + "." + extension;
+        }
+        return base + "_" + statut.toLowerCase() + "." + extension;
     }
 }

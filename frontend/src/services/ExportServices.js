@@ -1,4 +1,5 @@
-// Télécharge un fichier depuis une URL
+// Utilise le proxy Vite (/api → http://localhost:9090)
+
 const downloadFile = (url, filename) => {
     const link = document.createElement('a')
     link.href = url
@@ -8,25 +9,28 @@ const downloadFile = (url, filename) => {
     document.body.removeChild(link)
 }
 
-const BASE_URL = 'http://localhost:9090'
-
-export const exportBibtex = (projectId) => {
-    downloadFile(
-        `${BASE_URL}/api/export/bibtex/${projectId}`,
-        'references.bib'
-    )
+const buildFilename = (base, statut, extension) => {
+    if (!statut || statut === 'TOUS') return `${base}.${extension}`
+    return `${base}_${statut.toLowerCase()}.${extension}`
 }
 
-export const exportCsv = (projectId) => {
-    downloadFile(
-        `${BASE_URL}/api/export/csv/${projectId}`,
-        'articles.csv'
-    )
+export const exportBibtex = (projectId, statut = 'TOUS') => {
+    const params = statut && statut !== 'TOUS' ? `?statut=${encodeURIComponent(statut)}` : ''
+    const url = `/api/export/bibtex/${projectId}${params}`
+    console.log('[Export] BibTeX URL:', url, '| statut:', statut)
+    downloadFile(url, buildFilename('references', statut, 'bib'))
 }
 
-export const exportRis = (projectId) => {
-    downloadFile(
-        `${BASE_URL}/api/export/ris/${projectId}`,
-        'references.ris'
-    )
+export const exportCsv = (projectId, statut = 'TOUS') => {
+    const params = statut && statut !== 'TOUS' ? `?statut=${encodeURIComponent(statut)}` : ''
+    const url = `/api/export/csv/${projectId}${params}`
+    console.log('[Export] CSV URL:', url, '| statut:', statut)
+    downloadFile(url, buildFilename('articles', statut, 'csv'))
+}
+
+export const exportRis = (projectId, statut = 'TOUS') => {
+    const params = statut && statut !== 'TOUS' ? `?statut=${encodeURIComponent(statut)}` : ''
+    const url = `/api/export/ris/${projectId}${params}`
+    console.log('[Export] RIS URL:', url, '| statut:', statut)
+    downloadFile(url, buildFilename('references', statut, 'ris'))
 }
