@@ -380,9 +380,9 @@ function ProjectDetail() {
                                 <span>OUTILS DU PROJET</span>
                             </div>
                             <div className="tools-actions">
-                                <button className="btn-tool btn-tool-dashboard"
-                                    onClick={() => navigate(`/projects/${id}/dashboard`)}>
-                                    <FontAwesomeIcon icon={faChartBar} /> Voir le dashboard
+                                <button className="btn-tool btn-tool-Statistiques"
+                                    onClick={() => navigate(`/projects/${id}/statistiques`)}>
+                                    <FontAwesomeIcon icon={faChartBar} /> Voir les Statistiques
                                 </button>
                                 <button
                                     className="btn-tool btn-tool-dedup"

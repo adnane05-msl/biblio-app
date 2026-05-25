@@ -5,10 +5,10 @@ import {
     Tooltip, ResponsiveContainer, PieChart, Pie,
     Cell, Legend
 } from 'recharts'
-import { getDashboard } from '../../services/DashboardServices'
+import { getStatistiques } from '../../services/StatistiquesServices'
 import { getProjectById } from '../../services/ProjectServices'
 import Navbar from '../../components/Navbar/Navbar'
-import './DashboardPage.css'
+import './StatistiquesPage.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faChartBar, faArrowLeft,
@@ -26,7 +26,7 @@ const STATUT_COLORS = {
 
 const PIE_COLORS = ['#16a34a', '#6b7280', '#dc2626', '#d97706']
 
-function DashboardPage() {
+function StatistiquesPage() {
     const { id } = useParams()
     const navigate = useNavigate()
 
@@ -38,14 +38,14 @@ function DashboardPage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const [dash, proj] = await Promise.all([
-                    getDashboard(id),
+                const [stats, proj] = await Promise.all([
+                    getStatistiques(id),
                     getProjectById(id)
                 ])
-                setData(dash)
+                setData(stats)
                 setProject(proj)
             } catch {
-                setError('Erreur lors du chargement du dashboard')
+                setError('Erreur lors du chargement du statistiques')
             } finally {
                 setLoading(false)
             }
@@ -54,18 +54,18 @@ function DashboardPage() {
     }, [id])
 
     if (loading) return (
-        <div className="dashboard-page">
+        <div className="statistiques-page">
             <Navbar />
-            <div className="dashboard-loading">
-                Chargement du dashboard...
+            <div className="statistiques-loading">
+                Chargement des statistiques...
             </div>
         </div>
     )
 
     if (error) return (
-        <div className="dashboard-page">
+        <div className="statistiques-page">
             <Navbar />
-            <div className="dashboard-error">{error}</div>
+            <div className="statistiques-error">{error}</div>
         </div>
     )
 
@@ -102,9 +102,9 @@ function DashboardPage() {
 
 
     return (
-        <div className="dashboard-page">
+        <div className="statistiques-page">
             <Navbar />
-            <div className="dashboard-container">
+            <div className="statistiques-container">
 
                 {/* En-tête */}
                 <button className="btn-back"
@@ -113,11 +113,11 @@ function DashboardPage() {
                     Retour au projet
                 </button>
 
-                <h1 className="dashboard-title">
+                <h1 className="statistiques-title">
                     <FontAwesomeIcon icon={faChartBar} />
-                    Dashboard — {project?.nomProjet}
+                    Statistiques — {project?.nomProjet}
                 </h1>
-                <p className="dashboard-subtitle">
+                <p className="statistiques-subtitle">
                     Analyse bibliométrique de votre projet
                 </p>
 
@@ -190,7 +190,7 @@ function DashboardPage() {
                                     <Tooltip
                                         formatter={(v) =>
                                             [`${v} article(s)`,
-                                             'Articles']} />
+                                            'Articles']} />
                                     <Bar dataKey="articles"
                                         fill="#2563eb"
                                         radius={[4,4,0,0]} />
@@ -334,4 +334,4 @@ function DashboardPage() {
     )
 }
 
-export default DashboardPage
+export default StatistiquesPage

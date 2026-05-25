@@ -1,12 +1,20 @@
-.dashboard-page {
+.statistiques-page {
     min-height: 100vh;
     background-color: #f0f4f8;
 }
 
-.dashboard-container {
+.statistiques-container {
     max-width: 1100px;
     margin: 0 auto;
     padding: 40px 24px;
+}
+
+.statistiques-loading,
+.statistiques-error {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 0;
+    font-size: 14px;
 }
 
 .btn-back {
@@ -25,7 +33,7 @@
 
 .btn-back:hover { text-decoration: underline; }
 
-.dashboard-title {
+.statistiques-title {
     font-size: 26px;
     font-weight: 700;
     color: #374151;
@@ -35,7 +43,7 @@
     gap: 10px;
 }
 
-.dashboard-subtitle {
+.statistiques-subtitle {
     font-size: 14px;
     color: #6b7280;
     margin: 0 0 32px 0;
@@ -237,8 +245,8 @@
     }
 }
 
-.dashboard-loading,
-.dashboard-error {
+.statistiques-loading,
+.statistiques-error {
     text-align: center;
     padding: 60px;
     color: #6b7280;
