@@ -356,13 +356,18 @@ function ProjectDetail() {
                                 <span>EXPORTER</span>
                             </div>
                             <div className="export-actions">
-                                <button className="btn-export btn-bibtex" onClick={() => exportBibtex(id)}>
+                                <button className="btn-export btn-bibtex" 
+                                    onClick={() => exportBibtex(id, filterStatut)}>
                                     <FontAwesomeIcon icon={faFileCode} /> BibTeX
                                 </button>
-                                <button className="btn-export btn-csv" onClick={() => exportCsv(id)}>
+
+                                <button className="btn-export btn-csv" 
+                                    onClick={() => exportCsv(id, filterStatut)}>
                                     <FontAwesomeIcon icon={faFileCsv} /> CSV
                                 </button>
-                                <button className="btn-export btn-ris" onClick={() => exportRis(id)}>
+
+                                <button className="btn-export btn-ris" 
+                                    onClick={() => exportRis(id, filterStatut)}>
                                     <FontAwesomeIcon icon={faFileAlt} /> RIS
                                 </button>
                             </div>
