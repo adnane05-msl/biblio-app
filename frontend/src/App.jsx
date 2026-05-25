@@ -7,7 +7,7 @@ import RegisterPage from './pages/Authentification/RegisterPage'
 import SearchPage from './pages/Search/SearchPage'
 import ProjectsPage from './pages/Projets/ProjectsPage'
 import ProjectDetail from './pages/Projets/ProjectDetail'
-import DashboardPage from './pages/Dashboard/DashboardPage'
+import Statistiques from './pages/Statistiques/StatistiquesPage'
 import HomePage from './pages/HomePage/HomePage'
 import AboutPage from './pages/About/AboutPage'
 import ProfilPage from './pages/Profil/ProfilPage'
@@ -28,8 +28,8 @@ function AppRoutes() {
             <Route path="/projects/:id" element={
                 <ProtectedRoute><ProjectDetail /></ProtectedRoute>
             } />
-            <Route path="/projects/:id/dashboard" element={
-                <ProtectedRoute><DashboardPage /></ProtectedRoute>
+            <Route path="/projects/:id/statistiques" element={
+                <ProtectedRoute><Statistiques /></ProtectedRoute>
             } />
             <Route path="/" element={<HomePage />} />
             <Route path="/profil" element={
