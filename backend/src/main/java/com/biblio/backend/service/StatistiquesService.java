@@ -1,6 +1,6 @@
 package com.biblio.backend.service;
 
-import com.biblio.backend.dto.DashboardDTO;
+import com.biblio.backend.dto.StatistiquesDTO;
 import com.biblio.backend.model.Article;
 import com.biblio.backend.model.ProjectArticle;
 import com.biblio.backend.repository.ProjectArticleRepository;
@@ -10,20 +10,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class DashboardService {
+public class StatistiquesService {
 
     private final ProjectArticleRepository projectArticleRepository;
 
-    public DashboardService(
+    public StatistiquesService(
             ProjectArticleRepository projectArticleRepository) {
         this.projectArticleRepository = projectArticleRepository;
     }
 
-    public DashboardDTO getDashboard(Long projectId) {
+    public StatistiquesDTO getStatistiques(Long projectId) {
         List<ProjectArticle> list =
                 projectArticleRepository.findByProject_Id(projectId);
 
-        DashboardDTO dto = new DashboardDTO();
+        StatistiquesDTO dto = new StatistiquesDTO();
 
         // ── Stats globales ──────────────────────────────
         dto.setTotalArticles(list.size());
@@ -84,14 +84,14 @@ public class DashboardService {
         dto.setTopAuteurs(topAuteurs);
 
         // ── Top articles par citations ──────────────────
-        List<DashboardDTO.TopArticleDTO> topArticles = list.stream()
+        List<StatistiquesDTO.TopArticleDTO> topArticles = list.stream()
                 .map(ProjectArticle::getArticle)
                 .filter(a -> a.getNbCitations() != null
                         && a.getNbCitations() > 0)
                 .sorted(Comparator.comparing(
                         Article::getNbCitations).reversed())
                 .limit(5)
-                .map(a -> new DashboardDTO.TopArticleDTO(
+                .map(a -> new StatistiquesDTO.TopArticleDTO(
                         a.getTitre(),
                         a.getAuteurs(),
                         a.getAnnee(),

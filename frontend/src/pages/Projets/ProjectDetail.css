@@ -256,7 +256,7 @@
 .btn-dedup:hover:not(:disabled) { background-color: #ede9fe; }
 .btn-dedup:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.btn-dashboard {
+.btn-Statistiques {
     background-color: #eff6ff;
     color: #2563eb;
     border: 1px solid #bfdbfe;
@@ -271,7 +271,7 @@
     font-family: inherit;
     transition: background-color 0.2s;
 }
-.btn-dashboard:hover { background-color: #dbeafe; }
+.btn-Statistiques:hover { background-color: #dbeafe; }
 
 /* ── RESULTS TOOLBAR ── */
 .results-toolbar {
@@ -918,12 +918,19 @@
     border: 1px solid;
 }
 
-.btn-tool-dashboard {
+.btn-tool-Statistiques  {
     background-color: #eff6ff;
     color: #2563eb;
     border-color: #bfdbfe;
 }
-.btn-tool-dashboard:hover { background-color: #dbeafe; }
+.btn-tool-Statistiques { background-color: #dbeafe; }
+
+.btn-tool-prisma {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+.btn-tool-prisma:hover { background-color: #dcfce7; }
 
 .btn-tool-dedup {
     background-color: #faf5ff;

@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DashboardDTO {
+public class StatistiquesDTO {
 
     private int totalArticles;
     private int totalRetenus;
