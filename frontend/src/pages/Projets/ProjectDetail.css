@@ -925,6 +925,13 @@
 }
 .btn-tool-Statistiques { background-color: #dbeafe; }
 
+.btn-tool-prisma {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+.btn-tool-prisma:hover { background-color: #dcfce7; }
+
 .btn-tool-dedup {
     background-color: #faf5ff;
     color: #7c3aed;

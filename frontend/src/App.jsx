@@ -11,6 +11,7 @@ import Statistiques from './pages/Statistiques/StatistiquesPage'
 import HomePage from './pages/HomePage/HomePage'
 import AboutPage from './pages/About/AboutPage'
 import ProfilPage from './pages/Profil/ProfilPage'
+import PrismaDashboardPage from './pages/PrismaDashboard/PrismaDashboardPage'
 
 
 function ProtectedRoute({ children }) {
@@ -30,6 +31,9 @@ function AppRoutes() {
             } />
             <Route path="/projects/:id/statistiques" element={
                 <ProtectedRoute><Statistiques /></ProtectedRoute>
+            } />
+            <Route path="/projects/:id/prisma" element={
+                <ProtectedRoute><PrismaDashboardPage /></ProtectedRoute>
             } />
             <Route path="/" element={<HomePage />} />
             <Route path="/profil" element={

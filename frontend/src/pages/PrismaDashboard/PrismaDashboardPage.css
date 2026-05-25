@@ -1,0 +1,261 @@
+.prisma-page {
+    background-color: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.prisma-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    flex: 1;
+    width: 100%;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    font-family: inherit;
+}
+.btn-back:hover { text-decoration: underline; }
+
+.prisma-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.prisma-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e3a5f;
+    margin-bottom: 6px;
+}
+
+.prisma-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+}
+
+/* ── Résumé rapide ── */
+.prisma-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    min-width: 90px;
+}
+
+.summary-card.highlight {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.summary-num {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.summary-num.blue   { color: #2563eb; }
+.summary-num.amber  { color: #d97706; }
+.summary-num.red    { color: #dc2626; }
+.summary-num.green  { color: #16a34a; }
+
+.summary-lbl {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.summary-arrow {
+    font-size: 20px;
+    color: #9ca3af;
+    font-weight: 300;
+}
+
+/* ── Flux PRISMA ── */
+.prisma-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.prisma-step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.prisma-step {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 28px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    transition: transform 0.2s;
+}
+
+.prisma-step:hover { transform: translateY(-2px); }
+
+/* Couleurs par étape */
+.prisma-step.step-blue {
+    border-color: #bfdbfe;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 60%);
+}
+.prisma-step.step-blue .step-icon { background-color: #eff6ff; color: #2563eb; }
+.prisma-step.step-blue .step-value { color: #2563eb; }
+
+.prisma-step.step-amber {
+    border-color: #fde68a;
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%);
+}
+.prisma-step.step-amber .step-icon { background-color: #fffbeb; color: #d97706; }
+.prisma-step.step-amber .step-value { color: #d97706; }
+
+.prisma-step.step-purple {
+    border-color: #ddd6fe;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 60%);
+}
+.prisma-step.step-purple .step-icon { background-color: #f5f3ff; color: #7c3aed; }
+.prisma-step.step-purple .step-value { color: #7c3aed; }
+
+.prisma-step.step-red {
+    border-color: #fecaca;
+    background: linear-gradient(135deg, #fff1f2 0%, #ffffff 60%);
+}
+.prisma-step.step-red .step-icon { background-color: #fff1f2; color: #dc2626; }
+.prisma-step.step-red .step-value { color: #dc2626; }
+
+.prisma-step.step-green {
+    border-color: #bbf7d0;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+}
+.prisma-step.step-green .step-icon { background-color: #f0fdf4; color: #16a34a; }
+.prisma-step.step-green .step-value { color: #16a34a; }
+
+/* Final */
+.prisma-step.final {
+    border-width: 3px;
+    box-shadow: 0 4px 20px rgba(22,163,74,0.15);
+}
+
+/* Removed (doublons / exclus) */
+.prisma-step.removed {
+    opacity: 0.85;
+}
+
+/* Icône */
+.step-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+/* Contenu */
+.step-content { flex: 1; }
+
+.step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.step-value {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.step-unit {
+    font-size: 14px;
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.step-desc {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 2px;
+}
+
+.step-sub {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* Flèche entre étapes */
+.prisma-arrow {
+    color: #d1d5db;
+    font-size: 20px;
+    padding: 10px 0;
+}
+
+/* À lire */
+.prisma-alire {
+    margin-top: 32px;
+    padding: 14px 20px;
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.prisma-loading,
+.prisma-error {
+    text-align: center;
+    padding: 60px;
+    color: #6b7280;
+    font-size: 16px;
+}
+
+@media (max-width: 600px) {
+    .prisma-summary { gap: 8px; }
+    .summary-card { min-width: 70px; padding: 8px 12px; }
+    .prisma-step { padding: 16px 18px; gap: 14px; }
+    .step-value { font-size: 26px; }
+}
