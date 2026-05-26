@@ -15,11 +15,10 @@ public class PrismaService {
         this.projectArticleRepository = projectArticleRepository;
     }
 
-    public PrismaDTO getPrisma(Long projectId) {
+    public PrismaDTO getPrisma(Long projectId, int totalRecherche) {
         List<ProjectArticle> list =
                 projectArticleRepository.findByProject_Id(projectId);
 
-        // Statistiques des articles sauvegardés
         int total = list.size();
         int doublons = (int) list.stream()
                 .filter(pa -> pa.getStatut() == ProjectArticle.Statut.DOUBLON).count();
@@ -30,19 +29,19 @@ public class PrismaService {
         int aLire = (int) list.stream()
                 .filter(pa -> pa.getStatut() == ProjectArticle.Statut.A_LIRE).count();
 
-        // Simulation des résultats de recherche (à adapter avec données réelles)
-        // Dans un cas réel, ces données viendraient de SearchHistory
-        int totalRecherche = 200;  // À remplacer par données réelles
         int totalSauvegardes = total;
 
+        // Si aucune recherche enregistrée, utiliser totalSauvegardes comme minimum
+        int recherche = totalRecherche > 0 ? totalRecherche : totalSauvegardes;
+
         return new PrismaDTO(
-                totalRecherche,      // totalRecherche
-                totalSauvegardes,    // totalSauvegardes
-                doublons,            // totalDoublons
-                exclus,              // totalExclus
-                retenus,             // totalRetenus
-                aLire,               // totalALire
-                total - doublons     // apresDeduplication
+                recherche,
+                totalSauvegardes,
+                doublons,
+                exclus,
+                retenus,
+                aLire,
+                total - doublons
         );
     }
 }

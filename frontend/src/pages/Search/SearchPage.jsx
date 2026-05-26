@@ -76,6 +76,7 @@ function SearchPage() {
             )
 
             setArticles(validArticles)
+            localStorage.setItem('lastSearchCount', data.length)
 
             const types = [...new Set(
                 validArticles.map(a => a.documentType).filter(t => t && t.trim() !== '')

@@ -16,7 +16,9 @@ public class PrismaController {
     }
 
     @GetMapping("/prisma/{projectId}")
-    public ResponseEntity<PrismaDTO> getPrisma(@PathVariable Long projectId) {
-        return ResponseEntity.ok(prismaService.getPrisma(projectId));
+    public ResponseEntity<PrismaDTO> getPrisma(
+            @PathVariable Long projectId,
+            @RequestParam(required = false, defaultValue = "0") int totalRecherche) {
+        return ResponseEntity.ok(prismaService.getPrisma(projectId, totalRecherche));
     }
 }
