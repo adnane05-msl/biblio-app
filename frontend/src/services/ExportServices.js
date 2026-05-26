@@ -1,5 +1,3 @@
-// Utilise le proxy Vite (/api → http://localhost:9090)
-
 const downloadFile = (url, filename) => {
     const link = document.createElement('a')
     link.href = url
