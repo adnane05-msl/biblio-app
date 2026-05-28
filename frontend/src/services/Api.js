@@ -11,8 +11,8 @@ const api = axios.create({
 // Intercepteur pour les requêtes
 api.interceptors.request.use(
     (config) => {
-        console.log('📤 Requête:', config.method?.toUpperCase(), config.url);
-        console.log('📤 Data:', config.data);
+        console.log('Requête:', config.method?.toUpperCase(), config.url);
+        console.log('Data:', config.data);
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -27,11 +27,11 @@ api.interceptors.request.use(
 // Intercepteur pour les réponses
 api.interceptors.response.use(
     (response) => {
-        console.log('📥 Réponse:', response.status, response.config.url);
+        console.log('Réponse:', response.status, response.config.url);
         return response;
     },
     (error) => {
-        console.error('❌ Erreur:', error.response?.status, error.response?.data);
+        console.error('Erreur:', error.response?.status, error.response?.data);
         return Promise.reject(error);
     }
 );

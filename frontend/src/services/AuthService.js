@@ -1,7 +1,7 @@
 import api from './Api'
 
 export const register = async (nom, prenom, email, motDePasse, profil, verificationCode) => {
-    console.log('📝 Appel register avec:', { nom, prenom, email, profil, verificationCode });
+    console.log('Appel register avec:', { nom, prenom, email, profil, verificationCode });
     
     const response = await api.post('/api/authentification/inscription', {
         nom,
@@ -12,7 +12,7 @@ export const register = async (nom, prenom, email, motDePasse, profil, verificat
         verificationCode
     });
     
-    console.log('✅ Register succès:', response.data);
+    console.log('Register succès:', response.data);
     return response.data;
 };
 
@@ -25,7 +25,7 @@ export const login = async (email, motDePasse) => {
 };
 
 export const sendVerificationCode = async (email) => {
-    console.log('📧 Envoi code pour:', email);
+    console.log('Envoi code pour:', email);
     const response = await api.post('/api/authentification/envoyer-code', {
         email,
     });
@@ -33,7 +33,7 @@ export const sendVerificationCode = async (email) => {
 };
 
 export const verifyCode = async (email, code) => {
-    console.log('🔐 Vérification code pour:', email, code);
+    console.log('Vérification code pour:', email, code);
     const response = await api.post('/api/authentification/verifier-code', {
         email,
         code,
