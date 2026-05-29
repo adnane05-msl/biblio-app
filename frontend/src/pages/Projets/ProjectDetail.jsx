@@ -168,22 +168,28 @@ function ProjectDetail() {
     }
 
     const handleDeduplicate = async () => {
-        if (!window.confirm('Détecter automatiquement les doublons dans ce projet ?')) return
-        setDedupLoading(true)
-        try {
-            const result = await deduplicateProject(id)
-            const arts = await getArticlesByProject(id)
-            setArticles(arts)
-            if (result.marked > 0) handleFilterChange('DOUBLON')
-            setSuccess(result.message)
-            setTimeout(() => setSuccess(''), 4000)
-        } catch {
-            setError('Erreur lors de la déduplication')
-            setTimeout(() => setError(''), 3000)
-        } finally {
-            setDedupLoading(false)
+    if (!window.confirm('Détecter automatiquement les doublons dans ce projet ?')) return
+    setDedupLoading(true)
+    try {
+        const result = await deduplicateProject(id)
+
+        const arts = await getArticlesByProject(id)
+        setArticles(arts)
+
+        if (result.doublonsMarques > 0) {
+            handleFilterChange('DOUBLON')
+            setSuccess(`✅ ${result.doublonsMarques} doublon(s) détecté(s) sur ${result.totalTraites} articles`)
+        } else {
+            setSuccess(`✅ Aucun doublon trouvé parmi ${result.totalTraites} articles`)
         }
+        setTimeout(() => setSuccess(''), 4000)
+    } catch {
+        setError('Erreur lors de la déduplication')
+        setTimeout(() => setError(''), 3000)
+    } finally {
+        setDedupLoading(false)
     }
+}
 
     // Sélection multiple
     const isSelected = (article) =>
