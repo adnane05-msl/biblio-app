@@ -34,6 +34,10 @@ public class Project {
     @Column(name = "date_modification")
     private LocalDateTime dateModification;
 
+    // ── NOUVEAU : nombre de résultats de la dernière recherche liée à ce projet ──
+    @Column(name = "total_recherche", nullable = false, columnDefinition = "integer default 0")
+    private Integer totalRecherche = 0;
+
     @ManyToOne
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;

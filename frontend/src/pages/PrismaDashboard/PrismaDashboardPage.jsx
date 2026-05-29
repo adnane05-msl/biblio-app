@@ -7,20 +7,19 @@ import Footer from '../../components/Footer/Footer'
 import './PrismaDashboardPage.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-    faArrowLeft, faArrowRight, faArrowDown,
+    faArrowLeft,
     faSearch, faSave, faCopy, faTrashAlt,
-    faCheckCircle, faBookOpen, faChartLine,
-    faDatabase
+    faCheckCircle, faChartLine, faDatabase
 } from '@fortawesome/free-solid-svg-icons'
 
 function PrismaDashboardPage() {
     const { id } = useParams()
     const navigate = useNavigate()
 
-    const [data, setData] = useState(null)
+    const [data, setData]       = useState(null)
     const [project, setProject] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
+    const [error, setError]     = useState('')
 
     useEffect(() => {
         const load = async () => {
@@ -44,8 +43,8 @@ function PrismaDashboardPage() {
         <div className="prisma-page">
             <Navbar />
             <div className="prisma-loading">
-                <div className="loading-spinner"></div>
-                <p>Chargement du diagramme PRISMA...</p>
+                <div className="loading-spinner" />
+                <p>Chargement du diagramme PRISMA…</p>
             </div>
         </div>
     )
@@ -62,12 +61,13 @@ function PrismaDashboardPage() {
             <Navbar />
 
             <div className="prisma-container">
-                {/* Header */}
+
+                {/* ── Back ── */}
                 <button className="btn-back" onClick={() => navigate(`/projects/${id}`)}>
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                    Retour au projet
+                    <FontAwesomeIcon icon={faArrowLeft} /> Retour au projet
                 </button>
 
+                {/* ── Titre ── */}
                 <div className="prisma-header">
                     <h1 className="prisma-title">
                         <FontAwesomeIcon icon={faChartLine} /> Diagramme PRISMA
@@ -77,153 +77,154 @@ function PrismaDashboardPage() {
                     </p>
                 </div>
 
-                {/* ========== SCHÉMA PRISMA ========== */}
-                <div className="prisma-schema">
+                {/* ════════════════════════════════
+                    FLUX PRISMA
+                ════════════════════════════════ */}
+                <div className="prisma-flow">
 
-                    {/* Bloc 1 : Résultats de recherche */}
-                    <div className="schema-block block-search">
-                        <div className="block-icon">
-                            <FontAwesomeIcon icon={faSearch} />
-                        </div>
-                        <div className="block-content">
-                            <h3 className="block-title">RÉSULTATS DE LA RECHERCHE</h3>
-                            <div className="block-value">{data?.totalRecherche || 0}</div>
-                            <p className="block-subtitle">articles trouvés via les API scientifiques</p>
-                        </div>
-                    </div>
-
-                    {/* Flèche vers le bas */}
-                    <div className="schema-arrow-down">
-                        <FontAwesomeIcon icon={faArrowDown} />
-                    </div>
-
-                    {/* Bloc 2 : Articles sauvegardés */}
-                    <div className="schema-block block-saved">
-                        <div className="block-icon">
-                            <FontAwesomeIcon icon={faSave} />
-                        </div>
-                        <div className="block-content">
-                            <h3 className="block-title">ARTICLES SAUVEGARDÉS</h3>
-                            <div className="block-value">{data?.totalSauvegardes || 0}</div>
-                            <p className="block-subtitle">articles importés dans le projet</p>
+                    {/* ① Résultats de la recherche */}
+                    <div className="flow-card card-search">
+                        <div className="flow-card-icon"><FontAwesomeIcon icon={faSearch} /></div>
+                        <div className="flow-card-body">
+                            <div className="flow-card-label">RÉSULTATS DE LA RECHERCHE</div>
+                            <div className="flow-card-value">{data?.totalRecherche || 0}</div>
+                            <div className="flow-card-desc">articles retournés par les API scientifiques</div>
                         </div>
                     </div>
 
-                    {/* Flèche vers le bas */}
-                    <div className="schema-arrow-down">
-                        <FontAwesomeIcon icon={faArrowDown} />
+                    <ArrowV />
+
+                    {/* ② Articles sauvegardés */}
+                    <div className="flow-card card-saved">
+                        <div className="flow-card-icon"><FontAwesomeIcon icon={faSave} /></div>
+                        <div className="flow-card-body">
+                            <div className="flow-card-label">ARTICLES SAUVEGARDÉS</div>
+                            <div className="flow-card-value">{data?.totalSauvegardes || 0}</div>
+                            <div className="flow-card-desc">importés dans le projet</div>
+                        </div>
                     </div>
 
-                    {/* Bloc 3 : Analyse des articles */}
-                    <div className="schema-branch">
-                        <div className="schema-branch-label">ANALYSE DES ARTICLES</div>
-                        
-                        <div className="branch-cards">
-                            {/* Doublons */}
-                            <div className="branch-card branch-doublons">
-                                <div className="branch-icon">
-                                    <FontAwesomeIcon icon={faCopy} />
+                    <ArrowV />
+
+                    {/* ③ Ligne horizontale : Doublons → Après déduplication */}
+                    <div className="flow-row">
+                        <div className="flow-card card-doublons">
+                            <div className="flow-card-icon"><FontAwesomeIcon icon={faCopy} /></div>
+                            <div className="flow-card-body">
+                                <div className="flow-card-label">DOUBLONS</div>
+                                <div className="flow-card-value">{data?.totalDoublons || 0}</div>
+                                <div className="flow-card-desc">articles supprimés</div>
+                            </div>
+                        </div>
+
+                        <ArrowH />
+
+                        <div className="flow-card card-dedup" id="dedup-card">
+                            <div className="flow-card-icon"><FontAwesomeIcon icon={faDatabase} /></div>
+                            <div className="flow-card-body">
+                                <div className="flow-card-label">APRÈS DÉDUPLICATION</div>
+                                <div className="flow-card-value">{data?.apresDeduplication || 0}</div>
+                                <div className="flow-card-desc">articles uniques</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ④ Fourche SVG depuis "Après déduplication" vers Exclus / Retenus */}
+                    {/*
+                        La carte "Après déduplication" est alignée à droite dans flow-row.
+                        On utilise un SVG centré sur cette carte pour tracer la fourche.
+                    */}
+                    <div className="flow-fork-wrapper">
+                        {/* Tige descend depuis le centre de la carte Après déduplication */}
+                        <svg className="fork-svg" viewBox="0 0 500 130" xmlns="http://www.w3.org/2000/svg"
+                             preserveAspectRatio="none">
+                            {/* Tige verticale centrale (depuis le milieu de la carte dédup, côté droit) */}
+                            <line x1="350" y1="0"  x2="350" y2="50"
+                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                            {/* Barre horizontale */}
+                            <line x1="120" y1="50" x2="350" y2="50"
+                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                            {/* Branche gauche → Exclus */}
+                            <line x1="120" y1="50"  x2="120" y2="110"
+                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                            <polyline points="112,98 120,112 128,98"
+                                      fill="none" stroke="#94a3b8" strokeWidth="2.5"
+                                      strokeLinecap="round" strokeLinejoin="round"/>
+                            {/* Branche droite → Retenus */}
+                            <line x1="350" y1="50"  x2="350" y2="110"
+                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                            <polyline points="342,98 350,112 358,98"
+                                      fill="none" stroke="#94a3b8" strokeWidth="2.5"
+                                      strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+
+                        {/* Deux cartes côte à côte */}
+                        <div className="flow-fork-cards">
+                            <div className="flow-card card-exclus">
+                                <div className="flow-card-icon"><FontAwesomeIcon icon={faTrashAlt} /></div>
+                                <div className="flow-card-body">
+                                    <div className="flow-card-label">EXCLUS</div>
+                                    <div className="flow-card-value">{data?.totalExclus || 0}</div>
+                                    <div className="flow-card-desc">non retenus</div>
                                 </div>
-                                <div className="branch-value">{data?.totalDoublons || 0}</div>
-                                <div className="branch-label">DOUBLONS</div>
-                                <div className="branch-desc">articles supprimés</div>
                             </div>
 
-                            {/* Flèche droite */}
-                            <div className="branch-arrow">
-                                <FontAwesomeIcon icon={faArrowRight} />
-                            </div>
-
-                            {/* Après déduplication */}
-                            <div className="branch-card branch-dedup">
-                                <div className="branch-icon">
-                                    <FontAwesomeIcon icon={faDatabase} />
-                                </div>
-                                <div className="branch-value">{data?.apresDeduplication || 0}</div>
-                                <div className="branch-label">APRÈS DÉDUPLICATION</div>
-                                <div className="branch-desc">articles uniques</div>
-                            </div>
-
-                            {/* Flèche droite */}
-                            <div className="branch-arrow">
-                                <FontAwesomeIcon icon={faArrowRight} />
-                            </div>
-
-                            {/* Répartition Exclus / Retenus */}
-                            <div className="branch-split">
-                                <div className="split-card split-exclus">
-                                    <div className="split-icon">
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </div>
-                                    <div className="split-value">{data?.totalExclus || 0}</div>
-                                    <div className="split-label">EXCLUS</div>
-                                    <div className="split-desc">non retenus</div>
-                                </div>
-                                
-                                <div className="split-card split-retenus">
-                                    <div className="split-icon">
-                                        <FontAwesomeIcon icon={faCheckCircle} />
-                                    </div>
-                                    <div className="split-value">{data?.totalRetenus || 0}</div>
-                                    <div className="split-label">RETENUS</div>
-                                    <div className="split-desc">inclus dans l'étude</div>
+                            <div className="flow-card card-retenus">
+                                <div className="flow-card-icon"><FontAwesomeIcon icon={faCheckCircle} /></div>
+                                <div className="flow-card-body">
+                                    <div className="flow-card-label">RETENUS</div>
+                                    <div className="flow-card-value">{data?.totalRetenus || 0}</div>
+                                    <div className="flow-card-desc">inclus dans l'étude</div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Flèche vers le bas pour les retenus */}
-                    <div className="schema-arrow-down">
-                        <FontAwesomeIcon icon={faArrowDown} />
-                    </div>
-
-                    {/* Bloc Final : Résultat */}
-                    <div className="schema-block block-final">
-                        <div className="block-icon">
-                            <FontAwesomeIcon icon={faCheckCircle} />
-                        </div>
-                        <div className="block-content">
-                            <h3 className="block-title">RÉSULTAT FINAL</h3>
-                            <div className="block-value-final">{data?.totalRetenus || 0}</div>
-                            <p className="block-subtitle">articles retenus pour la revue</p>
                         </div>
                     </div>
 
                 </div>
+                {/* fin .prisma-flow */}
 
-                {/* ========== LÉGENDE / NOTES ========== */}
+                {/* ── Légende ── */}
                 <div className="prisma-legend">
-                    <div className="legend-item">
-                        <div className="legend-color color-blue"></div>
-                        <span>Résultats de recherche</span>
-                    </div>
-                    <div className="legend-item">
-                        <div className="legend-color color-green"></div>
-                        <span>Articles sauvegardés</span>
-                    </div>
-                    <div className="legend-item">
-                        <div className="legend-color color-amber"></div>
-                        <span>Doublons / Exclus</span>
-                    </div>
-                    <div className="legend-item">
-                        <div className="legend-color color-emerald"></div>
-                        <span>Articles retenus</span>
-                    </div>
+                    <span className="legend-item"><span className="ldot ldot-blue"/>Recherche</span>
+                    <span className="legend-item"><span className="ldot ldot-green"/>Sauvegarde</span>
+                    <span className="legend-item"><span className="ldot ldot-amber"/>Doublons / Déduplication</span>
+                    <span className="legend-item"><span className="ldot ldot-red"/>Exclus</span>
+                    <span className="legend-item"><span className="ldot ldot-emerald"/>Retenus</span>
                 </div>
-
-                {/* Note sur les articles "À lire" */}
-                {data?.totalALire > 0 && (
-                    <div className="prisma-note">
-                        <FontAwesomeIcon icon={faBookOpen} />
-                        <span>
-                            <strong>{data.totalALire}</strong> article(s) encore à lire
-                        </span>
-                    </div>
-                )}
 
             </div>
 
             <Footer />
+        </div>
+    )
+}
+
+/* ── Flèche verticale ── */
+function ArrowV() {
+    return (
+        <div className="arrow-v">
+            <svg viewBox="0 0 20 44" xmlns="http://www.w3.org/2000/svg">
+                <line x1="10" y1="2"  x2="10" y2="32"
+                      stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points="3,24 10,36 17,24"
+                          fill="none" stroke="#94a3b8" strokeWidth="2.5"
+                          strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+        </div>
+    )
+}
+
+/* ── Flèche horizontale ── */
+function ArrowH() {
+    return (
+        <div className="arrow-h">
+            <svg viewBox="0 0 64 20" xmlns="http://www.w3.org/2000/svg">
+                <line x1="2"  y1="10" x2="48" y2="10"
+                      stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points="40,3 52,10 40,17"
+                          fill="none" stroke="#94a3b8" strokeWidth="2.5"
+                          strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
         </div>
     )
 }

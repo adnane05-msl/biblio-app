@@ -1,39 +1,41 @@
 import api from './Api'
 
-// Sauvegarder un article dans un projet (unitaire - gardé pour compatibilité)
+// ── Sauvegarde unitaire (gardé pour compatibilité) ──────────────────────────
 export const saveArticleToProject = async (article, projectId) => {
     const response = await api.post('/api/projet-articles/save', {
         projectId,
-        titre: article.title,
-        auteurs: article.authors,
-        annee: article.year,
-        doi: article.doi,
-        resume: article.abstractText,
-        url: article.url,
-        nbCitations: article.citations,
-        source: article.source,
-        journal: article.journal,
+        titre:        article.title,
+        auteurs:      article.authors,
+        annee:        article.year,
+        doi:          article.doi,
+        resume:       article.abstractText,
+        url:          article.url,
+        nbCitations:  article.citations,
+        source:       article.source,
+        journal:      article.journal,
         documentType: article.documentType,
     })
     return response.data
 }
 
-// NOUVEAU : Sauvegarder plusieurs articles en une seule requête
-// Cela évite les race conditions qui causaient les articles perdus
-export const saveArticlesToProject = async (articles, projectId) => {
+// ── Sauvegarde en lot ────────────────────────────────────────────────────────
+// CORRECTION : on passe maintenant totalRecherche (nb résultats API) au backend
+// pour qu'il soit persisté dans le projet et affiché correctement dans PRISMA.
+export const saveArticlesToProject = async (articles, projectId, totalRecherche = 0) => {
     const payload = {
         projectId,
+        totalRecherche,          // ← NOUVEAU : nombre total retourné par les API
         articles: articles.map(article => ({
             projectId,
-            titre: article.title,
-            auteurs: article.authors,
-            annee: article.year,
-            doi: article.doi,
-            resume: article.abstractText,
-            url: article.url,
-            nbCitations: article.citations,
-            source: article.source,
-            journal: article.journal,
+            titre:        article.title,
+            auteurs:      article.authors,
+            annee:        article.year,
+            doi:          article.doi,
+            resume:       article.abstractText,
+            url:          article.url,
+            nbCitations:  article.citations,
+            source:       article.source,
+            journal:      article.journal,
             documentType: article.documentType,
         }))
     }
@@ -42,13 +44,12 @@ export const saveArticlesToProject = async (articles, projectId) => {
     // Retourne : { total, saved, existing, failed, errors }
 }
 
-// Récupérer les articles d'un projet
+// ── Autres fonctions (inchangées) ────────────────────────────────────────────
 export const getArticlesByProject = async (projectId) => {
     const response = await api.get(`/api/projet-articles/project/${projectId}`)
     return response.data
 }
 
-// Changer le statut d'un article
 export const updateArticleStatut = async (projectArticleId, statut) => {
     const response = await api.put(
         `/api/projet-articles/${projectArticleId}/statut`,
@@ -56,7 +57,6 @@ export const updateArticleStatut = async (projectArticleId, statut) => {
     return response.data
 }
 
-// Modifier la note d'un article
 export const updateArticleNote = async (projectArticleId, note) => {
     const response = await api.put(
         `/api/projet-articles/${projectArticleId}/note`,
@@ -64,12 +64,10 @@ export const updateArticleNote = async (projectArticleId, note) => {
     return response.data
 }
 
-// Supprimer un article d'un projet
 export const removeArticleFromProject = async (projectArticleId) => {
     await api.delete(`/api/projet-articles/${projectArticleId}`)
 }
 
-// Déduplication d'articles dans un projet
 export const deduplicateProject = async (projectId) => {
     const response = await api.post(
         `/api/projet-articles/project/${projectId}/deduplicate`

@@ -15,10 +15,9 @@ public class PrismaController {
         this.prismaService = prismaService;
     }
 
+    // ── Plus besoin du paramètre totalRecherche : il vient de la BDD ──
     @GetMapping("/prisma/{projectId}")
-    public ResponseEntity<PrismaDTO> getPrisma(
-            @PathVariable Long projectId,
-            @RequestParam(required = false, defaultValue = "0") int totalRecherche) {
-        return ResponseEntity.ok(prismaService.getPrisma(projectId, totalRecherche));
+    public ResponseEntity<PrismaDTO> getPrisma(@PathVariable Long projectId) {
+        return ResponseEntity.ok(prismaService.getPrisma(projectId));
     }
 }

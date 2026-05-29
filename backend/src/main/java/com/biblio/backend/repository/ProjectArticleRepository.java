@@ -18,4 +18,5 @@ public interface ProjectArticleRepository extends JpaRepository<ProjectArticle, 
     long countByProject_IdAndStatut(Long projectId, ProjectArticle.Statut statut);
     List<ProjectArticle> findByArticle(Article article);
 
+    boolean existsByProjectAndArticle(Project project, Article article);
 }

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { searchArticles } from '../../services/SearchServices'
 import { getProjectsByUser } from '../../services/ProjectServices'
-import { saveArticleToProject } from '../../services/ProjectArticleServices'
+import { saveArticleToProject, saveArticlesToProject } from '../../services/ProjectArticleServices'
 import Navbar from '../../components/Navbar/Navbar'
 import Footer from '../../components/Footer/Footer'
 import SearchBar from '../../components/Search/SearchBar'
@@ -10,8 +10,7 @@ import ArticleCard from '../../components/Search/ArticleCard'
 import './SearchPage.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-    faSort,
-    faCalendar, faFile,
+    faSort, faCalendar, faFile,
     faBuilding, faXmark, faFloppyDisk, faFolder
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -27,17 +26,20 @@ const ARTICLES_PER_PAGE = 10
 function SearchPage() {
     const { user } = useAuth()
 
-    const [articles,        setArticles]        = useState([])
-    const [projects,        setProjects]        = useState([])
-    const [loading,         setLoading]         = useState(false)
-    const [error,           setError]           = useState('')
-    const [success,         setSuccess]         = useState('')
-    const [hasSearched,     setHasSearched]     = useState(false)
-    const [currentPage,     setCurrentPage]     = useState(1)
+    const [articles,         setArticles]         = useState([])
+    const [projects,         setProjects]         = useState([])
+    const [loading,          setLoading]          = useState(false)
+    const [error,            setError]            = useState('')
+    const [success,          setSuccess]          = useState('')
+    const [hasSearched,      setHasSearched]      = useState(false)
+    const [currentPage,      setCurrentPage]      = useState(1)
     const [selectedArticles, setSelectedArticles] = useState([])
     const [showBulkMenu,     setShowBulkMenu]     = useState(false)
     const [bulkLoading,      setBulkLoading]      = useState(false)
     const selectAllRef = useRef(null)
+
+    // totalRecherche dans le state React — plus de localStorage
+    const [totalRecherche, setTotalRecherche] = useState(0)
 
     const [sortBy,          setSortBy]          = useState('Recommandé')
     const [yearMin,         setYearMin]         = useState('')
@@ -45,9 +47,9 @@ function SearchPage() {
     const [selectedTypes,   setSelectedTypes]   = useState([])
     const [publisherFilter, setPublisherFilter] = useState('TOUS')
 
-    const [availableTypes,  setAvailableTypes]  = useState([])
-    const [publishers,      setPublishers]      = useState([])
-    const [yearRange,       setYearRange]       = useState({ min: 2000, max: 2025 })
+    const [availableTypes, setAvailableTypes] = useState([])
+    const [publishers,     setPublishers]     = useState([])
+    const [yearRange,      setYearRange]      = useState({ min: 2000, max: 2025 })
 
     useEffect(() => {
         if (user?.id) {
@@ -68,7 +70,6 @@ function SearchPage() {
         try {
             const data = await searchArticles(query)
 
-            // Filtrer : garder uniquement les articles avec un titre réel
             const validArticles = data.filter(a =>
                 a.title &&
                 a.title.trim() !== '' &&
@@ -76,7 +77,7 @@ function SearchPage() {
             )
 
             setArticles(validArticles)
-            localStorage.setItem('lastSearchCount', data.length)
+            setTotalRecherche(data.length)   // stocké dans le state, pas localStorage
 
             const types = [...new Set(
                 validArticles.map(a => a.documentType).filter(t => t && t.trim() !== '')
@@ -107,6 +108,7 @@ function SearchPage() {
         setPublisherFilter('TOUS')
     }
 
+    // Sauvegarde unitaire depuis ArticleCard
     const handleSave = async (article, projectId) => {
         try {
             await saveArticleToProject(article, projectId)
@@ -118,6 +120,28 @@ function SearchPage() {
         }
     }
 
+    // Sauvegarde groupée — passe totalRecherche pour persistance en BDD par projet
+    const handleBulkSave = async (projectId) => {
+        setBulkLoading(true)
+        setShowBulkMenu(false)
+
+        try {
+            const result = await saveArticlesToProject(
+                selectedArticles,
+                projectId,
+                totalRecherche
+            )
+            setSelectedArticles([])
+            setSuccess(`✅ ${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
+            setTimeout(() => setSuccess(''), 4000)
+        } catch {
+            setError('Erreur lors de la sauvegarde groupée')
+            setTimeout(() => setError(''), 4000)
+        } finally {
+            setBulkLoading(false)
+        }
+    }
+
     const toggleType = (type) => {
         setSelectedTypes(prev =>
             prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
@@ -125,52 +149,19 @@ function SearchPage() {
         setCurrentPage(1)
     }
 
-    const getFilteredAndSorted = () => {
-        let result = [...articles]
-
-        if (yearMin !== '') {
-            result = result.filter(a => a.year != null && a.year >= parseInt(yearMin))
-        }
-        if (yearMax !== '') {
-            result = result.filter(a => a.year != null && a.year <= parseInt(yearMax))
-        }
-        if (selectedTypes.length > 0) {
-            result = result.filter(a => selectedTypes.includes(a.documentType))
-        }
-        if (publisherFilter !== 'TOUS') {
-            result = result.filter(a => a.publisher === publisherFilter)
-        }
-
-        switch (sortBy) {
-            case 'year_desc':
-                result.sort((a, b) => (b.year || 0) - (a.year || 0))
-                break
-            case 'year_asc':
-                result.sort((a, b) => (a.year || 0) - (b.year || 0))
-                break
-            case 'citations':
-                result.sort((a, b) => (b.citations || 0) - (a.citations || 0))
-                break
-            default:
-                break
-        }
-
-        return result
+    const toggleSelect = (article) => {
+        setSelectedArticles(prev => {
+            const key = article.doi || article.title
+            const exists = prev.find(a => (a.doi || a.title) === key)
+            if (exists) return prev.filter(a => (a.doi || a.title) !== key)
+            return [...prev, article]
+        })
     }
 
-    const filteredArticles = getFilteredAndSorted()
-    const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
-    const paginatedArticles = filteredArticles.slice(
-        (currentPage - 1) * ARTICLES_PER_PAGE,
-        currentPage * ARTICLES_PER_PAGE
-    )
-
-    const activeFiltersCount = [
-        yearMin !== '',
-        yearMax !== '',
-        selectedTypes.length > 0,
-        publisherFilter !== 'TOUS'
-    ].filter(Boolean).length
+    const isSelected = (article) => {
+        const key = article.doi || article.title
+        return selectedArticles.some(a => (a.doi || a.title) === key)
+    }
 
     const getPageNumbers = (current, total) => {
         if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -179,56 +170,45 @@ function SearchPage() {
         return [1, '...', current-1, current, current+1, '...', total]
     }
 
-    const toggleSelect = (article) => {
-        setSelectedArticles(prev => {
-            const key = article.doi || article.title
-            const exists = prev.find(a => (a.doi || a.title) === key)
-            if (exists) {
-                return prev.filter(a => (a.doi || a.title) !== key)
-            }
-            return [...prev, article]
-        })
+    // ── Filtrage & tri ──────────────────────────────────────────────────────
+    let filteredArticles = [...articles]
+
+    if (yearMin) filteredArticles = filteredArticles.filter(a => a.year >= parseInt(yearMin))
+    if (yearMax) filteredArticles = filteredArticles.filter(a => a.year <= parseInt(yearMax))
+    if (selectedTypes.length > 0) {
+        filteredArticles = filteredArticles.filter(a => selectedTypes.includes(a.documentType))
+    }
+    if (publisherFilter !== 'TOUS') {
+        filteredArticles = filteredArticles.filter(a => a.publisher === publisherFilter)
     }
 
-    const isAllSelected = filteredArticles.length > 0 &&
+    if (sortBy === 'year_desc') filteredArticles.sort((a, b) => (b.year || 0) - (a.year || 0))
+    if (sortBy === 'year_asc')  filteredArticles.sort((a, b) => (a.year || 0) - (b.year || 0))
+    if (sortBy === 'citations') filteredArticles.sort((a, b) => (b.citations || 0) - (a.citations || 0))
+
+    const activeFiltersCount =
+        (yearMin ? 1 : 0) +
+        (yearMax ? 1 : 0) +
+        selectedTypes.length +
+        (publisherFilter !== 'TOUS' ? 1 : 0)
+
+    const totalPages        = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
+    const paginatedArticles = filteredArticles.slice(
+        (currentPage - 1) * ARTICLES_PER_PAGE,
+        currentPage * ARTICLES_PER_PAGE
+    )
+
+    // ── Sélection globale ───────────────────────────────────────────────────
+    const allFilteredSelected = filteredArticles.length > 0 &&
         filteredArticles.every(a =>
             selectedArticles.some(s => (s.doi || s.title) === (a.doi || a.title))
         )
-
-    const isIndeterminate = !isAllSelected && selectedArticles.length > 0
-
-    useEffect(() => {
-        if (selectAllRef.current) {
-            selectAllRef.current.indeterminate = isIndeterminate
-        }
-    }, [isIndeterminate])
-
-    // Sauvegarde groupée : sauvegarde tous les articles, ignore silencieusement les erreurs
-    const handleBulkSave = async (projectId) => {
-        const total = selectedArticles.length
-        setBulkLoading(true)
-        setShowBulkMenu(false)
-        let saved = 0
-
-        for (const article of selectedArticles) {
-            try {
-                await saveArticleToProject(article, projectId)
-                saved++
-            } catch {
-                // Ignorer l'erreur et continuer avec l'article suivant
-            }
-        }
-
-        setSelectedArticles([])
-        setSuccess(`✅ ${saved} article(s) sauvegardé(s) sur ${total}`)
-        setTimeout(() => setSuccess(''), 4000)
-        setBulkLoading(false)
-    }
+    const someFilteredSelected = !allFilteredSelected && selectedArticles.length > 0
 
     const selectAll = () => {
-        if (isAllSelected) {
-            const filteredKeys = new Set(filteredArticles.map(a => a.doi || a.title))
-            setSelectedArticles(prev => prev.filter(a => !filteredKeys.has(a.doi || a.title)))
+        if (allFilteredSelected) {
+            const keys = new Set(filteredArticles.map(a => a.doi || a.title))
+            setSelectedArticles(prev => prev.filter(a => !keys.has(a.doi || a.title)))
         } else {
             const existing = new Set(selectedArticles.map(a => a.doi || a.title))
             const toAdd = filteredArticles.filter(a => !existing.has(a.doi || a.title))
@@ -236,10 +216,16 @@ function SearchPage() {
         }
     }
 
-    const isSelected = (article) => {
-        const key = article.doi || article.title
-        return selectedArticles.some(a => (a.doi || a.title) === key)
-    }
+    // FIX ESLint react-hooks/exhaustive-deps : useCallback avec la bonne dépendance
+    const syncIndeterminate = useCallback(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = someFilteredSelected
+        }
+    }, [someFilteredSelected])
+
+    useEffect(() => {
+        syncIndeterminate()
+    }, [syncIndeterminate])
 
     return (
         <div className="search-page">
@@ -283,117 +269,116 @@ function SearchPage() {
                 {hasSearched && (
                     <div className="search-layout">
 
-                        {!loading && <aside className="search-sidebar">
+                        {/* ── Sidebar filtres ── */}
+                        {!loading && (
+                            <aside className="search-sidebar">
 
-                            <div className="sidebar-card">
-                                <div className="sidebar-section-title">📊 Résultats</div>
-                                <div className="sidebar-stats">
-                                    <div className="sidebar-stat">
-                                        <span className="sidebar-stat-num">{filteredArticles.length}</span>
-                                        <span className="sidebar-stat-lbl">
-                                            {filteredArticles.length !== articles.length
-                                                ? `/ ${articles.length} total`
-                                                : 'articles'}
-                                        </span>
+                                <div className="sidebar-card">
+                                    <div className="sidebar-section-title">📊 Résultats</div>
+                                    <div className="sidebar-stats">
+                                        <div className="sidebar-stat">
+                                            <span className="sidebar-stat-num">{filteredArticles.length}</span>
+                                            <span className="sidebar-stat-lbl">
+                                                {filteredArticles.length !== articles.length
+                                                    ? `/ ${articles.length} total`
+                                                    : 'articles'}
+                                            </span>
+                                        </div>
                                     </div>
+                                    {activeFiltersCount > 0 && (
+                                        <button
+                                            className="btn-reset-filters"
+                                            onClick={() => { resetFilters(); setCurrentPage(1) }}
+                                        >
+                                            <FontAwesomeIcon icon={faXmark} />
+                                            Effacer les filtres ({activeFiltersCount})
+                                        </button>
+                                    )}
                                 </div>
 
-                                {activeFiltersCount > 0 && (
-                                    <button
-                                        className="btn-reset-filters"
-                                        onClick={() => { resetFilters(); setCurrentPage(1) }}
-                                    >
-                                        <FontAwesomeIcon icon={faXmark} />
-                                        Effacer les filtres ({activeFiltersCount})
-                                    </button>
+                                <div className="sidebar-card">
+                                    <div className="sidebar-section-title">
+                                        <FontAwesomeIcon icon={faCalendar} /> Année de publication
+                                    </div>
+                                    <div className="year-inputs">
+                                        <div className="year-input-group">
+                                            <label>De</label>
+                                            <input
+                                                type="number"
+                                                className="year-input"
+                                                placeholder={yearRange.min}
+                                                value={yearMin}
+                                                min={yearRange.min}
+                                                max={yearRange.max}
+                                                onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }}
+                                            />
+                                        </div>
+                                        <span className="year-separator">—</span>
+                                        <div className="year-input-group">
+                                            <label>À</label>
+                                            <input
+                                                type="number"
+                                                className="year-input"
+                                                placeholder={yearRange.max}
+                                                value={yearMax}
+                                                min={yearRange.min}
+                                                max={yearRange.max}
+                                                onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="year-hint">Disponible : {yearRange.min} — {yearRange.max}</div>
+                                </div>
+
+                                {availableTypes.length > 0 && (
+                                    <div className="sidebar-card">
+                                        <div className="sidebar-section-title">
+                                            <FontAwesomeIcon icon={faFile} /> Type de document
+                                        </div>
+                                        <div className="type-list">
+                                            {availableTypes.map(type => (
+                                                <label key={type} className="type-checkbox">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedTypes.includes(type)}
+                                                        onChange={() => toggleType(type)}
+                                                    />
+                                                    <span>{type}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
-                            </div>
 
-                            <div className="sidebar-card">
-                                <div className="sidebar-section-title">
-                                    <FontAwesomeIcon icon={faCalendar} /> Année de publication
-                                </div>
-                                <div className="year-inputs">
-                                    <div className="year-input-group">
-                                        <label>De</label>
-                                        <input
-                                            type="number"
-                                            className="year-input"
-                                            placeholder={yearRange.min}
-                                            value={yearMin}
-                                            min={yearRange.min}
-                                            max={yearRange.max}
-                                            onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }}
-                                        />
+                                {publishers.length > 0 && (
+                                    <div className="sidebar-card">
+                                        <div className="sidebar-section-title">
+                                            <FontAwesomeIcon icon={faBuilding} /> Éditeur
+                                        </div>
+                                        <select
+                                            className="publisher-select"
+                                            value={publisherFilter}
+                                            onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}
+                                        >
+                                            <option value="TOUS">Tous les éditeurs</option>
+                                            {publishers.map(p => (
+                                                <option key={p} value={p}>{p}</option>
+                                            ))}
+                                        </select>
                                     </div>
-                                    <span className="year-separator">—</span>
-                                    <div className="year-input-group">
-                                        <label>À</label>
-                                        <input
-                                            type="number"
-                                            className="year-input"
-                                            placeholder={yearRange.max}
-                                            value={yearMax}
-                                            min={yearRange.min}
-                                            max={yearRange.max}
-                                            onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="year-hint">Disponible : {yearRange.min} — {yearRange.max}</div>
-                            </div>
+                                )}
 
-                            {availableTypes.length > 0 && (
-                                <div className="sidebar-card">
-                                    <div className="sidebar-section-title">
-                                        <FontAwesomeIcon icon={faFile} /> Type de document
-                                    </div>
-                                    <div className="type-list">
-                                        {availableTypes.map(type => (
-                                            <label key={type} className="type-checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedTypes.includes(type)}
-                                                    onChange={() => toggleType(type)}
-                                                />
-                                                <span className="type-name">{type}</span>
-                                                <span className="type-count">
-                                                    {articles.filter(a => a.documentType === type).length}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                            </aside>
+                        )}
 
-                            {publishers.length > 0 && (
-                                <div className="sidebar-card">
-                                    <div className="sidebar-section-title">
-                                        <FontAwesomeIcon icon={faBuilding} /> Éditeur
-                                    </div>
-                                    <select
-                                        className="publisher-select"
-                                        value={publisherFilter}
-                                        onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}
-                                    >
-                                        <option value="TOUS">Tous les éditeurs</option>
-                                        {publishers.map(p => (
-                                            <option key={p} value={p}>
-                                                {p.length > 35 ? p.substring(0, 35) + '...' : p}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                        </aside>}
+                        {/* ── Zone principale ── */}
+                        <div className="search-main">
 
-                        <div className="search-results">
-
-                            {!loading && articles.length > 0 && (
-                                <div className="results-toolbar">
+                            {/* Tri */}
+                            {!loading && filteredArticles.length > 0 && (
+                                <div className="results-header">
                                     <span className="results-count">
-                                        <strong>{filteredArticles.length}</strong>
-                                        {' '}article{filteredArticles.length > 1 ? 's' : ''}
+                                        {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''}
                                         {filteredArticles.length !== articles.length && ` (sur ${articles.length})`}
                                     </span>
                                     <div className="sort-control">
@@ -411,6 +396,7 @@ function SearchPage() {
                                 </div>
                             )}
 
+                            {/* Aucun résultat */}
                             {!loading && hasSearched && filteredArticles.length === 0 && (
                                 <div className="empty-state">
                                     <p className="empty-icon">📭</p>
@@ -431,6 +417,7 @@ function SearchPage() {
                                 </div>
                             )}
 
+                            {/* Barre de sélection */}
                             {!loading && filteredArticles.length > 0 && (
                                 <div className="selection-bar">
                                     <div className="selection-left">
@@ -438,12 +425,12 @@ function SearchPage() {
                                             <input
                                                 type="checkbox"
                                                 ref={selectAllRef}
-                                                checked={isAllSelected}
+                                                checked={allFilteredSelected}
                                                 onChange={selectAll}
                                             />
-                                            {isAllSelected
+                                            {allFilteredSelected
                                                 ? 'Tout désélectionner'
-                                                : isIndeterminate
+                                                : someFilteredSelected
                                                     ? 'Sélectionner tout'
                                                     : 'Tout sélectionner'}
                                         </label>
@@ -502,6 +489,7 @@ function SearchPage() {
                                 </div>
                             )}
 
+                            {/* Liste des articles */}
                             {!loading && paginatedArticles.length > 0 && (
                                 <div className="articles-list">
                                     {paginatedArticles.map((article, index) => (
@@ -517,6 +505,7 @@ function SearchPage() {
                                 </div>
                             )}
 
+                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="pagination">
                                     <div className="pagination-info">
@@ -560,7 +549,10 @@ function SearchPage() {
                                     </div>
                                 </div>
                             )}
+
                         </div>
+                        {/* fin search-main */}
+
                     </div>
                 )}
 

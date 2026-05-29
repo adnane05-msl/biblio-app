@@ -2,6 +2,7 @@ package com.biblio.backend.service;
 
 import com.biblio.backend.dto.ProjectArticleDTO;
 import com.biblio.backend.dto.SaveArticleRequest;
+import com.biblio.backend.dto.SaveBatchRequest;
 import com.biblio.backend.model.Article;
 import com.biblio.backend.model.Project;
 import com.biblio.backend.model.ProjectArticle;
@@ -30,72 +31,120 @@ public class ProjectArticleService {
         this.articleRepository = articleRepository;
     }
 
+    // ── Sauvegarde unitaire ──────────────────────────────────────────────────
     public ProjectArticleDTO saveArticle(SaveArticleRequest request) {
 
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
-        // Chercher si l'article existe déjà en base (par DOI d'abord, puis titre)
+        Article article = findOrCreateArticle(request);
+
+        if (projectArticleRepository.existsByProjectAndArticle(project, article)) {
+            throw new RuntimeException("Article déjà présent dans ce projet");
+        }
+
+        ProjectArticle pa = new ProjectArticle();
+        pa.setProject(project);
+        pa.setArticle(article);
+        pa.setStatut(ProjectArticle.Statut.A_LIRE);
+
+        return convertToDTO(projectArticleRepository.save(pa));
+    }
+
+    // ── Sauvegarde en lot ─────────────────────────────────────────────────────
+    public Map<String, Object> saveBatch(SaveBatchRequest batchRequest) {
+
+        Project project = projectRepository.findById(batchRequest.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        // Persiste totalRecherche dans le projet (par projet, pas global)
+        if (batchRequest.getTotalRecherche() != null && batchRequest.getTotalRecherche() > 0) {
+            project.setTotalRecherche(batchRequest.getTotalRecherche());
+            projectRepository.save(project);
+        }
+
+        int total    = batchRequest.getArticles().size();
+        int saved    = 0;
+        int existing = 0;
+        int failed   = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (SaveArticleRequest req : batchRequest.getArticles()) {
+            try {
+                req.setProjectId(batchRequest.getProjectId());
+                Article article = findOrCreateArticle(req);
+
+                if (projectArticleRepository.existsByProjectAndArticle(project, article)) {
+                    existing++;
+                } else {
+                    ProjectArticle pa = new ProjectArticle();
+                    pa.setProject(project);
+                    pa.setArticle(article);
+                    pa.setStatut(ProjectArticle.Statut.A_LIRE);
+                    projectArticleRepository.save(pa);
+                    saved++;
+                }
+            } catch (Exception e) {
+                failed++;
+                errors.add(e.getMessage());
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("total",    total);
+        result.put("saved",    saved);
+        result.put("existing", existing);
+        result.put("failed",   failed);
+        result.put("errors",   errors);
+        return result;
+    }
+
+    // ── Helper : trouve ou crée un article ───────────────────────────────────
+    // FIX "Common part can be extracted from if" : la création du ProjectArticle
+    // est factorisée dans saveArticle() et saveBatch() séparément (logiques différentes).
+    // Ici on factorise uniquement la recherche/création de l'Article lui-même.
+    private Article findOrCreateArticle(SaveArticleRequest request) {
+        String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
+        String titre = request.getTitre() != null ? request.getTitre().trim() : null;
+
+        // 1. Chercher par DOI, puis par titre
         Article article = null;
-        String doi = request.getDoi() != null ? request.getDoi().trim() : null;
         if (doi != null && !doi.isEmpty()) {
             article = articleRepository.findByDoi(doi).orElse(null);
         }
-        String titre = request.getTitre() != null ? request.getTitre().trim() : null;
         if (article == null && titre != null && !titre.isEmpty()) {
             article = articleRepository.findByTitre(titre).orElse(null);
         }
 
-        // Créer l'article s'il n'existe pas encore
         if (article == null) {
-            article = new Article();
+            // 2. Créer un nouvel article
+            // FIX "Common part" : le titre par défaut est extrait avant le if/else
             if (titre == null || titre.isEmpty()) {
-                titre = doi != null && !doi.isEmpty()
-                        ? "Article " + doi
-                        : "Article sans titre";
+                titre = (doi != null && !doi.isEmpty()) ? "Article " + doi : "Article sans titre";
             }
+            article = new Article();
             article.setTitre(titre);
+            article.setDoi(doi != null && !doi.isEmpty() ? doi : null);
+            // Les champs suivants sont communs — extraits du if/else
             article.setAuteurs(request.getAuteurs());
             article.setAnnee(request.getAnnee());
             article.setJournal(request.getJournal());
             article.setDocumentType(request.getDocumentType());
             article.setSourceNom(request.getSource());
-            article.setDoi(doi != null && !doi.isEmpty() ? doi : null);
             article.setResume(request.getResume());
             article.setUrl(request.getUrl());
             article.setNbCitations(request.getNbCitations());
-            article = articleRepository.save(article);
         } else {
-            // Article déjà en base : toujours mettre à jour avec les valeurs fraîches
-            if (request.getDocumentType() != null) {
-                article.setDocumentType(request.getDocumentType());
-            }
-            if (request.getJournal() != null) {
-                article.setJournal(request.getJournal());
-            }
-            if (request.getAuteurs() != null) {
-                article.setAuteurs(request.getAuteurs());
-            }
-            if (request.getResume() != null) {
-                article.setResume(request.getResume());
-            }
-            if (request.getNbCitations() != null) {
-                article.setNbCitations(request.getNbCitations());
-            }
-            if (request.getUrl() != null) {
-                article.setUrl(request.getUrl());
-            }
-            article = articleRepository.save(article);
+            // 3. Mettre à jour les métadonnées fraîches (champs non-null uniquement)
+            if (request.getDocumentType() != null) article.setDocumentType(request.getDocumentType());
+            if (request.getJournal()      != null) article.setJournal(request.getJournal());
+            if (request.getAuteurs()      != null) article.setAuteurs(request.getAuteurs());
+            if (request.getResume()       != null) article.setResume(request.getResume());
+            if (request.getNbCitations()  != null) article.setNbCitations(request.getNbCitations());
+            if (request.getUrl()          != null) article.setUrl(request.getUrl());
         }
 
-        // Toujours créer le lien article <-> projet
-        ProjectArticle projectArticle = new ProjectArticle();
-        projectArticle.setProject(project);
-        projectArticle.setArticle(article);
-        projectArticle.setStatut(ProjectArticle.Statut.A_LIRE);
-
-        ProjectArticle saved = projectArticleRepository.save(projectArticle);
-        return convertToDTO(saved);
+        return articleRepository.save(article);
     }
 
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
@@ -125,6 +174,36 @@ public class ProjectArticleService {
         projectArticleRepository.deleteById(projectArticleId);
     }
 
+    public Map<String, Object> deduplicate(Long projectId) {
+        List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
+
+        Map<String, List<ProjectArticle>> groups = new LinkedHashMap<>();
+        for (ProjectArticle pa : list) {
+            String doi = pa.getArticle().getDoi();
+            String key = (doi != null && !doi.trim().isEmpty())
+                    ? "doi:"   + doi.trim().toLowerCase()
+                    : "titre:" + (pa.getArticle().getTitre() != null
+                    ? pa.getArticle().getTitre().trim().toLowerCase() : "");
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
+        }
+
+        int doublonsMarques = 0;
+        for (List<ProjectArticle> group : groups.values()) {
+            if (group.size() > 1) {
+                for (int i = 1; i < group.size(); i++) {
+                    group.get(i).setStatut(ProjectArticle.Statut.DOUBLON);
+                    projectArticleRepository.save(group.get(i));
+                    doublonsMarques++;
+                }
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("doublonsMarques", doublonsMarques);
+        result.put("totalTraites",    list.size());
+        return result;
+    }
+
     private ProjectArticleDTO convertToDTO(ProjectArticle pa) {
         ProjectArticleDTO dto = new ProjectArticleDTO();
         dto.setId(pa.getId());
@@ -143,44 +222,5 @@ public class ProjectArticleService {
         dto.setNote(pa.getNote());
         dto.setDateAjout(pa.getDateAjout());
         return dto;
-    }
-
-    public Map<String, Object> deduplicate(Long projectId) {
-        List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
-
-        Map<String, List<ProjectArticle>> groups = new LinkedHashMap<>();
-
-        for (ProjectArticle pa : list) {
-            String key;
-            String doi = pa.getArticle().getDoi();
-            if (doi != null && !doi.trim().isEmpty()) {
-                key = "doi:" + doi.trim().toLowerCase();
-            } else {
-                String titre = pa.getArticle().getTitre();
-                key = "titre:" + (titre != null ? titre.trim().toLowerCase() : "");
-            }
-            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(pa);
-        }
-
-        int marked = 0;
-        for (List<ProjectArticle> group : groups.values()) {
-            if (group.size() > 1) {
-                for (int i = 1; i < group.size(); i++) {
-                    ProjectArticle pa = group.get(i);
-                    if (pa.getStatut() != ProjectArticle.Statut.DOUBLON) {
-                        pa.setStatut(ProjectArticle.Statut.DOUBLON);
-                        projectArticleRepository.save(pa);
-                        marked++;
-                    }
-                }
-            }
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("marked", marked);
-        result.put("message", marked > 0
-                ? marked + " doublon(s) détecté(s) et marqué(s)"
-                : "Aucun doublon détecté");
-        return result;
     }
 }

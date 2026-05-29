@@ -2,6 +2,7 @@ package com.biblio.backend.controller;
 
 import com.biblio.backend.dto.ProjectArticleDTO;
 import com.biblio.backend.dto.SaveArticleRequest;
+import com.biblio.backend.dto.SaveBatchRequest;
 import com.biblio.backend.service.ProjectArticleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,11 @@ public class ProjectArticleController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @PostMapping("/save-batch")
+    public ResponseEntity<Map<String, Object>> saveBatch(@RequestBody SaveBatchRequest request) {
+        return ResponseEntity.ok(projectArticleService.saveBatch(request));
     }
 
     @GetMapping("/project/{projectId}")
