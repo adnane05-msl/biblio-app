@@ -25,7 +25,7 @@ function PrismaDashboardPage() {
     const [error, setError]         = useState('')
     const [exporting, setExporting] = useState(false)
 
-    /* ── Ref sur le bloc diagramme seul ── */
+    /* Ref sur le bloc diagramme seul */
     const diagramRef = useRef(null)
 
     useEffect(() => {
@@ -46,9 +46,8 @@ function PrismaDashboardPage() {
         load()
     }, [id])
 
-    /* ════════════════════════════════════════
-      Export PDF — capture uniquement #prisma-diagram
-    ════════════════════════════════════════ */
+    /*Export PDF — capture uniquement #prisma-diagram */
+
     const handleExportPDF = async () => {
         if (!diagramRef.current) return
         setExporting(true)
@@ -56,9 +55,9 @@ function PrismaDashboardPage() {
             const el = diagramRef.current
 
             const canvas = await html2canvas(el, {
-                scale: 3,                    // haute résolution
+                scale: 3,
                 useCORS: true,
-                backgroundColor: '#f0f4f8', // même fond que la page
+                backgroundColor: '#f0f4f8',
                 logging: false,
             })
 
@@ -67,7 +66,7 @@ function PrismaDashboardPage() {
             /* Dimensions en mm (A4 portrait) */
             const pdfW = 210
             const pdfH = 297
-            const margin = 15                // marge 15 mm sur chaque côté
+            const margin = 15 
 
             const usableW = pdfW - margin * 2
             const usableH = pdfH - margin * 2
@@ -165,15 +164,13 @@ function PrismaDashboardPage() {
                     </p>
                 </div>
 
-                {/* ════════════════════════════════
-                    ZONE CAPTURÉE POUR LE PDF
-                ════════════════════════════════ */}
+                {/* ZONE CAPTURÉE POUR LE PDF */}
                 <div id="prisma-diagram" ref={diagramRef} className="prisma-diagram-wrapper">
 
                     {/* FLUX PRISMA */}
                     <div className="prisma-flow">
 
-                        {/* ① Résultats de la recherche */}
+                        {/* Résultats de la recherche */}
                         <div className="flow-card card-search">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faSearch} /></div>
                             <div className="flow-card-body">
@@ -197,7 +194,7 @@ function PrismaDashboardPage() {
 
                         <ArrowDown />
 
-                        {/* ③ Doublons */}
+                        {/* Doublons */}
                         <div className="flow-card card-doublons">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faCopy} /></div>
                             <div className="flow-card-body">
@@ -209,7 +206,7 @@ function PrismaDashboardPage() {
 
                         <ArrowDown />
 
-                        {/* ④ Après déduplication */}
+                        {/* Après déduplication */}
                         <div className="flow-card card-dedup">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faDatabase} /></div>
                             <div className="flow-card-body">
@@ -222,7 +219,7 @@ function PrismaDashboardPage() {
                         {/* Fourche SVG */}
                         <ForkArrows />
 
-                        {/* ⑤⑥ Exclus + Retenus */}
+                        {/* Exclus + Retenus */}
                         <div className="flow-fork-cards">
                             <div className="flow-card card-exclus">
                                 <div className="flow-card-icon"><FontAwesomeIcon icon={faTrashAlt} /></div>

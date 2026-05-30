@@ -1,7 +1,3 @@
-/* ════════════════════════════════════════
-   PRISMA DASHBOARD — redesign v2 + export PDF
-════════════════════════════════════════ */
-
 .prisma-page {
     background: #f0f4f8;
     display: flex;
@@ -38,9 +34,7 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ════════════════════════════════════════
-   BARRE HAUT : retour + bouton PDF
-════════════════════════════════════════ */
+/* BARRE HAUT : retour + bouton PDF */
 .prisma-topbar {
     display: flex;
     align-items: center;
@@ -50,7 +44,7 @@
     gap: 12px;
 }
 
-/* ── Bouton retour ── */
+/* Bouton retour */
 .btn-back {
     background: none; border: none;
     color: #2563eb; font-size: 14px;
@@ -61,7 +55,7 @@
 }
 .btn-back:hover { color: #1d4ed8; text-decoration: underline; }
 
-/* ── Bouton Export PDF ── */
+/* Bouton Export PDF */
 .btn-export-pdf {
     display: inline-flex;
     align-items: center;
@@ -92,7 +86,7 @@
     box-shadow: none;
 }
 
-/* ── En-tête ── */
+/* En-tête */
 .prisma-header { text-align: center; margin-bottom: 44px; }
 .prisma-title {
     font-size: 26px; font-weight: 700; color: #1e3a5f;
@@ -101,18 +95,14 @@
 }
 .prisma-subtitle { font-size: 14px; color: #6b7280; }
 
-/* ════════════════════════════════════════
-   ZONE CAPTURÉE — wrapper du diagramme
-════════════════════════════════════════ */
+/* ZONE CAPTURÉE — wrapper du diagramme */
 .prisma-diagram-wrapper {
     background: #f0f4f8;   /* fond identique à la page pour la capture */
     padding: 24px 0 8px;
     border-radius: 16px;
 }
 
-/* ════════════════════════════════════════
-   FLUX — colonne centrale
-════════════════════════════════════════ */
+/* FLUX — colonne centrale */
 .prisma-flow {
     display: flex;
     flex-direction: column;
@@ -120,7 +110,7 @@
     gap: 0;
 }
 
-/* ── Carte générique ── */
+/* Carte générique */
 .flow-card {
     background: #fff;
     border-radius: 16px;
@@ -153,7 +143,7 @@
 }
 .flow-card-desc { font-size: 12px; color: #9ca3af; }
 
-/* ── Couleurs par type ── */
+/* Couleurs par type */
 .card-search  .flow-card-icon  { background: #dbeafe; color: #2563eb; }
 .card-search  .flow-card-value { color: #2563eb; }
 
@@ -172,7 +162,7 @@
 .card-retenus .flow-card-icon  { background: #d1fae5; color: #059669; }
 .card-retenus .flow-card-value { color: #059669; }
 
-/* ── Flèche verticale droite ── */
+/* Flèche verticale droite */
 .arrow-down {
     width: 24px;
     height: 56px;
@@ -184,7 +174,7 @@
 }
 .arrow-down svg { width: 24px; height: 56px; display: block; }
 
-/* ── Fourche SVG ── */
+/* Fourche SVG */
 .fork-wrapper {
     width: 100%;
     max-width: 480px;
@@ -201,7 +191,7 @@
     overflow: visible;
 }
 
-/* ── Cartes finales côte à côte ── */
+/* Cartes finales côte à côte */
 .flow-fork-cards {
     display: flex;
     gap: 24px;
@@ -210,9 +200,7 @@
 }
 .flow-fork-cards .flow-card { width: 210px; }
 
-/* ════════════════════════════════════════
-   LÉGENDE
-════════════════════════════════════════ */
+/* LÉGENDE */
 .prisma-legend {
     display: flex; flex-wrap: wrap;
     gap: 14px 24px; justify-content: center;
@@ -232,9 +220,7 @@
 .ldot-red     { background: #dc2626; }
 .ldot-emerald { background: #059669; }
 
-/* ════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════ */
+/* RESPONSIVE */
 @media (max-width: 520px) {
     .flow-card { width: 100%; max-width: 360px; }
     .flow-fork-cards .flow-card { width: 100%; max-width: 360px; }
