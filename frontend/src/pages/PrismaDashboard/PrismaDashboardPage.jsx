@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPrismaData } from '../../services/PrismaServices'
 import { getProjectById } from '../../services/ProjectServices'
@@ -9,17 +9,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowLeft,
     faSearch, faSave, faCopy, faTrashAlt,
-    faCheckCircle, faChartLine, faDatabase
+    faCheckCircle, faChartLine, faDatabase,
+    faFilePdf, faSpinner
 } from '@fortawesome/free-solid-svg-icons'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 function PrismaDashboardPage() {
     const { id } = useParams()
     const navigate = useNavigate()
 
-    const [data, setData]       = useState(null)
-    const [project, setProject] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError]     = useState('')
+    const [data, setData]           = useState(null)
+    const [project, setProject]     = useState(null)
+    const [loading, setLoading]     = useState(true)
+    const [error, setError]         = useState('')
+    const [exporting, setExporting] = useState(false)
+
+    /* ── Ref sur le bloc diagramme seul ── */
+    const diagramRef = useRef(null)
 
     useEffect(() => {
         const load = async () => {
@@ -38,6 +45,75 @@ function PrismaDashboardPage() {
         }
         load()
     }, [id])
+
+    /* ════════════════════════════════════════
+      Export PDF — capture uniquement #prisma-diagram
+    ════════════════════════════════════════ */
+    const handleExportPDF = async () => {
+        if (!diagramRef.current) return
+        setExporting(true)
+        try {
+            const el = diagramRef.current
+
+            const canvas = await html2canvas(el, {
+                scale: 3,                    // haute résolution
+                useCORS: true,
+                backgroundColor: '#f0f4f8', // même fond que la page
+                logging: false,
+            })
+
+            const imgData = canvas.toDataURL('image/png')
+
+            /* Dimensions en mm (A4 portrait) */
+            const pdfW = 210
+            const pdfH = 297
+            const margin = 15                // marge 15 mm sur chaque côté
+
+            const usableW = pdfW - margin * 2
+            const usableH = pdfH - margin * 2
+
+            /* Ratio image → calcul hauteur proportionnelle */
+            const ratio   = canvas.width / canvas.height
+            let imgW      = usableW
+            let imgH      = imgW / ratio
+
+            /* Si trop haut, on recalcule en fixant la hauteur */
+            if (imgH > usableH) {
+                imgH = usableH
+                imgW = imgH * ratio
+            }
+
+            /* Centrer horizontalement */
+            const offsetX = margin + (usableW - imgW) / 2
+            const offsetY = margin + (usableH - imgH) / 2
+
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+            })
+
+            /* Titre en petit en haut */
+            pdf.setFontSize(9)
+            pdf.setTextColor(150)
+            const titre = project?.nomProjet
+                ? `Diagramme PRISMA — ${project.nomProjet}`
+                : 'Diagramme PRISMA'
+            pdf.text(titre, pdfW / 2, 10, { align: 'center' })
+
+            pdf.addImage(imgData, 'PNG', offsetX, offsetY, imgW, imgH)
+
+            const filename = project?.nomProjet
+                ? `PRISMA_${project.nomProjet.replace(/\s+/g, '_')}.pdf`
+                : 'PRISMA_diagramme.pdf'
+
+            pdf.save(filename)
+        } catch (err) {
+            console.error('Export PDF échoué :', err)
+        } finally {
+            setExporting(false)
+        }
+    }
 
     if (loading) return (
         <div className="prisma-page">
@@ -62,10 +138,22 @@ function PrismaDashboardPage() {
 
             <div className="prisma-container">
 
-                {/* ── Back ── */}
-                <button className="btn-back" onClick={() => navigate(`/projects/${id}`)}>
-                    <FontAwesomeIcon icon={faArrowLeft} /> Retour au projet
-                </button>
+                {/* ── Barre d'actions : Retour + Export PDF ── */}
+                <div className="prisma-topbar">
+                    <button className="btn-back" onClick={() => navigate(`/projects/${id}`)}>
+                        <FontAwesomeIcon icon={faArrowLeft} /> Retour au projet
+                    </button>
+
+                    <button
+                        className={`btn-export-pdf${exporting ? ' btn-export-pdf--loading' : ''}`}
+                        onClick={handleExportPDF}
+                        disabled={exporting}
+                        title="Télécharger le diagramme en PDF"
+                    >
+                        <FontAwesomeIcon icon={exporting ? faSpinner : faFilePdf} spin={exporting} />
+                        {exporting ? 'Export en cours…' : 'Télécharger PDF'}
+                    </button>
+                </div>
 
                 {/* ── Titre ── */}
                 <div className="prisma-header">
@@ -78,48 +166,51 @@ function PrismaDashboardPage() {
                 </div>
 
                 {/* ════════════════════════════════
-                    FLUX PRISMA
+                    ZONE CAPTURÉE POUR LE PDF
                 ════════════════════════════════ */}
-                <div className="prisma-flow">
+                <div id="prisma-diagram" ref={diagramRef} className="prisma-diagram-wrapper">
 
-                    {/* ① Résultats de la recherche */}
-                    <div className="flow-card card-search">
-                        <div className="flow-card-icon"><FontAwesomeIcon icon={faSearch} /></div>
-                        <div className="flow-card-body">
-                            <div className="flow-card-label">RÉSULTATS DE LA RECHERCHE</div>
-                            <div className="flow-card-value">{data?.totalRecherche || 0}</div>
-                            <div className="flow-card-desc">articles retournés par les API scientifiques</div>
+                    {/* FLUX PRISMA */}
+                    <div className="prisma-flow">
+
+                        {/* ① Résultats de la recherche */}
+                        <div className="flow-card card-search">
+                            <div className="flow-card-icon"><FontAwesomeIcon icon={faSearch} /></div>
+                            <div className="flow-card-body">
+                                <div className="flow-card-label">RÉSULTATS DE LA RECHERCHE</div>
+                                <div className="flow-card-value">{data?.totalRecherche || 0}</div>
+                                <div className="flow-card-desc">articles retournés par les API scientifiques</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <ArrowV />
+                        <ArrowDown />
 
-                    {/* ② Articles sauvegardés */}
-                    <div className="flow-card card-saved">
-                        <div className="flow-card-icon"><FontAwesomeIcon icon={faSave} /></div>
-                        <div className="flow-card-body">
-                            <div className="flow-card-label">ARTICLES SAUVEGARDÉS</div>
-                            <div className="flow-card-value">{data?.totalSauvegardes || 0}</div>
-                            <div className="flow-card-desc">importés dans le projet</div>
+                        {/* ② Articles sauvegardés */}
+                        <div className="flow-card card-saved">
+                            <div className="flow-card-icon"><FontAwesomeIcon icon={faSave} /></div>
+                            <div className="flow-card-body">
+                                <div className="flow-card-label">ARTICLES SAUVEGARDÉS</div>
+                                <div className="flow-card-value">{data?.totalSauvegardes || 0}</div>
+                                <div className="flow-card-desc">importés dans le projet</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <ArrowV />
+                        <ArrowDown />
 
-                    {/* ③ Ligne horizontale : Doublons → Après déduplication */}
-                    <div className="flow-row">
+                        {/* ③ Doublons */}
                         <div className="flow-card card-doublons">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faCopy} /></div>
                             <div className="flow-card-body">
-                                <div className="flow-card-label">DOUBLONS</div>
+                                <div className="flow-card-label">DOUBLONS SUPPRIMÉS</div>
                                 <div className="flow-card-value">{data?.totalDoublons || 0}</div>
                                 <div className="flow-card-desc">articles supprimés</div>
                             </div>
                         </div>
 
-                        <ArrowH />
+                        <ArrowDown />
 
-                        <div className="flow-card card-dedup" id="dedup-card">
+                        {/* ④ Après déduplication */}
+                        <div className="flow-card card-dedup">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faDatabase} /></div>
                             <div className="flow-card-body">
                                 <div className="flow-card-label">APRÈS DÉDUPLICATION</div>
@@ -127,38 +218,11 @@ function PrismaDashboardPage() {
                                 <div className="flow-card-desc">articles uniques</div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* ④ Fourche SVG depuis "Après déduplication" vers Exclus / Retenus */}
-                    {/*
-                        La carte "Après déduplication" est alignée à droite dans flow-row.
-                        On utilise un SVG centré sur cette carte pour tracer la fourche.
-                    */}
-                    <div className="flow-fork-wrapper">
-                        {/* Tige descend depuis le centre de la carte Après déduplication */}
-                        <svg className="fork-svg" viewBox="0 0 500 130" xmlns="http://www.w3.org/2000/svg"
-                             preserveAspectRatio="none">
-                            {/* Tige verticale centrale (depuis le milieu de la carte dédup, côté droit) */}
-                            <line x1="350" y1="0"  x2="350" y2="50"
-                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                            {/* Barre horizontale */}
-                            <line x1="120" y1="50" x2="350" y2="50"
-                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                            {/* Branche gauche → Exclus */}
-                            <line x1="120" y1="50"  x2="120" y2="110"
-                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                            <polyline points="112,98 120,112 128,98"
-                                      fill="none" stroke="#94a3b8" strokeWidth="2.5"
-                                      strokeLinecap="round" strokeLinejoin="round"/>
-                            {/* Branche droite → Retenus */}
-                            <line x1="350" y1="50"  x2="350" y2="110"
-                                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                            <polyline points="342,98 350,112 358,98"
-                                      fill="none" stroke="#94a3b8" strokeWidth="2.5"
-                                      strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        {/* Fourche SVG */}
+                        <ForkArrows />
 
-                        {/* Deux cartes côte à côte */}
+                        {/* ⑤⑥ Exclus + Retenus */}
                         <div className="flow-fork-cards">
                             <div className="flow-card card-exclus">
                                 <div className="flow-card-icon"><FontAwesomeIcon icon={faTrashAlt} /></div>
@@ -178,19 +242,21 @@ function PrismaDashboardPage() {
                                 </div>
                             </div>
                         </div>
+
+                    </div>
+                    {/* fin .prisma-flow */}
+
+                    {/* Légende */}
+                    <div className="prisma-legend">
+                        <span className="legend-item"><span className="ldot ldot-blue"/>Recherche</span>
+                        <span className="legend-item"><span className="ldot ldot-green"/>Sauvegarde</span>
+                        <span className="legend-item"><span className="ldot ldot-amber"/>Doublons / Déduplication</span>
+                        <span className="legend-item"><span className="ldot ldot-red"/>Exclus</span>
+                        <span className="legend-item"><span className="ldot ldot-emerald"/>Retenus</span>
                     </div>
 
                 </div>
-                {/* fin .prisma-flow */}
-
-                {/* ── Légende ── */}
-                <div className="prisma-legend">
-                    <span className="legend-item"><span className="ldot ldot-blue"/>Recherche</span>
-                    <span className="legend-item"><span className="ldot ldot-green"/>Sauvegarde</span>
-                    <span className="legend-item"><span className="ldot ldot-amber"/>Doublons / Déduplication</span>
-                    <span className="legend-item"><span className="ldot ldot-red"/>Exclus</span>
-                    <span className="legend-item"><span className="ldot ldot-emerald"/>Retenus</span>
-                </div>
+                {/* fin #prisma-diagram */}
 
             </div>
 
@@ -199,31 +265,50 @@ function PrismaDashboardPage() {
     )
 }
 
-/* ── Flèche verticale ── */
-function ArrowV() {
+/* ── Flèche verticale droite avec pointe ── */
+function ArrowDown() {
     return (
-        <div className="arrow-v">
-            <svg viewBox="0 0 20 44" xmlns="http://www.w3.org/2000/svg">
-                <line x1="10" y1="2"  x2="10" y2="32"
-                      stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                <polyline points="3,24 10,36 17,24"
-                          fill="none" stroke="#94a3b8" strokeWidth="2.5"
-                          strokeLinecap="round" strokeLinejoin="round"/>
+        <div className="arrow-down">
+            <svg viewBox="0 0 24 56" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <line x1="12" y1="0" x2="12" y2="42"
+                    stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points="5,34 12,46 19,34"
+                        fill="none" stroke="#94a3b8" strokeWidth="2.5"
+                        strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
         </div>
     )
 }
 
-/* ── Flèche horizontale ── */
-function ArrowH() {
+function ForkArrows() {
+    const CX = 240, L = 100, R = 380
+    const stemY  = 48
+    const barY   = 48
+    const arrowY = 110
+
     return (
-        <div className="arrow-h">
-            <svg viewBox="0 0 64 20" xmlns="http://www.w3.org/2000/svg">
-                <line x1="2"  y1="10" x2="48" y2="10"
-                      stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
-                <polyline points="40,3 52,10 40,17"
-                          fill="none" stroke="#94a3b8" strokeWidth="2.5"
-                          strokeLinecap="round" strokeLinejoin="round"/>
+        <div className="fork-wrapper">
+            <svg
+                className="fork-svg"
+                viewBox="0 0 480 120"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                preserveAspectRatio="xMidYMid meet"
+            >
+                <line x1={CX} y1="0" x2={CX} y2={stemY}
+                    stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <line x1={L} y1={barY} x2={R} y2={barY}
+                    stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <line x1={L} y1={barY} x2={L} y2={arrowY - 10}
+                    stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points={`${L-7},${arrowY-18} ${L},${arrowY} ${L+7},${arrowY-18}`}
+                        stroke="#94a3b8" strokeWidth="2.5"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1={R} y1={barY} x2={R} y2={arrowY - 10}
+                    stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points={`${R-7},${arrowY-18} ${R},${arrowY} ${R+7},${arrowY-18}`}
+                        stroke="#94a3b8" strokeWidth="2.5"
+                        strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
         </div>
     )

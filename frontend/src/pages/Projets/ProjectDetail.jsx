@@ -178,9 +178,9 @@ function ProjectDetail() {
 
         if (result.doublonsMarques > 0) {
             handleFilterChange('DOUBLON')
-            setSuccess(`✅ ${result.doublonsMarques} doublon(s) détecté(s) sur ${result.totalTraites} articles`)
+            setSuccess(`${result.doublonsMarques} doublon(s) détecté(s) sur ${result.totalTraites} articles`)
         } else {
-            setSuccess(`✅ Aucun doublon trouvé parmi ${result.totalTraites} articles`)
+            setSuccess(`Aucun doublon trouvé parmi ${result.totalTraites} articles`)
         }
         setTimeout(() => setSuccess(''), 4000)
     } catch {

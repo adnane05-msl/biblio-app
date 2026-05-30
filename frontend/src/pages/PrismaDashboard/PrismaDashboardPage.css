@@ -1,3 +1,7 @@
+/* ════════════════════════════════════════
+   PRISMA DASHBOARD — redesign v2 + export PDF
+════════════════════════════════════════ */
+
 .prisma-page {
     background: #f0f4f8;
     display: flex;
@@ -5,9 +9,9 @@
 }
 
 .prisma-container {
-    max-width: 820px;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 32px 24px 64px;
+    padding: 32px 24px 72px;
     flex: 1;
     width: 100%;
     box-sizing: border-box;
@@ -34,19 +38,62 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ════════════════════════════════════════
+   BARRE HAUT : retour + bouton PDF
+════════════════════════════════════════ */
+.prisma-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
 /* ── Bouton retour ── */
 .btn-back {
     background: none; border: none;
     color: #2563eb; font-size: 14px;
     cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px;
-    margin-bottom: 28px; font-weight: 500;
+    font-weight: 500;
     transition: color .2s; padding: 0;
 }
 .btn-back:hover { color: #1d4ed8; text-decoration: underline; }
 
+/* ── Bouton Export PDF ── */
+.btn-export-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, .25);
+}
+.btn-export-pdf:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, .35);
+}
+.btn-export-pdf:active:not(:disabled) {
+    transform: translateY(0);
+}
+.btn-export-pdf--loading,
+.btn-export-pdf:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 /* ── En-tête ── */
-.prisma-header { text-align: center; margin-bottom: 40px; }
+.prisma-header { text-align: center; margin-bottom: 44px; }
 .prisma-title {
     font-size: 26px; font-weight: 700; color: #1e3a5f;
     margin-bottom: 8px;
@@ -55,12 +102,21 @@
 .prisma-subtitle { font-size: 14px; color: #6b7280; }
 
 /* ════════════════════════════════════════
-   FLUX — colonne centrée
+   ZONE CAPTURÉE — wrapper du diagramme
+════════════════════════════════════════ */
+.prisma-diagram-wrapper {
+    background: #f0f4f8;   /* fond identique à la page pour la capture */
+    padding: 24px 0 8px;
+    border-radius: 16px;
+}
+
+/* ════════════════════════════════════════
+   FLUX — colonne centrale
 ════════════════════════════════════════ */
 .prisma-flow {
     display: flex;
     flex-direction: column;
-    align-items: center;   /* tout est centré */
+    align-items: center;
     gap: 0;
 }
 
@@ -72,14 +128,14 @@
     display: flex;
     align-items: center;
     gap: 18px;
-    width: 320px;
+    width: 360px;
     box-sizing: border-box;
-    box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
     transition: transform .2s, box-shadow .2s;
 }
 .flow-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 28px rgba(0,0,0,.13);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .13);
 }
 
 .flow-card-icon {
@@ -116,69 +172,51 @@
 .card-retenus .flow-card-icon  { background: #d1fae5; color: #059669; }
 .card-retenus .flow-card-value { color: #059669; }
 
-/* ── Flèche verticale ── */
-.arrow-v {
-    width: 20px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 4px 0;
-}
-.arrow-v svg { width: 20px; height: 44px; }
-
-/* ── Ligne horizontale (Doublons → Déduplication) ── */
-.flow-row {
+/* ── Flèche verticale droite ── */
+.arrow-down {
+    width: 24px;
+    height: 56px;
     display: flex;
     align-items: center;
-    gap: 0;
-    /* aligner la carte "Après déduplication" à droite dans le conteneur 820px  */
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 8px 0;
+}
+.arrow-down svg { width: 24px; height: 56px; display: block; }
+
+/* ── Fourche SVG ── */
+.fork-wrapper {
     width: 100%;
+    max-width: 480px;
+    margin-top: 8px;
+    margin-bottom: 0;
+    display: flex;
     justify-content: center;
 }
-
-.arrow-h {
-    width: 64px; height: 20px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-}
-.arrow-h svg { width: 64px; height: 20px; }
-
-/* ════════════════════════════════════════
-   FOURCHE SVG + cartes Exclus / Retenus
-════════════════════════════════════════ */
-.flow-fork-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;   /* centré sur le flux */
-    width: 100%;
-    /* on force la même largeur que .flow-row pour que le SVG se cale bien */
-    max-width: 720px;
-}
-
-/*
-  Le SVG viewBox="0 0 500 130"
-  - x=120 → centre de la carte Exclus  (gauche dans les fork-cards)
-  - x=350 → centre de la carte Après déduplication (droite dans flow-row)
-  - x=350 → centre de la carte Retenus (droite dans fork-cards)
-  Les deux cartes dans fork-cards font chacune ~240px et ont un gap de ~20px → total ~500px
-*/
 .fork-svg {
     width: 100%;
-    max-width: 500px;
-    height: 130px;
+    max-width: 480px;
+    height: 120px;
     display: block;
     overflow: visible;
 }
 
-/* Les deux cartes du bas côte à côte, centrées */
+/* ── Cartes finales côte à côte ── */
 .flow-fork-cards {
     display: flex;
-    gap: 20px;
+    gap: 24px;
     justify-content: center;
+    flex-wrap: wrap;
 }
+.flow-fork-cards .flow-card { width: 210px; }
 
-/* ── Légende ── */
+/* ════════════════════════════════════════
+   LÉGENDE
+════════════════════════════════════════ */
 .prisma-legend {
     display: flex; flex-wrap: wrap;
     gap: 14px 24px; justify-content: center;
-    margin-top: 44px;
+    margin-top: 48px;
 }
 .legend-item {
     display: flex; align-items: center; gap: 7px;
@@ -193,3 +231,13 @@
 .ldot-amber   { background: #ca8a04; }
 .ldot-red     { background: #dc2626; }
 .ldot-emerald { background: #059669; }
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media (max-width: 520px) {
+    .flow-card { width: 100%; max-width: 360px; }
+    .flow-fork-cards .flow-card { width: 100%; max-width: 360px; }
+    .fork-svg { max-width: 340px; }
+    .prisma-topbar { flex-direction: column; align-items: flex-start; }
+}
