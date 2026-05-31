@@ -596,6 +596,17 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.search-page-with-history {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 64px);
+    align-items: flex-start;
+}
+.search-page-inner {
+    flex: 1;
+    min-width: 0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
     .search-layout {
