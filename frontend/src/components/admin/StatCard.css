@@ -1,0 +1,46 @@
+/* src/components/admin/StatCard.css */
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e8e8e2;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stat-card__icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.stat-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card__value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.stat-card__sub {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* Couleurs sémantiques */
+.stat-card--blue  .stat-card__value { color: #1a56a0; }
+.stat-card--green .stat-card__value { color: #2a7d4f; }
+.stat-card--amber .stat-card__value { color: #a05c00; }
+.stat-card--red   .stat-card__value { color: #a03030; }

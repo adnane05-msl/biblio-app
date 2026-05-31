@@ -15,9 +15,6 @@ public class SearchService {
     @Autowired
     private OpenAlexService openAlexService;
 
-    @Autowired
-    private ArxivService arxivService;
-
     public List<ArticleDTO> search(String query,
                                    boolean includeCrossref,
                                    boolean includeOpenAlex,
@@ -38,14 +35,6 @@ public class SearchService {
                 allResults.addAll(openAlexService.search(query));
             } catch (Exception e) {
                 System.err.println("Erreur OpenAlex: " + e.getMessage());
-            }
-        }
-
-        if (includeArxiv) {
-            try {
-                allResults.addAll(arxivService.search(query));
-            } catch (Exception e) {
-                System.err.println("Erreur arXiv: " + e.getMessage());
             }
         }
 
