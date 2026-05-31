@@ -599,7 +599,7 @@ button:disabled {
 .search-page-with-history {
     display: flex;
     flex: 1;
-    min-height: calc(100vh - 64px);
+    min-height: calc(101vh - 64px);
     align-items: flex-start;
 }
 .search-page-inner {

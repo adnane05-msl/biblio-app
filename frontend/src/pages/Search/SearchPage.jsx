@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/useAuth'
-import { searchArticles } from '../../services/SearchServices'
+import { searchArticles, saveHistorique } from '../../services/SearchServices'
 import { getProjectsByUser } from '../../services/ProjectServices'
 import { saveArticleToProject, saveArticlesToProject } from '../../services/ProjectArticleServices'
 import Navbar from '../../components/Navbar/Navbar'
@@ -20,10 +20,8 @@ const SORT_OPTIONS = [
     { value: 'year_asc',   label: 'Année (ancien)' },
     { value: 'citations',  label: 'Citations' },
 ]
-
 const ARTICLES_PER_PAGE = 10
 
-// ── Helper pagination ──────────────────────────────────────────────────────
 function getPageNumbers(current, total) {
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
     const pages = []
@@ -37,10 +35,16 @@ function getPageNumbers(current, total) {
     return pages
 }
 
+const cacheKey = (q) => q.trim().toLowerCase()
+
 function SearchPage() {
     const { user } = useAuth()
 
-    // ── État principal ─────────────────────────────────────────────────────
+    // ── Cache mémoire (session courante) ──────────────────────────────────
+    // Complète le cache BDD pour les requêtes répétées dans la même session
+    const sessionCache = useRef(new Map())
+
+    // ── États ─────────────────────────────────────────────────────────────
     const [articles,         setArticles]         = useState([])
     const [projects,         setProjects]         = useState([])
     const [loading,          setLoading]          = useState(false)
@@ -52,10 +56,8 @@ function SearchPage() {
     const [showBulkMenu,     setShowBulkMenu]     = useState(false)
     const [bulkLoading,      setBulkLoading]      = useState(false)
     const [currentQuery,     setCurrentQuery]     = useState('')
+    const [totalRecherche,   setTotalRecherche]   = useState(0)
     const selectAllRef = useRef(null)
-
-    // totalRecherche dans le state React — plus de localStorage
-    const [totalRecherche, setTotalRecherche] = useState(0)
 
     // ── Filtres ────────────────────────────────────────────────────────────
     const [sortBy,          setSortBy]          = useState('Recommandé')
@@ -63,64 +65,18 @@ function SearchPage() {
     const [yearMax,         setYearMax]         = useState('')
     const [selectedTypes,   setSelectedTypes]   = useState([])
     const [publisherFilter, setPublisherFilter] = useState('TOUS')
+    const [availableTypes,  setAvailableTypes]  = useState([])
+    const [publishers,      setPublishers]      = useState([])
+    const [yearRange,       setYearRange]       = useState({ min: 2000, max: 2025 })
 
-    const [availableTypes, setAvailableTypes] = useState([])
-    const [publishers,     setPublishers]     = useState([])
-    const [yearRange,      setYearRange]      = useState({ min: 2000, max: 2025 })
-
-    // ── Chargement des projets de l'utilisateur ────────────────────────────
+    // ── Chargement projets ─────────────────────────────────────────────────
     useEffect(() => {
         if (user?.id) {
-            getProjectsByUser(user.id)
-                .then(data => setProjects(data))
-                .catch(() => {})
+            getProjectsByUser(user.id).then(setProjects).catch(() => {})
         }
     }, [user])
 
-    // ── Recherche principale ───────────────────────────────────────────────
-    const handleSearch = async (query) => {
-        setLoading(true)
-        setError('')
-        setHasSearched(true)
-        setArticles([])
-        setCurrentPage(1)
-        setCurrentQuery(query)
-        resetFilters()
-
-        try {
-            // Passe userId pour sauvegarder automatiquement dans l'historique
-            const data = await searchArticles(query, user?.id)
-
-            const validArticles = data.filter(a =>
-                a.title &&
-                a.title.trim() !== '' &&
-                a.title.trim().toLowerCase() !== 'titre non disponible'
-            )
-
-            setArticles(validArticles)
-            setTotalRecherche(data.length)
-
-            const types = [...new Set(
-                validArticles.map(a => a.documentType).filter(t => t && t.trim() !== '')
-            )].sort()
-            setAvailableTypes(types)
-
-            const pubs = [...new Set(
-                validArticles.map(a => a.publisher).filter(p => p && p.trim() !== '')
-            )].sort()
-            setPublishers(pubs)
-
-            const years = validArticles.map(a => a.year).filter(y => y != null && y > 0)
-            if (years.length > 0) {
-                setYearRange({ min: Math.min(...years), max: Math.max(...years) })
-            }
-        } catch {
-            setError('Erreur lors de la recherche.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
+    // ── Reset filtres ──────────────────────────────────────────────────────
     const resetFilters = () => {
         setSortBy('Recommandé')
         setYearMin('')
@@ -129,7 +85,99 @@ function SearchPage() {
         setPublisherFilter('TOUS')
     }
 
-    // ── Sauvegarde unitaire depuis ArticleCard ─────────────────────────────
+    // ── Applique les articles dans les états ───────────────────────────────
+    const applyResults = useCallback((validArticles) => {
+        setArticles(validArticles)
+        setTotalRecherche(validArticles.length)
+
+        const types = [...new Set(
+            validArticles.map(a => a.documentType).filter(t => t?.trim())
+        )].sort()
+        setAvailableTypes(types)
+
+        const pubs = [...new Set(
+            validArticles.map(a => a.publisher).filter(p => p?.trim())
+        )].sort()
+        setPublishers(pubs)
+
+        const years = validArticles.map(a => a.year).filter(y => y > 0)
+        if (years.length > 0) {
+            setYearRange({ min: Math.min(...years), max: Math.max(...years) })
+        }
+    }, [])
+
+    // ── Recherche principale ───────────────────────────────────────────────
+    const handleSearch = useCallback(async (query, cachedJsonFromDB = null) => {
+        const key = cacheKey(query)
+
+        setError('')
+        setHasSearched(true)
+        setCurrentPage(1)
+        setCurrentQuery(query)
+        resetFilters()
+        setSelectedArticles([])
+
+        // ── CAS 1 : résultats depuis le cache SESSION (même navigation) ──
+        if (sessionCache.current.has(key)) {
+            const cached = sessionCache.current.get(key)
+            applyResults(cached)
+            setLoading(false)
+            return
+        }
+
+        // ── CAS 2 : résultats depuis la BDD (clic historique après retour page) ──
+        if (cachedJsonFromDB) {
+            try {
+                const parsed = JSON.parse(cachedJsonFromDB)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    applyResults(parsed)
+                    sessionCache.current.set(key, parsed) // aussi en mémoire session
+                    setLoading(false)
+                    return
+                }
+            } catch {
+                // JSON invalide → on refait l'appel API
+            }
+        }
+
+        // ── CAS 3 : nouvelle requête → appel APIs externes ──
+        setLoading(true)
+        setArticles([])
+
+        try {
+            const data = await searchArticles(query)
+
+            const validArticles = data.filter(a =>
+                a.title?.trim() &&
+                a.title.trim().toLowerCase() !== 'titre non disponible'
+            )
+
+            // Mettre en cache session
+            sessionCache.current.set(key, validArticles)
+
+            // Sauvegarder en BDD avec le JSON des résultats (cache persistant)
+            if (user?.id) {
+                const jsonStr = JSON.stringify(validArticles)
+                saveHistorique(query, user.id, validArticles.length, jsonStr)
+                    .catch(e => console.warn('Erreur sauvegarde historique:', e))
+            }
+
+            applyResults(validArticles)
+
+        } catch {
+            setError('Erreur lors de la recherche.')
+        } finally {
+            setLoading(false)
+        }
+    }, [user?.id, applyResults])
+
+    // ── Callback depuis la sidebar : clic sur un item historique ──────────
+    // Reçoit la requête ET le JSON sauvegardé en BDD
+    const handleHistorySelect = useCallback((query, resultatsJson) => {
+        handleSearch(query, resultatsJson)
+    }, [handleSearch])
+
+    // ── Sauvegarde unitaire ────────────────────────────────────────────────
     const handleSave = async (article, projectId) => {
         try {
             await saveArticleToProject(article, projectId)
@@ -145,13 +193,8 @@ function SearchPage() {
     const handleBulkSave = async (projectId) => {
         setBulkLoading(true)
         setShowBulkMenu(false)
-
         try {
-            const result = await saveArticlesToProject(
-                selectedArticles,
-                projectId,
-                totalRecherche
-            )
+            const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche)
             setSelectedArticles([])
             setSuccess(`✅ ${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
             setTimeout(() => setSuccess(''), 4000)
@@ -163,7 +206,7 @@ function SearchPage() {
         }
     }
 
-    // ── Filtres types ──────────────────────────────────────────────────────
+    // ── Filtres ────────────────────────────────────────────────────────────
     const toggleType = (type) => {
         setSelectedTypes(prev =>
             prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
@@ -171,7 +214,6 @@ function SearchPage() {
         setCurrentPage(1)
     }
 
-    // ── Sélection articles ─────────────────────────────────────────────────
     const toggleSelect = (article) => {
         const key = article.doi || article.title
         setSelectedArticles(prev =>
@@ -186,35 +228,19 @@ function SearchPage() {
         return selectedArticles.some(a => (a.doi || a.title) === key)
     }
 
-    // ── Pipeline filtrage + tri ────────────────────────────────────────────
     let filteredArticles = [...articles]
+    if (yearMin) filteredArticles = filteredArticles.filter(a => a.year >= parseInt(yearMin))
+    if (yearMax) filteredArticles = filteredArticles.filter(a => a.year <= parseInt(yearMax))
+    if (selectedTypes.length > 0) filteredArticles = filteredArticles.filter(a => selectedTypes.includes(a.documentType))
+    if (publisherFilter !== 'TOUS') filteredArticles = filteredArticles.filter(a => a.publisher === publisherFilter)
 
-    if (yearMin) {
-        filteredArticles = filteredArticles.filter(a => a.year >= parseInt(yearMin))
-    }
-    if (yearMax) {
-        filteredArticles = filteredArticles.filter(a => a.year <= parseInt(yearMax))
-    }
-    if (selectedTypes.length > 0) {
-        filteredArticles = filteredArticles.filter(a => selectedTypes.includes(a.documentType))
-    }
-    if (publisherFilter !== 'TOUS') {
-        filteredArticles = filteredArticles.filter(a => a.publisher === publisherFilter)
-    }
-
-    if (sortBy === 'year_desc') {
-        filteredArticles.sort((a, b) => (b.year || 0) - (a.year || 0))
-    } else if (sortBy === 'year_asc') {
-        filteredArticles.sort((a, b) => (a.year || 0) - (b.year || 0))
-    } else if (sortBy === 'citations') {
-        filteredArticles.sort((a, b) => (b.citations || 0) - (a.citations || 0))
-    }
+    if (sortBy === 'year_desc') filteredArticles.sort((a, b) => (b.year || 0) - (a.year || 0))
+    else if (sortBy === 'year_asc') filteredArticles.sort((a, b) => (a.year || 0) - (b.year || 0))
+    else if (sortBy === 'citations') filteredArticles.sort((a, b) => (b.citations || 0) - (a.citations || 0))
 
     const activeFiltersCount =
-        (yearMin ? 1 : 0) +
-        (yearMax ? 1 : 0) +
-        selectedTypes.length +
-        (publisherFilter !== 'TOUS' ? 1 : 0)
+        (yearMin ? 1 : 0) + (yearMax ? 1 : 0) +
+        selectedTypes.length + (publisherFilter !== 'TOUS' ? 1 : 0)
 
     const totalPages        = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
     const paginatedArticles = filteredArticles.slice(
@@ -222,11 +248,8 @@ function SearchPage() {
         currentPage * ARTICLES_PER_PAGE
     )
 
-    // ── Sélection globale ──────────────────────────────────────────────────
     const allFilteredSelected = filteredArticles.length > 0 &&
-        filteredArticles.every(a =>
-            selectedArticles.some(s => (s.doi || s.title) === (a.doi || a.title))
-        )
+        filteredArticles.every(a => selectedArticles.some(s => (s.doi || s.title) === (a.doi || a.title)))
     const someFilteredSelected = !allFilteredSelected && selectedArticles.length > 0
 
     const selectAll = () => {
@@ -241,28 +264,23 @@ function SearchPage() {
     }
 
     const syncIndeterminate = useCallback(() => {
-        if (selectAllRef.current) {
-            selectAllRef.current.indeterminate = someFilteredSelected
-        }
+        if (selectAllRef.current) selectAllRef.current.indeterminate = someFilteredSelected
     }, [someFilteredSelected])
 
-    useEffect(() => {
-        syncIndeterminate()
-    }, [syncIndeterminate])
+    useEffect(() => { syncIndeterminate() }, [syncIndeterminate])
 
     // ── Rendu ──────────────────────────────────────────────────────────────
     return (
         <div className="search-page">
             <Navbar />
 
-            {/* Layout global : sidebar historique + contenu */}
             <div className="search-page-with-history">
 
-                {/* ── Sidebar Historique (gauche, style Claude/ChatGPT) ── */}
+                {/* ── Sidebar Historique ── */}
                 <SearchHistorySidebar
                     userId={user?.id}
                     currentQuery={currentQuery}
-                    onSelectQuery={(q) => handleSearch(q)}
+                    onSelectQuery={handleHistorySelect}
                 />
 
                 {/* ── Contenu principal ── */}
@@ -278,7 +296,6 @@ function SearchPage() {
                         <SearchBar onSearch={handleSearch} loading={loading} />
                     </div>
 
-                    {/* ── Alertes ── */}
                     {error && (
                         <div className="search-alerts">
                             <div className="alert alert-error">
@@ -295,7 +312,6 @@ function SearchPage() {
                         </div>
                     )}
 
-                    {/* ── Spinner ── */}
                     {loading && (
                         <div className="loading-state">
                             <div className="loading-spinner" />
@@ -303,15 +319,11 @@ function SearchPage() {
                         </div>
                     )}
 
-                    {/* ── Layout résultats : sidebar filtres + zone principale ── */}
                     {hasSearched && (
                         <div className="search-layout">
 
-                            {/* ── Sidebar filtres ── */}
                             {!loading && (
                                 <aside className="search-sidebar">
-
-                                    {/* Statistiques */}
                                     <div className="sidebar-card">
                                         <div className="sidebar-section-title">📊 Résultats</div>
                                         <div className="sidebar-stats">
@@ -319,23 +331,19 @@ function SearchPage() {
                                                 <span className="sidebar-stat-num">{filteredArticles.length}</span>
                                                 <span className="sidebar-stat-lbl">
                                                     {filteredArticles.length !== articles.length
-                                                        ? `/ ${articles.length} total`
-                                                        : 'articles'}
+                                                        ? `/ ${articles.length} total` : 'articles'}
                                                 </span>
                                             </div>
                                         </div>
                                         {activeFiltersCount > 0 && (
-                                            <button
-                                                className="btn-reset-filters"
-                                                onClick={() => { resetFilters(); setCurrentPage(1) }}
-                                            >
+                                            <button className="btn-reset-filters"
+                                                onClick={() => { resetFilters(); setCurrentPage(1) }}>
                                                 <FontAwesomeIcon icon={faXmark} />
                                                 Effacer les filtres ({activeFiltersCount})
                                             </button>
                                         )}
                                     </div>
 
-                                    {/* Filtre Année */}
                                     <div className="sidebar-card">
                                         <div className="sidebar-section-title">
                                             <FontAwesomeIcon icon={faCalendar} /> Année de publication
@@ -343,34 +351,23 @@ function SearchPage() {
                                         <div className="year-inputs">
                                             <div className="year-input-group">
                                                 <label>De</label>
-                                                <input
-                                                    type="number"
-                                                    className="year-input"
-                                                    placeholder={yearRange.min}
-                                                    value={yearMin}
-                                                    min={yearRange.min}
-                                                    max={yearRange.max}
-                                                    onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }}
-                                                />
+                                                <input type="number" className="year-input"
+                                                    placeholder={yearRange.min} value={yearMin}
+                                                    min={yearRange.min} max={yearRange.max}
+                                                    onChange={e => { setYearMin(e.target.value); setCurrentPage(1) }} />
                                             </div>
                                             <span className="year-separator">—</span>
                                             <div className="year-input-group">
                                                 <label>À</label>
-                                                <input
-                                                    type="number"
-                                                    className="year-input"
-                                                    placeholder={yearRange.max}
-                                                    value={yearMax}
-                                                    min={yearRange.min}
-                                                    max={yearRange.max}
-                                                    onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }}
-                                                />
+                                                <input type="number" className="year-input"
+                                                    placeholder={yearRange.max} value={yearMax}
+                                                    min={yearRange.min} max={yearRange.max}
+                                                    onChange={e => { setYearMax(e.target.value); setCurrentPage(1) }} />
                                             </div>
                                         </div>
                                         <div className="year-hint">Disponible : {yearRange.min} — {yearRange.max}</div>
                                     </div>
 
-                                    {/* Filtre Type de document */}
                                     {availableTypes.length > 0 && (
                                         <div className="sidebar-card">
                                             <div className="sidebar-section-title">
@@ -379,11 +376,9 @@ function SearchPage() {
                                             <div className="type-list">
                                                 {availableTypes.map(type => (
                                                     <label key={type} className="type-checkbox">
-                                                        <input
-                                                            type="checkbox"
+                                                        <input type="checkbox"
                                                             checked={selectedTypes.includes(type)}
-                                                            onChange={() => toggleType(type)}
-                                                        />
+                                                            onChange={() => toggleType(type)} />
                                                         <span>{type}</span>
                                                     </label>
                                                 ))}
@@ -391,17 +386,13 @@ function SearchPage() {
                                         </div>
                                     )}
 
-                                    {/* Filtre Éditeur */}
                                     {publishers.length > 0 && (
                                         <div className="sidebar-card">
                                             <div className="sidebar-section-title">
                                                 <FontAwesomeIcon icon={faBuilding} /> Éditeur
                                             </div>
-                                            <select
-                                                className="publisher-select"
-                                                value={publisherFilter}
-                                                onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}
-                                            >
+                                            <select className="publisher-select" value={publisherFilter}
+                                                onChange={e => { setPublisherFilter(e.target.value); setCurrentPage(1) }}>
                                                 <option value="TOUS">Tous les éditeurs</option>
                                                 {publishers.map(p => (
                                                     <option key={p} value={p}>{p}</option>
@@ -409,14 +400,10 @@ function SearchPage() {
                                             </select>
                                         </div>
                                     )}
-
                                 </aside>
                             )}
 
-                            {/* ── Zone principale ── */}
                             <div className="search-main">
-
-                                {/* En-tête résultats + tri */}
                                 {!loading && filteredArticles.length > 0 && (
                                     <div className="results-header">
                                         <span className="results-count">
@@ -425,11 +412,8 @@ function SearchPage() {
                                         </span>
                                         <div className="sort-control">
                                             <FontAwesomeIcon icon={faSort} />
-                                            <select
-                                                className="sort-select"
-                                                value={sortBy}
-                                                onChange={e => { setSortBy(e.target.value); setCurrentPage(1) }}
-                                            >
+                                            <select className="sort-select" value={sortBy}
+                                                onChange={e => { setSortBy(e.target.value); setCurrentPage(1) }}>
                                                 {SORT_OPTIONS.map(opt => (
                                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                                 ))}
@@ -438,40 +422,31 @@ function SearchPage() {
                                     </div>
                                 )}
 
-                                {/* Aucun résultat */}
                                 {!loading && hasSearched && filteredArticles.length === 0 && (
                                     <div className="empty-state">
                                         <p className="empty-icon">📭</p>
                                         <p className="empty-title">Aucun résultat</p>
                                         <p className="empty-subtitle">
                                             {activeFiltersCount > 0
-                                                ? 'Essayez d\'élargir vos filtres'
+                                                ? "Essayez d'élargir vos filtres"
                                                 : 'Essayez avec d\'autres mots-clés'}
                                         </p>
                                         {activeFiltersCount > 0 && (
-                                            <button
-                                                className="btn-reset-filters-center"
-                                                onClick={() => { resetFilters(); setCurrentPage(1) }}
-                                            >
+                                            <button className="btn-reset-filters-center"
+                                                onClick={() => { resetFilters(); setCurrentPage(1) }}>
                                                 Effacer les filtres
                                             </button>
                                         )}
                                     </div>
                                 )}
 
-                                {/* Barre de sélection */}
                                 {!loading && filteredArticles.length > 0 && (
                                     <div className="selection-bar">
                                         <div className="selection-left">
                                             <label className="select-all-label">
-                                                <input
-                                                    type="checkbox"
-                                                    ref={selectAllRef}
-                                                    checked={allFilteredSelected}
-                                                    onChange={selectAll}
-                                                />
-                                                {allFilteredSelected
-                                                    ? 'Tout désélectionner'
+                                                <input type="checkbox" ref={selectAllRef}
+                                                    checked={allFilteredSelected} onChange={selectAll} />
+                                                {allFilteredSelected ? 'Tout désélectionner'
                                                     : someFilteredSelected
                                                         ? `${selectedArticles.length} sélectionné(s)`
                                                         : 'Tout sélectionner'}
@@ -482,55 +457,39 @@ function SearchPage() {
                                                 </span>
                                             )}
                                         </div>
-
                                         {selectedArticles.length > 0 && (
                                             <div className="bulk-actions">
                                                 <div className="bulk-save-wrapper">
-                                                    <button
-                                                        className="btn-bulk-action btn-bulk-save"
+                                                    <button className="btn-bulk-action btn-bulk-save"
                                                         onClick={() => setShowBulkMenu(m => !m)}
-                                                        disabled={bulkLoading}
-                                                    >
+                                                        disabled={bulkLoading}>
                                                         <FontAwesomeIcon icon={faFloppyDisk} />
-                                                        {bulkLoading
-                                                            ? 'Sauvegarde...'
-                                                            : `Sauvegarder (${selectedArticles.length})`}
+                                                        {bulkLoading ? 'Sauvegarde...' : `Sauvegarder (${selectedArticles.length})`}
                                                     </button>
-
                                                     {showBulkMenu && (
                                                         <div className="bulk-menu">
                                                             <p className="bulk-menu-title">Choisir un projet :</p>
-                                                            {projects.length > 0 ? (
-                                                                projects.map(p => (
-                                                                    <button
-                                                                        key={p.id}
-                                                                        className="bulk-menu-item"
-                                                                        onClick={() => handleBulkSave(p.id)}
-                                                                    >
-                                                                        <FontAwesomeIcon icon={faFolder} />
-                                                                        {p.nomProjet}
-                                                                    </button>
-                                                                ))
-                                                            ) : (
+                                                            {projects.length > 0 ? projects.map(p => (
+                                                                <button key={p.id} className="bulk-menu-item"
+                                                                    onClick={() => handleBulkSave(p.id)}>
+                                                                    <FontAwesomeIcon icon={faFolder} />
+                                                                    {p.nomProjet}
+                                                                </button>
+                                                            )) : (
                                                                 <p className="bulk-menu-empty">Aucun projet disponible</p>
                                                             )}
                                                         </div>
                                                     )}
                                                 </div>
-
-                                                <button
-                                                    className="btn-clear-selection"
-                                                    onClick={() => setSelectedArticles([])}
-                                                >
-                                                    <FontAwesomeIcon icon={faXmark} />
-                                                    Annuler
+                                                <button className="btn-clear-selection"
+                                                    onClick={() => setSelectedArticles([])}>
+                                                    <FontAwesomeIcon icon={faXmark} /> Annuler
                                                 </button>
                                             </div>
                                         )}
                                     </div>
                                 )}
 
-                                {/* Liste des articles */}
                                 {!loading && paginatedArticles.length > 0 && (
                                     <div className="articles-list">
                                         {paginatedArticles.map((article, index) => (
@@ -546,7 +505,6 @@ function SearchPage() {
                                     </div>
                                 )}
 
-                                {/* Pagination */}
                                 {totalPages > 1 && (
                                     <div className="pagination">
                                         <div className="pagination-info">
@@ -554,51 +512,37 @@ function SearchPage() {
                                             <span className="pagination-total">({filteredArticles.length} articles)</span>
                                         </div>
                                         <div className="pagination-controls">
-                                            <button
-                                                className="page-btn page-nav"
+                                            <button className="page-btn page-nav"
                                                 onClick={() => { setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                                disabled={currentPage === 1}
-                                            >«</button>
-                                            <button
-                                                className="page-btn page-nav"
+                                                disabled={currentPage === 1}>«</button>
+                                            <button className="page-btn page-nav"
                                                 onClick={() => { setCurrentPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                                disabled={currentPage === 1}
-                                            >‹</button>
-
+                                                disabled={currentPage === 1}>‹</button>
                                             {getPageNumbers(currentPage, totalPages).map((page, index) =>
                                                 page === '...' ? (
                                                     <span key={`dots-${index}`} className="page-dots">…</span>
                                                 ) : (
-                                                    <button
-                                                        key={page}
+                                                    <button key={page}
                                                         className={`page-btn ${currentPage === page ? 'active' : ''}`}
-                                                        onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                                    >
+                                                        onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
                                                         {page}
                                                     </button>
                                                 )
                                             )}
-
-                                            <button
-                                                className="page-btn page-nav"
+                                            <button className="page-btn page-nav"
                                                 onClick={() => { setCurrentPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                                disabled={currentPage === totalPages}
-                                            >›</button>
-                                            <button
-                                                className="page-btn page-nav"
+                                                disabled={currentPage === totalPages}>›</button>
+                                            <button className="page-btn page-nav"
                                                 onClick={() => { setCurrentPage(totalPages); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                                                disabled={currentPage === totalPages}
-                                            >»</button>
+                                                disabled={currentPage === totalPages}>»</button>
                                         </div>
                                     </div>
                                 )}
-
-                            </div>{/* fin search-main */}
+                            </div>
                         </div>
                     )}
-
-                </div>{/* fin search-page-inner */}
-            </div>{/* fin search-page-with-history */}
+                </div>
+            </div>
         </div>
     )
 }

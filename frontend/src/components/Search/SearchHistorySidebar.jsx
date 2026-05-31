@@ -7,7 +7,6 @@ import {
     faXmark,
     faMagnifyingGlass,
     faChevronLeft,
-    faChevronRight,
 } from '@fortawesome/free-solid-svg-icons'
 import { getHistorique, deleteHistoriqueEntry, clearHistorique } from '../../services/SearchServices'
 import './SearchHistorySidebar.css'
@@ -23,15 +22,13 @@ function timeAgo(dateStr) {
 }
 
 function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
-    const [historique, setHistorique]   = useState([])
-    const [collapsed,  setCollapsed]    = useState(false)
-    const [loading,    setLoading]      = useState(false)
+    const [historique,   setHistorique]   = useState([])
+    const [collapsed,    setCollapsed]    = useState(true)
+    const [loading,      setLoading]      = useState(false)
+    const [searchText,   setSearchText]   = useState('')
+    const [searchActive, setSearchActive] = useState(false)
+    const searchInputRef = useRef(null)
 
-    // ── FIX react-hooks/set-state-in-effect ──────────────────────────────
-    // On garde une ref vers setHistorique / setLoading pour les appeler
-    // depuis un callback async HORS du corps synchrone de l'effect.
-    // L'effect lui-même ne fait que démarrer l'opération async ; les setState
-    // se produisent dans la closure async, ce qui satisfait le linter.
     const setHistoriqueRef = useRef(setHistorique)
     const setLoadingRef    = useRef(setLoading)
 
@@ -52,9 +49,15 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
         }
 
         fetchHistorique()
-
         return () => { cancelled = true }
     }, [userId, currentQuery])
+
+    // Focus automatique quand la recherche s'ouvre
+    useEffect(() => {
+        if (searchActive && searchInputRef.current) {
+            searchInputRef.current.focus()
+        }
+    }, [searchActive])
 
     const handleDelete = async (e, id) => {
         e.stopPropagation()
@@ -68,43 +71,122 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
         setHistorique([])
     }
 
+    const handleCloseSearch = () => {
+        setSearchActive(false)
+        setSearchText('')
+    }
+
+    // Filtrer l'historique selon le texte saisi
+    const filteredHistorique = searchText.trim()
+        ? historique.filter(h =>
+            h.requete.toLowerCase().includes(searchText.toLowerCase().trim())
+          )
+        : historique
+
     if (!userId) return null
 
     return (
         <div className={`history-sidebar ${collapsed ? 'history-sidebar--collapsed' : ''}`}>
 
-            {/* Toggle collapse */}
-            <button
-                className="history-toggle-btn"
-                onClick={() => setCollapsed(c => !c)}
-                title={collapsed ? "Afficher l'historique" : 'Réduire'}
-            >
-                <FontAwesomeIcon icon={collapsed ? faChevronRight : faChevronLeft} />
-            </button>
-
-            {!collapsed && (
+            {collapsed ? (
+                /* ── État réduit ── */
+                <div className="history-collapsed-indicator">
+                    <div className="history-collapsed-icon" title="Historique des recherches">
+                        <FontAwesomeIcon icon={faClockRotateLeft} />
+                    </div>
+                    <button
+                        className="history-expand-btn"
+                        onClick={() => setCollapsed(false)}
+                        title="Afficher l'historique"
+                    >
+                        <span className="history-expand-arrow">›</span>
+                    </button>
+                </div>
+            ) : (
+                /* ── État ouvert ── */
                 <>
-                    {/* Header */}
+                    {/* ── Header ── */}
                     <div className="history-header">
                         <div className="history-title">
-                            <FontAwesomeIcon icon={faClockRotateLeft} />
+                            <FontAwesomeIcon icon={faClockRotateLeft} className="history-title-icon" />
                             <span>Historique</span>
+                            {historique.length > 0 && (
+                                <span className="history-count-badge">{historique.length}</span>
+                            )}
                         </div>
-                        {historique.length > 0 && (
+                        <div className="history-header-actions">
+                            {/* Bouton recherche dans l'historique */}
+                            {historique.length > 0 && (
+                                <button
+                                    className={`history-search-btn ${searchActive ? 'history-search-btn--active' : ''}`}
+                                    onClick={() => setSearchActive(a => !a)}
+                                    title="Rechercher dans l'historique"
+                                >
+                                    <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                </button>
+                            )}
+                            {/* Bouton vider */}
+                            {historique.length > 0 && (
+                                <button
+                                    className="history-clear-btn"
+                                    onClick={handleClear}
+                                    title="Vider l'historique"
+                                >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                            )}
+                            {/* Bouton réduire */}
                             <button
-                                className="history-clear-btn"
-                                onClick={handleClear}
-                                title="Vider l'historique"
+                                className="history-collapse-btn"
+                                onClick={() => setCollapsed(true)}
+                                title="Réduire l'historique"
                             >
-                                <FontAwesomeIcon icon={faTrash} />
+                                <FontAwesomeIcon icon={faChevronLeft} />
                             </button>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Liste */}
+                    {/* ── Barre de recherche dans l'historique ── */}
+                    {searchActive && (
+                        <div className="history-search-bar">
+                            <FontAwesomeIcon icon={faMagnifyingGlass} className="history-search-icon" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                className="history-search-input"
+                                placeholder="Filtrer l'historique..."
+                                value={searchText}
+                                onChange={e => setSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <button
+                                    className="history-search-clear"
+                                    onClick={() => setSearchText('')}
+                                    title="Effacer"
+                                >
+                                    <FontAwesomeIcon icon={faXmark} />
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ── Message aucun résultat de filtre ── */}
+                    {searchActive && searchText && filteredHistorique.length === 0 && (
+                        <div className="history-search-empty">
+                            <FontAwesomeIcon icon={faMagnifyingGlass} />
+                            <span>Aucune requête ne correspond à <strong>"{searchText}"</strong></span>
+                            <button onClick={handleCloseSearch}>Annuler le filtre</button>
+                        </div>
+                    )}
+
+                    {/* ── Liste ── */}
                     <div className="history-list">
                         {loading && (
-                            <div className="history-loading">Chargement...</div>
+                            <div className="history-loading">
+                                <div className="history-loading-dots">
+                                    <span /><span /><span />
+                                </div>
+                            </div>
                         )}
 
                         {!loading && historique.length === 0 && (
@@ -115,18 +197,23 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
                             </div>
                         )}
 
-                        {!loading && historique.map(entry => (
+                        {!loading && filteredHistorique.map(entry => (
                             <div
                                 key={entry.id}
                                 className={`history-item ${currentQuery === entry.requete ? 'history-item--active' : ''}`}
-                                onClick={() => onSelectQuery(entry.requete)}
+                                onClick={() => onSelectQuery(entry.requete, entry.resultatsJson)}
                                 title={entry.requete}
                             >
                                 <div className="history-item-icon">
                                     <FontAwesomeIcon icon={faMagnifyingGlass} />
                                 </div>
                                 <div className="history-item-content">
-                                    <span className="history-item-query">{entry.requete}</span>
+                                    {/* Surligner le texte correspondant au filtre */}
+                                    <span className="history-item-query">
+                                        {searchText.trim()
+                                            ? highlightMatch(entry.requete, searchText)
+                                            : entry.requete}
+                                    </span>
                                     <div className="history-item-meta">
                                         <span className="history-item-time">{timeAgo(entry.dateRecherche)}</span>
                                         {entry.nbResultats != null && (
@@ -147,6 +234,19 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
                 </>
             )}
         </div>
+    )
+}
+
+// Surligne la partie correspondante dans le texte
+function highlightMatch(text, search) {
+    const idx = text.toLowerCase().indexOf(search.toLowerCase())
+    if (idx === -1) return text
+    return (
+        <>
+            {text.slice(0, idx)}
+            <mark className="history-highlight">{text.slice(idx, idx + search.length)}</mark>
+            {text.slice(idx + search.length)}
+        </>
     )
 }
 

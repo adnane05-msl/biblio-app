@@ -1,4 +1,4 @@
-// entity/Recherche.java
+// model/Recherche.java
 package com.biblio.backend.model;
 
 import jakarta.persistence.*;
@@ -26,6 +26,9 @@ public class Recherche {
 
     @Column(name = "nb_resultats")
     private Integer nbResultats;
+
+    @Column(name = "resultats_json", columnDefinition = "TEXT")
+    private String resultatsJson;
 
     @ManyToOne
     @JoinColumn(name = "id_utilisateur", nullable = false)
