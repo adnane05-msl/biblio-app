@@ -23,7 +23,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // ✅ API jjwt 0.11.5 : setSubject / setIssuedAt / setExpiration / signWith
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -46,7 +45,6 @@ public class JwtService {
         }
     }
 
-    // ✅ API jjwt 0.11.5 : parserBuilder / setSigningKey / parseClaimsJws / getBody
     private Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())

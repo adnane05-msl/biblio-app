@@ -20,15 +20,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * Filtre JWT : extrait et valide le token Bearer à chaque requête.
- *
- * Compatible jjwt 0.11.5 ET 0.12.x :
- *  - 0.11.5 → parserBuilder() est disponible via jjwt-impl en scope runtime (pom.xml)
- *  - 0.12.x → remplacer parserBuilder() par parser() si migration future
- *
- * ✅ FIX : s'assurer que pom.xml contient jjwt-impl et jjwt-jackson en scope runtime.
- */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -52,10 +43,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             String token = header.substring(7);
 
-            // ✅ SecretKey typé explicitement pour éviter l'ambiguïté de compilation
-            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+            SecretKey key = Keys.hmacShaKeyFor(
+                    jwtSecret.getBytes(StandardCharsets.UTF_8));
 
-            Claims claims = Jwts.parserBuilder()   // jjwt-api 0.11.5
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
@@ -77,7 +68,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            // Token invalide ou expiré → accès refusé par la suite de la chaîne
             SecurityContextHolder.clearContext();
         }
 

@@ -1,7 +1,7 @@
 // src/services/apiClient.js
 import axios from 'axios';
 
-// ✅ Vite uniquement — pas de process.env
+// ✅ Vite : import.meta.env.VITE_API_URL  (.env → VITE_API_URL=http://localhost:8080)
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 const apiClient = axios.create({
@@ -16,15 +16,10 @@ apiClient.interceptors.request.use((config) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (r) => r,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    if (error.response?.status === 403) {
-      window.location.href = '/unauthorized';
-    }
+    if (error.response?.status === 401) { localStorage.removeItem('token'); window.location.href = '/login'; }
+    if (error.response?.status === 403) { window.location.href = '/unauthorized'; }
     return Promise.reject(error);
   }
 );
