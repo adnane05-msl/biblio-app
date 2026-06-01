@@ -5,7 +5,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * Journal système : trace toutes les actions importantes de l'application.
+ * Journal système : trace les actions importantes de l'application.
+ * La référence à User a été supprimée (User admin n'est plus nécessaire ici).
  */
 @Data
 @NoArgsConstructor
@@ -21,20 +22,21 @@ public class LogSysteme {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private TypeLog type; // INFO, WARN, ERROR, OK
+    private TypeLog type;
 
     @Column(nullable = false, length = 500)
     private String message;
 
     @Column(length = 200)
-    private String composant; // Ex: "CrossRef", "Auth", "DB"
+    private String composant;
 
     @Column(length = 100)
     private String ipSource;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user; // peut être null (action système)
+    // ← La relation vers User supprimée : User.java (admin) est remplacé par AdminUser.java
+    // et LogSysteme n'en a pas besoin pour son fonctionnement
+    @Column(name = "user_email", length = 150)
+    private String userEmail; // on stocke juste l'email si nécessaire
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

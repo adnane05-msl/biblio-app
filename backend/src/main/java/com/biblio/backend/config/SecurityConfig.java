@@ -1,11 +1,3 @@
-// backend/src/main/java/com/biblio/backend/config/SecurityConfig.java
-// ✅ Config unifiée — remplace les deux SecurityConfig séparées
-//    (com.biblio.backend.config.SecurityConfig  +  com.biblio.admin.security.SecurityConfig)
-//
-// Une seule SecurityFilterChain est autorisée par Spring.
-// L'ancienne dans com.biblio.admin.security.SecurityConfig doit être supprimée
-// (ou annotée @Configuration(proxyBeanMethods=false) sans @Bean filterChain).
-
 package com.biblio.backend.config;
 
 import com.biblio.admin.security.JwtAuthFilter;
@@ -35,17 +27,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        // ── Routes publiques ──────────────────────────────────────
+                        // Routes publiques
                         .requestMatchers("/api/authentification/**").permitAll()
 
-                        // ── Routes admin : ROLE_ADMIN requis ─────────────────────
+                        // Routes admin — hasRole("ADMIN") vérifie l'authority "ROLE_ADMIN"
+                        // Le token doit contenir le claim role = "ROLE_ADMIN"
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // ── Toutes les autres routes : authentifié ────────────────
+                        // Toutes les autres routes : authentifié
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

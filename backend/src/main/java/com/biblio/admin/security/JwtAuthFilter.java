@@ -24,7 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Value("${app.jwt.secret}")
+    // ← Utilise "jwt.secret" (même propriété que JwtService backend)
+    // Plus de divergence entre les deux filtres
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Override
@@ -53,21 +55,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .getBody();
 
             String email = claims.getSubject();
-            String role  = claims.get("role", String.class);
+            String role  = claims.get("role", String.class);  // ex: "ROLE_ADMIN"
 
-            if (email != null
-                    && role != null
-                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                // Si pas de claim role, on met ROLE_USER par défaut
+                String effectiveRole = (role != null) ? role : "ROLE_USER";
 
                 var auth = new UsernamePasswordAuthenticationToken(
                         email,
                         null,
-                        List.of(new SimpleGrantedAuthority(role))
+                        List.of(new SimpleGrantedAuthority(effectiveRole))
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
 
         } catch (Exception e) {
+            // Token invalide ou expiré → on laisse Spring Security gérer (401)
             SecurityContextHolder.clearContext();
         }
 

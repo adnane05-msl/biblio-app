@@ -5,16 +5,16 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * Entité représentant une source académique externe connectée.
- * Ex : Semantic Scholar, OpenAlex, CrossRef
+ * Entité Source du module ADMIN - supervision des sources académiques.
+ * Table SQL : "admin_sources" (renommée pour éviter tout conflit avec "source").
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "sources")
-public class Source {
+@Entity(name = "AdminSource")      // ← nom JPA unique
+@Table(name = "admin_sources")     // ← table SQL dédiée admin
+public class AdminSource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Source {
     private String urlBase;
 
     @Column(length = 50)
-    private String typeApi; // REST, GraphQL, etc.
+    private String typeApi;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -41,7 +41,7 @@ public class Source {
     private Integer requetesJour;
 
     @Column(name = "limite_requetes")
-    private Integer limiteRequetes; // null = illimité
+    private Integer limiteRequetes;
 
     @Column(name = "disponibilite_pct")
     private Double disponibilitePct;
@@ -50,7 +50,7 @@ public class Source {
     private LocalDateTime derniereSynchro;
 
     @Column(name = "cle_api", length = 500)
-    private String cleApi; // optionnel, stocké chiffré
+    private String cleApi;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

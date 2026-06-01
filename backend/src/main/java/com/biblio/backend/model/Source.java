@@ -1,4 +1,3 @@
-// entity/Source.java
 package com.biblio.backend.model;
 
 import jakarta.persistence.*;
@@ -9,11 +8,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entité Source utilisée par le module de recherche bibliographique.
+ * Distinct de com.biblio.admin.model.Source (supervision admin).
+ * Le nom JPA "SourceSearch" évite le conflit Hibernate.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "source")
+@Entity(name = "SourceSearch")   // ← nom JPA unique, évite DuplicateMappingException
+@Table(name = "source")          // ← table SQL inchangée
 public class Source {
 
     @Id
@@ -21,12 +25,12 @@ public class Source {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nomSource;  // les sources: "Crossref", "OpenAlex", "arXiv"
+    private String nomSource;
 
     @Column(name = "url_api")
-    private String urlApi;     // URL de L'API
+    private String urlApi;
 
-    private Boolean active = true;  // Source Activée ou non
+    private Boolean active = true;
 
     @Column(name = "date_ajout")
     private LocalDateTime dateAjout = LocalDateTime.now();

@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO pour les journaux système.
- */
 public class LogDto {
 
     @Data
@@ -33,7 +30,7 @@ public class LogDto {
                     .message(log.getMessage())
                     .composant(log.getComposant())
                     .ipSource(log.getIpSource())
-                    .userEmail(log.getUser() != null ? log.getUser().getEmail() : null)
+                    .userEmail(log.getUserEmail())   // ← corrigé : plus de getUser()
                     .createdAt(log.getCreatedAt())
                     .build();
         }
