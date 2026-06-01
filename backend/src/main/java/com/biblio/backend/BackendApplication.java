@@ -2,20 +2,20 @@ package com.biblio.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-/**
- * Point d'entrée principal de l'application.
- *
- * ✅ scanBasePackages inclut les deux packages :
- *    - com.biblio.backend  → controllers utilisateur, auth, export…
- *    - com.biblio.admin    → controllers admin (dashboard, users, sources, logs)
- *
- * Sans ce scan explicite, Spring Boot ne charge que com.biblio.backend
- * et tous les /api/admin/** retournent 404.
- */
 @SpringBootApplication(scanBasePackages = {
 		"com.biblio.backend",
 		"com.biblio.admin"
+})
+@EnableJpaRepositories(basePackages = {
+		"com.biblio.backend.repository",
+		"com.biblio.admin.repository"
+})
+@EntityScan(basePackages = {
+		"com.biblio.backend.model",
+		"com.biblio.admin.model"
 })
 public class BackendApplication {
 
