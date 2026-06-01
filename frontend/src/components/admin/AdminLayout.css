@@ -1,25 +1,21 @@
 /* src/components/admin/AdminLayout.css */
-/* Design unifié avec les pages utilisateur (SearchPage, ProjectDetail) */
 
-/* ── Variables ───────────────────────────────────────────────── */
 :root {
-  --admin-bg:        #f0f4f8;
-  --admin-sidebar-w: 240px;
+  --admin-bg:               #f0f4f8;
+  --admin-sidebar-w:        240px;
   --admin-sidebar-collapsed: 60px;
-  --admin-blue:      #2563eb;
-  --admin-blue-dark: #1d4ed8;
-  --admin-blue-soft: #eff6ff;
-  --admin-navy:      #1e3a5f;
-  --admin-text:      #374151;
-  --admin-muted:     #6b7280;
-  --admin-border:    #e5e7eb;
-  --admin-white:     #ffffff;
-  --admin-header-h:  64px;
-  --admin-radius:    10px;
-  --admin-shadow:    0 2px 8px rgba(0,0,0,0.06);
+  --admin-blue:             #2563eb;
+  --admin-blue-dark:        #1d4ed8;
+  --admin-blue-soft:        #eff6ff;
+  --admin-navy:             #1e3a5f;
+  --admin-text:             #374151;
+  --admin-muted:            #6b7280;
+  --admin-border:           #e5e7eb;
+  --admin-white:            #ffffff;
+  --admin-header-h:         64px;
 }
 
-/* ── Layout global ───────────────────────────────────────────── */
+/* ── Layout global ─────────────────────────────────────────── */
 .admin-layout {
   display: flex;
   min-height: 100vh;
@@ -36,7 +32,6 @@
   border-right: 1px solid var(--admin-border);
   display: flex;
   flex-direction: column;
-  padding: 0;
   transition: width 0.25s ease;
   flex-shrink: 0;
   position: sticky;
@@ -51,54 +46,53 @@
   width: var(--admin-sidebar-collapsed);
 }
 
-/* ── Brand / Logo ────────────────────────────────────────────── */
+/* ── Logo — identique à .navbar-brand de Navbar.css ── */
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 0 1rem;
   height: var(--admin-header-h);
   border-bottom: 1px solid var(--admin-border);
   flex-shrink: 0;
-  background: var(--admin-white);
   text-decoration: none;
+  background: var(--admin-white);
 }
 
+/* Icône carrée bleue */
 .brand-icon {
-  font-size: 22px;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  color: #2563eb;
-  background: var(--admin-blue-soft);
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #2563eb;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
-
+/* Texte "BiblioApp" — même style que .navbar-brand */
 .brand-name {
   font-size: 20px;
   font-weight: 700;
-  color: #2563eb;
+  color: #2563eb;          /* ← bleu comme la Navbar */
   white-space: nowrap;
-  overflow: hidden;
+  text-decoration: none;
 }
 
-/* ── Nav section label ───────────────────────────────────────── */
+/* ── Nav section label ── */
 .nav-section-label {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: #9ca3af;
-  padding: 14px 16px 6px;
+  padding: 16px 16px 6px;
   white-space: nowrap;
-  overflow: hidden;
 }
 
-/* ── Nav ─────────────────────────────────────────────────────── */
+/* ── Nav ── */
 .sidebar-nav {
   flex: 1;
   display: flex;
@@ -116,62 +110,21 @@
   padding: 9px 10px;
   border-radius: 8px;
   font-size: 14px;
+  font-weight: 500;
   color: var(--admin-muted);
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   overflow: hidden;
-  position: relative;
 }
 
-.nav-link:hover {
-  background: #f3f4f6;
-  color: var(--admin-navy);
-}
+.nav-link:hover  { background: #f3f4f6; color: var(--admin-navy); }
+.nav-link.active { background: var(--admin-blue-soft); color: var(--admin-blue); font-weight: 600; }
 
-.nav-link.active {
-  background: var(--admin-blue-soft);
-  color: var(--admin-blue);
-  font-weight: 600;
-}
+.nav-icon  { font-size: 16px; flex-shrink: 0; width: 22px; text-align: center; }
+.nav-label { font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
 
-.nav-link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 20%;
-  bottom: 20%;
-  width: 3px;
-  background: var(--admin-blue);
-  border-radius: 0 3px 3px 0;
-}
-
-.nav-icon {
-  font-size: 17px;
-  flex-shrink: 0;
-  width: 24px;
-  text-align: center;
-}
-
-.nav-label {
-  font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Badge dans nav (ex: count) */
-.nav-badge {
-  margin-left: auto;
-  background: var(--admin-blue);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 10px;
-  flex-shrink: 0;
-}
-
-/* ── Footer sidebar ──────────────────────────────────────────── */
+/* ── Footer sidebar ── */
 .sidebar-footer {
   border-top: 1px solid var(--admin-border);
   padding: 10px 8px;
@@ -195,17 +148,13 @@
   overflow: hidden;
 }
 
-.collapse-btn:hover {
-  background: #f3f4f6;
-  color: var(--admin-navy);
-}
-
-.collapse-icon { flex-shrink: 0; transition: transform 0.25s; }
+.collapse-btn:hover { background: #f3f4f6; color: var(--admin-navy); }
+.collapse-icon      { flex-shrink: 0; transition: transform 0.25s; }
 .admin-layout.collapsed .collapse-icon { transform: rotate(180deg); }
-.collapse-label { font-size: 13px; overflow: hidden; }
+.collapse-label     { font-size: 13px; }
 
 /* ══════════════════════════════════════════════════════════════
-   MAIN CONTENT WRAPPER
+   CONTENU PRINCIPAL
 ══════════════════════════════════════════════════════════════ */
 .admin-content-wrapper {
   flex: 1;
@@ -215,7 +164,7 @@
   min-height: 100vh;
 }
 
-/* ── Top Header Bar ──────────────────────────────────────────── */
+/* ── Top Bar ── */
 .admin-topbar {
   height: var(--admin-header-h);
   background: var(--admin-white);
@@ -231,11 +180,7 @@
   flex-shrink: 0;
 }
 
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
 
 .topbar-title {
   font-size: 17px;
@@ -243,68 +188,135 @@
   color: var(--admin-navy);
 }
 
-.topbar-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--admin-muted);
-}
-
-.topbar-breadcrumb span { color: #d1d5db; }
-
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* Indicateur statut système dans topbar */
+/* Statut système */
 .topbar-status {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: var(--admin-muted);
-  background: #f9fafb;
-  border: 1px solid var(--admin-border);
+  font-size: 12px;
+  font-weight: 500;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
   padding: 5px 12px;
   border-radius: 20px;
 }
 
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10b981;
-  animation: pulse-green 2s infinite;
+/* ══════════════════════════════════════════════════════════════
+   USER MENU — même style que Navbar utilisateur
+══════════════════════════════════════════════════════════════ */
+.topbar-user-menu { position: relative; }
+
+.topbar-user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
 }
 
-@keyframes pulse-green {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
-}
+.topbar-user-trigger:hover { background-color: #f0f4f8; }
 
-/* Avatar admin */
-.topbar-avatar {
+/* Avatar — identique à .user-avatar Navbar */
+.topbar-user-avatar {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--admin-blue) 0%, #1d4ed8 100%);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  background-color: #eff6ff;
+  border: 1.5px solid #bfdbfe;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  border: 2px solid var(--admin-blue-soft);
-  transition: transform 0.15s;
+  color: #2563eb;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
-.topbar-avatar:hover { transform: scale(1.05); }
+.topbar-user-details { display: flex; flex-direction: column; }
 
-/* ── Main ────────────────────────────────────────────────────── */
+/* Nom — identique à .user-name Navbar */
+.topbar-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* Sous-titre — identique à .user-profil Navbar */
+.topbar-user-role {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.topbar-chevron {
+  font-size: 11px;
+  color: #9ca3af;
+  transition: transform 0.2s;
+}
+
+.topbar-chevron.open { transform: rotate(180deg); }
+
+/* Overlay */
+.topbar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+}
+
+/* Dropdown — identique à .user-dropdown Navbar */
+.topbar-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  min-width: 180px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+/* Item — identique à .dropdown-item Navbar */
+.topbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 14px;
+  color: #374151;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s;
+  font-family: inherit;
+}
+
+.topbar-dropdown-item:hover {
+  background-color: #f0f4f8;
+  color: #2563eb;
+}
+
+.topbar-dropdown-divider { height: 1px; background-color: #f3f4f6; }
+
+.topbar-dropdown-logout { color: #ef4444; }
+.topbar-dropdown-logout:hover {
+  background-color: #fff0f0 !important;
+  color: #dc2626 !important;
+}
+
+/* ── Main content ── */
 .admin-main {
   flex: 1;
   padding: 28px 32px;
@@ -315,11 +327,11 @@
    RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .admin-sidebar { width: var(--admin-sidebar-collapsed); }
-  .brand-name, .nav-label, .nav-badge,
-  .nav-section-label, .collapse-label { display: none; }
-  .admin-topbar { padding: 0 1.25rem; }
-  .admin-main   { padding: 20px 16px; }
+  .admin-sidebar  { width: var(--admin-sidebar-collapsed); }
+  .brand-name, .nav-label, .nav-section-label, .collapse-label { display: none; }
+  .admin-topbar   { padding: 0 1.25rem; }
+  .admin-main     { padding: 20px 16px; }
+  .topbar-user-details, .topbar-chevron { display: none; }
 }
 
 @media (max-width: 600px) {

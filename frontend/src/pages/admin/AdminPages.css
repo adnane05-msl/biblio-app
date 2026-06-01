@@ -1,8 +1,12 @@
+/* ══════════════════════════════════════════════════════════════
+   AdminPages.css — design unifié avec SearchPage & ProjectsPage
+══════════════════════════════════════════════════════════════ */
+
 .admin-page {
   max-width: 1200px;
 }
 
-/* En-tête de page — même style que search-top-header */
+/* ── En-tête de page ───────────────────────────────────────── */
 .page-header {
   margin-bottom: 24px;
 }
@@ -12,6 +16,9 @@
   font-weight: 700;
   color: #1e3a5f;
   margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .page-sub {
@@ -40,7 +47,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   STATS GRID — comme les sidebar-stat-num de SearchPage
+   STATS GRID
 ══════════════════════════════════════════════════════════════ */
 .stats-grid {
   display: grid;
@@ -50,7 +57,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   CARDS — reprend sidebar-card de SearchPage
+   CARDS
 ══════════════════════════════════════════════════════════════ */
 .card {
   background: #ffffff;
@@ -76,15 +83,8 @@
   gap: 8px;
 }
 
-/* Card sans padding pour les tables */
-.table-card {
-  padding: 0;
-  overflow: hidden;
-}
-
-.table-card .card-title {
-  padding: 16px 20px 0;
-}
+.table-card          { padding: 0; overflow: hidden; }
+.table-card .card-title { padding: 16px 20px 0; }
 
 /* ══════════════════════════════════════════════════════════════
    DEUX COLONNES
@@ -101,7 +101,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TOOLBAR — recherche + actions
+   TOOLBAR
 ══════════════════════════════════════════════════════════════ */
 .toolbar {
   display: flex;
@@ -115,6 +115,48 @@
 .toolbar-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .toolbar-right { display: flex; align-items: center; gap: 8px;  flex-wrap: wrap; }
 
+/* ══════════════════════════════════════════════════════════════
+   SEARCH BOX — identique à ProjectsPage .projects-search-bar
+══════════════════════════════════════════════════════════════ */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 9px 14px;
+  flex: 1;
+  max-width: 380px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-box:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-box__icon {
+  color: #9ca3af;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.search-box__input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #374151;
+  background: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.search-box__input::placeholder {
+  color: #9ca3af;
+}
+
+/* ancien .search-input conservé pour compatibilité */
 .search-input {
   padding: 9px 14px;
   border: 1px solid #d1d5db;
@@ -127,9 +169,7 @@
   background: #fff;
   color: #374151;
 }
-
 .search-input::placeholder { color: #9ca3af; }
-
 .search-input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
@@ -146,7 +186,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   BOUTONS — reprend les page-btn de SearchPage
+   BOUTONS
 ══════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
@@ -174,62 +214,33 @@
 
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.btn--sm { padding: 5px 12px; font-size: 13px; }
+.btn--sm     { padding: 5px 12px; font-size: 13px; }
+.btn--ghost  { background: transparent; color: #6b7280; border-color: #d1d5db; }
+.btn--ghost:hover:not(:disabled) { background: #f3f4f6; color: #374151; }
 
-.btn--primary {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
-}
-.btn--primary:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  color: #fff;
-}
+.btn--primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+.btn--primary:hover:not(:disabled) { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
 
-.btn--danger {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
-.btn--danger:hover:not(:disabled) {
-  background: #fee2e2;
-  border-color: #fca5a5;
-}
+.btn--danger  { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+.btn--danger:hover:not(:disabled)  { background: #fee2e2; }
 
-.btn--warn {
-  background: #fffbeb;
-  color: #92400e;
-  border-color: #fde68a;
-}
+.btn--red     { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+.btn--red:hover:not(:disabled)     { background: #fee2e2; border-color: #fca5a5; }
 
-.btn--green {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #bbf7d0;
-}
-.btn--green:hover:not(:disabled) { background: #dcfce7; }
+.btn--green   { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.btn--green:hover:not(:disabled)   { background: #dcfce7; }
 
-.btn--blue {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #bfdbfe;
-}
+.btn--blue    { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.btn--blue:hover:not(:disabled)    { background: #dbeafe; }
 
-.btn--amber {
-  background: #fffbeb;
-  color: #92400e;
-  border-color: #fde68a;
-}
+.btn--amber   { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.btn--amber:hover:not(:disabled)   { background: #fef3c7; }
 
-.btn--red {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
+.btn--warn    { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.btn--warn:hover:not(:disabled)    { background: #fef3c7; }
 
 /* ══════════════════════════════════════════════════════════════
-   TABLES — style épuré comme article-card
+   TABLES
 ══════════════════════════════════════════════════════════════ */
 .admin-table {
   width: 100%;
@@ -271,7 +282,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   BADGES — reprend article-type-badge de ProjectDetail
+   BADGES
 ══════════════════════════════════════════════════════════════ */
 .badge {
   display: inline-flex;
@@ -293,7 +304,7 @@
 .badge--teal   { background: #ccfbf1; color: #0f766e; }
 
 /* ══════════════════════════════════════════════════════════════
-   AVATAR — reprend le style cohérent
+   AVATAR & ICÔNES SOURCE
 ══════════════════════════════════════════════════════════════ */
 .avatar {
   width: 34px;
@@ -311,30 +322,28 @@
 
 .avatar--sm { width: 28px; height: 28px; font-size: 10px; }
 
-/* Source icon */
 .source-icon {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  font-size: 11px;
-  font-weight: 700;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  font-size: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #6b7280;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   USER CELL & ACTION BUTTONS
+   USER CELL & ACTIONS
 ══════════════════════════════════════════════════════════════ */
 .user-cell   { display: flex; align-items: center; gap: 10px; }
-.action-btns { display: flex; gap: 6px; }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ══════════════════════════════════════════════════════════════
-   USER LIST (dashboard derniers inscrits)
+   USER LIST (dashboard)
 ══════════════════════════════════════════════════════════════ */
 .user-list { list-style: none; padding: 0; margin: 0; }
 
@@ -347,124 +356,31 @@
 }
 
 .user-list__item:last-child { border-bottom: none; }
-
 .user-list__name  { margin: 0; font-size: 14px; font-weight: 500; color: #1e3a5f; }
 .user-list__email { margin: 0; font-size: 12px; color: #6b7280; }
 .user-list__item .badge { margin-left: auto; }
 
 /* ══════════════════════════════════════════════════════════════
-   LOG LIST
-══════════════════════════════════════════════════════════════ */
-.log-list { list-style: none; padding: 0; margin: 0; }
-
-.log-list__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #f3f4f6;
-  font-size: 14px;
-}
-
-.log-list__item:last-child { border-bottom: none; }
-
-.log-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.log-dot--ok    { background: #10b981; }
-.log-dot--info  { background: #3b82f6; }
-.log-dot--warn  { background: #f59e0b; }
-.log-dot--error { background: #ef4444; }
-
-.log-time      { font-size: 12px; color: #9ca3af; min-width: 115px; flex-shrink: 0; }
-.log-composant { font-size: 12px; color: #6b7280; min-width: 90px; font-style: italic; flex-shrink: 0; }
-.log-msg       { flex: 1; color: #374151; }
-.log-user      { font-size: 12px; color: #9ca3af; background: #f3f4f6; padding: 2px 8px; border-radius: 12px; flex-shrink: 0; }
-
-/* ══════════════════════════════════════════════════════════════
-   ACTION LIST (MaintenancePage)
-══════════════════════════════════════════════════════════════ */
-.action-list { display: flex; flex-direction: column; gap: 2px; }
-
-.action-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.action-item:last-child { border-bottom: none; }
-
-.action-label { font-size: 14px; font-weight: 500; color: #1e3a5f; margin: 0 0 2px; }
-.action-desc  { font-size: 12px; color: #6b7280; margin: 0; }
-
-/* ══════════════════════════════════════════════════════════════
-   ALERTS — reprend alert-error / alert-success de SearchPage
-══════════════════════════════════════════════════════════════ */
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  gap: 12px;
-}
-
-.alert button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: inherit;
-  font-size: 16px;
-  line-height: 1;
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.alert--error, .alert-error {
-  background: #fef2f2;
-  color: #991b1b;
-  border-left: 4px solid #ef4444;
-  border: 1px solid #fecaca;
-  border-left-width: 4px;
-}
-
-.alert--ok, .alert-success {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-  border-left: 4px solid #22c55e;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   MODAL — overlay + boîte centrée
+   MODAL — identique aux modals de ProjectsPage
 ══════════════════════════════════════════════════════════════ */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
-  padding: 20px;
+  z-index: 999;
+  padding: 16px;
   backdrop-filter: blur(2px);
 }
 
-.modal {
+.modal-box {
   background: #ffffff;
   border-radius: 12px;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
   overflow: hidden;
 }
 
@@ -472,82 +388,141 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 24px;
+  padding: 20px 24px 16px;
   border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: #1e3a5f;
   margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .modal-close {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af;
-  font-size: 20px;
-  line-height: 1;
+  color: #6b7280;
+  font-size: 16px;
   padding: 4px;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
 }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
 
-.modal-close:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.modal-body {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+.modal-form   { padding: 20px 24px; }
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 4px;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   FORM FIELDS (modals)
-══════════════════════════════════════════════════════════════ */
+/* ── Formulaire modal ─────────────────────────────────────── */
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-bottom: 16px;
 }
 
 .form-label {
+  display: block;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: #374151;
+  margin-bottom: 6px;
 }
 
-.form-input,
-.form-select {
+.form-input {
+  width: 100%;
   padding: 9px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
+  font-family: inherit;
   color: #374151;
+  background: #fff;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
-  background: #fff;
-  font-family: inherit;
-  width: 100%;
   box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-select:focus {
+.form-input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ALERTS
+══════════════════════════════════════════════════════════════ */
+.alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.alert button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.alert--ok    { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+.alert--error { background: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444; }
+.alert--warn  { background: #fffbeb; color: #92400e; border-left: 4px solid #f59e0b; }
+
+/* ══════════════════════════════════════════════════════════════
+   ACTION LIST (Maintenance)
+══════════════════════════════════════════════════════════════ */
+.action-list { display: flex; flex-direction: column; gap: 0; }
+
+.action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.action-item:last-child { border-bottom: none; }
+
+.action-label {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e3a5f;
+}
+
+.action-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .toolbar     { flex-direction: column; align-items: stretch; }
+  .search-box  { max-width: 100%; }
+  .form-row    { grid-template-columns: 1fr; }
+  .action-btns { flex-wrap: wrap; }
 }

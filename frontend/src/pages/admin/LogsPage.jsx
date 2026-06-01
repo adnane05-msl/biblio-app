@@ -1,21 +1,26 @@
-// src/pages/admin/LogsPage.jsx
-// Journaux système avec icônes Font Awesome
-
 import { useEffect, useState } from 'react';
 import { getLogs } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faScroll, faCircleCheck, faCircleInfo,
-  faTriangleExclamation, faCircleXmark,
+  faClipboardList,      // Titre page
+  faCircleCheck,        // OK
+  faCircleInfo,         // INFO
+  faTriangleExclamation,// WARN
+  faCircleXmark,        // ERROR
+  faFilter,             // Filtres
+  faCalendarDay,        // Date
+  faMicrochip,          // Composant
+  faArrowsRotate,       // Chargement
+  faInbox,              // Vide
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
 const TYPES = [
-  { value: null,    label: 'Tout',    color: 'blue'  },
-  { value: 'ERROR', label: 'Erreurs', color: 'red'   },
-  { value: 'WARN',  label: 'Alertes', color: 'amber' },
-  { value: 'INFO',  label: 'Info',    color: 'blue'  },
-  { value: 'OK',    label: 'Succès',  color: 'green' },
+  { value: null,    label: 'Tout',    color: 'blue',  icon: faFilter        },
+  { value: 'ERROR', label: 'Erreurs', color: 'red',   icon: faCircleXmark   },
+  { value: 'WARN',  label: 'Alertes', color: 'amber', icon: faTriangleExclamation },
+  { value: 'INFO',  label: 'Info',    color: 'blue',  icon: faCircleInfo    },
+  { value: 'OK',    label: 'Succès',  color: 'green', icon: faCircleCheck   },
 ];
 
 const TYPE_ICON = {
@@ -31,6 +36,21 @@ const TYPE_COLOR = {
   WARN:  '#f59e0b',
   ERROR: '#ef4444',
 };
+
+const TYPE_BG = {
+  OK:    '#ecfdf5',
+  INFO:  '#eff6ff',
+  WARN:  '#fffbeb',
+  ERROR: '#fef2f2',
+};
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('fr-FR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
 
 export default function LogsPage() {
   const [logs,       setLogs]   = useState([]);
@@ -55,7 +75,7 @@ export default function LogsPage() {
     <div className="admin-page">
       <div className="page-header">
         <h1 className="page-title">
-          <FontAwesomeIcon icon={faScroll} style={{ marginRight: 10, color: '#2563eb' }} />
+          <FontAwesomeIcon icon={faClipboardList} style={{ marginRight: 10, color: '#dc2626' }} />
           Journaux système
         </h1>
         <p className="page-sub">Historique des événements et erreurs</p>
@@ -69,40 +89,72 @@ export default function LogsPage() {
             className={`btn btn--sm ${activeType === t.value ? `btn--${t.color}` : ''}`}
             onClick={() => setActive(t.value)}
           >
+            <FontAwesomeIcon icon={t.icon} style={{ marginRight: 5 }} />
             {t.label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="page-loading">Chargement…</p>
+        <p className="page-loading">
+          <FontAwesomeIcon icon={faArrowsRotate} spin /> Chargement…
+        </p>
       ) : (
-        <div className="card">
-          <ul className="log-list">
-            {logs.map((l) => (
-              <li key={l.id} className="log-list__item">
-                <FontAwesomeIcon
-                  icon={TYPE_ICON[l.type] ?? faCircleInfo}
-                  style={{ color: TYPE_COLOR[l.type] ?? '#6b7280', flexShrink: 0, fontSize: 14 }}
-                />
-                <span className="log-time">{fmt(l.createdAt)}</span>
-                <span className="log-composant">{l.composant}</span>
-                <span className="log-msg">{l.message}</span>
-                {l.userEmail && <span className="log-user">{l.userEmail}</span>}
-              </li>
-            ))}
-            {logs.length === 0 && <li className="empty-row">Aucun journal</li>}
-          </ul>
+        <div className="card table-card">
+          {logs.length === 0 ? (
+            <div className="empty-row" style={{ padding: '3rem', textAlign: 'center' }}>
+              <FontAwesomeIcon icon={faInbox} style={{ fontSize: 32, color: '#d1d5db', marginBottom: 12, display: 'block' }} />
+              Aucun journal trouvé
+            </div>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Message</th>
+                  <th>Composant</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((l) => (
+                  <tr key={l.id}>
+                    <td>
+                      <span
+                        className={`badge badge--${
+                          l.type === 'OK'    ? 'green' :
+                          l.type === 'ERROR' ? 'red'   :
+                          l.type === 'WARN'  ? 'amber' : 'blue'
+                        }`}
+                        style={{ background: TYPE_BG[l.type] }}
+                      >
+                        <FontAwesomeIcon
+                          icon={TYPE_ICON[l.type] ?? faCircleInfo}
+                          style={{ color: TYPE_COLOR[l.type], marginRight: 6 }}
+                        />
+                        {l.type}
+                      </span>
+                    </td>
+                    <td style={{ maxWidth: 400 }}>{l.message}</td>
+                    <td className="text-muted">
+                      {l.composant && (
+                        <>
+                          <FontAwesomeIcon icon={faMicrochip} style={{ marginRight: 5 }} />
+                          {l.composant}
+                        </>
+                      )}
+                    </td>
+                    <td className="text-muted">
+                      <FontAwesomeIcon icon={faCalendarDay} style={{ marginRight: 5 }} />
+                      {formatDate(l.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
   );
-}
-
-function fmt(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleString('fr-FR', {
-    day: '2-digit', month: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-  });
 }
