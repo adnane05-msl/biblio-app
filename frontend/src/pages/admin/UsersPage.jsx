@@ -1,13 +1,25 @@
 // src/pages/admin/UsersPage.jsx
+// Gestion des utilisateurs avec icônes Font Awesome
+
 import { useEffect, useState } from 'react';
 import {
   getUsers, createUser, updateUser, desactiverUser, supprimerUser,
 } from '../../services/adminService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUserPlus, faPenToSquare, faUserSlash, faTrashCan,
+  faMagnifyingGlass, faUsers, faXmark, faFloppyDisk,
+  faCrown, faUser,
+} from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
 const ROLES   = ['ROLE_USER', 'ROLE_ADMIN'];
 const STATUTS = ['ACTIF', 'INACTIF'];
 const EMPTY   = { nom: '', email: '', motDePasse: '', role: 'ROLE_USER', statut: 'ACTIF' };
+
+function initials(nom = '') {
+  return nom.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+}
 
 export default function UsersPage() {
   const [users,    setUsers]   = useState([]);
@@ -19,7 +31,6 @@ export default function UsersPage() {
   const [saving,   setSaving]  = useState(false);
   const [error,    setError]   = useState(null);
 
-  // ✅ Inline dans useEffect — aucune fonction externe appelée, aucun setState synchrone
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -42,6 +53,7 @@ export default function UsersPage() {
     setEdit(u);
     setModal('edit');
   }
+  function closeModal() { setModal(null); setError(null); }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -53,8 +65,7 @@ export default function UsersPage() {
         const { motDePasse, ...rest } = form; void motDePasse;
         await updateUser(editUser.id, rest);
       }
-      setModal(null);
-      // Forcer un re-fetch en changeant la dépendance via un trick : on toggle search
+      closeModal();
       setSearch((s) => s);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -64,84 +75,235 @@ export default function UsersPage() {
   }
 
   async function handleDesactiver(id) {
-    if (!window.confirm('Désactiver ?')) return;
+    if (!window.confirm('Désactiver cet utilisateur ?')) return;
     await desactiverUser(id);
     setSearch((s) => s);
   }
 
   async function handleSupprimer(id) {
-    if (!window.confirm('Supprimer définitivement ?')) return;
+    if (!window.confirm('Supprimer définitivement cet utilisateur ?')) return;
     await supprimerUser(id);
     setSearch((s) => s);
   }
 
   return (
     <div className="admin-page">
-      <h1 className="page-title">Gestion des utilisateurs</h1>
-      <p className="page-sub">Créer, modifier ou désactiver les comptes</p>
-
-      {error && <div className="alert alert--error">{error}<button onClick={() => setError(null)}>✕</button></div>}
-
-      <div className="toolbar">
-        <input className="search-input" placeholder="Rechercher…" value={search}
-          onChange={(e) => setSearch(e.target.value)} />
-        <button className="btn btn--primary" onClick={openCreate}>+ Ajouter</button>
+      <div className="page-header">
+        <h1 className="page-title">
+          <FontAwesomeIcon icon={faUsers} style={{ marginRight: 10, color: '#2563eb' }} />
+          Gestion des utilisateurs
+        </h1>
+        <p className="page-sub">Créer, modifier ou désactiver les comptes</p>
       </div>
 
-      {loading ? <p className="page-loading">Chargement…</p> : (
+      {error && (
+        <div className="alert alert--error">
+          {error}
+          <button onClick={() => setError(null)}>
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
+        </div>
+      )}
+
+      {/* ── Toolbar ─────────────────────────────────────────── */}
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <div style={{ position: 'relative' }}>
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 13 }}
+            />
+            <input
+              className="search-input"
+              style={{ paddingLeft: 34 }}
+              placeholder="Rechercher par nom ou email…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <span className="text-muted" style={{ fontSize: 13 }}>
+            {users.length} utilisateur(s)
+          </span>
+        </div>
+        <div className="toolbar-right">
+          <button className="btn btn--primary" onClick={openCreate}>
+            <FontAwesomeIcon icon={faUserPlus} /> Ajouter un utilisateur
+          </button>
+        </div>
+      </div>
+
+      {/* ── Table ───────────────────────────────────────────── */}
+      {loading ? (
+        <p className="page-loading">Chargement…</p>
+      ) : (
         <div className="card table-card">
           <table className="admin-table">
-            <thead><tr>
-              <th>Nom</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Projets</th><th>Actions</th>
-            </tr></thead>
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Inscrit le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td><div className="user-cell">
-                    <span className="avatar avatar--sm">{initials(u.nom)}</span>{u.nom}
-                  </div></td>
-                  <td className="text-muted">{u.email}</td>
-                  <td><span className={`badge badge--${u.role === 'ROLE_ADMIN' ? 'purple' : 'teal'}`}>{u.role}</span></td>
-                  <td><span className={`badge badge--${u.statut === 'ACTIF' ? 'green' : 'gray'}`}>{u.statut}</span></td>
-                  <td className="text-muted">{u.nombreProjets}</td>
-                  <td><div className="action-btns">
-                    <button className="btn btn--sm" onClick={() => openEdit(u)}>✏️</button>
-                    <button className="btn btn--sm btn--warn" onClick={() => handleDesactiver(u.id)}>⏸</button>
-                    <button className="btn btn--sm btn--danger" onClick={() => handleSupprimer(u.id)}>🗑</button>
-                  </div></td>
+                  <td>
+                    <div className="user-cell">
+                      <span className="avatar">{initials(u.nom)}</span>
+                      <div>
+                        <div style={{ fontWeight: 500, color: '#1e3a5f' }}>{u.nom}</div>
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>{u.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.role === 'ROLE_ADMIN' ? 'badge--purple' : 'badge--blue'}`}>
+                      <FontAwesomeIcon
+                        icon={u.role === 'ROLE_ADMIN' ? faCrown : faUser}
+                        style={{ marginRight: 5 }}
+                      />
+                      {u.role === 'ROLE_ADMIN' ? 'Admin' : 'Utilisateur'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.statut === 'ACTIF' ? 'badge--green' : 'badge--gray'}`}>
+                      {u.statut}
+                    </span>
+                  </td>
+                  <td className="text-muted">{fmt(u.createdAt)}</td>
+                  <td>
+                    <div className="action-btns">
+                      <button className="btn btn--sm btn--blue" onClick={() => openEdit(u)}>
+                        <FontAwesomeIcon icon={faPenToSquare} /> Modifier
+                      </button>
+                      {u.statut === 'ACTIF' && (
+                        <button className="btn btn--sm btn--warn" onClick={() => handleDesactiver(u.id)}>
+                          <FontAwesomeIcon icon={faUserSlash} /> Désactiver
+                        </button>
+                      )}
+                      <button className="btn btn--sm btn--danger" onClick={() => handleSupprimer(u.id)}>
+                        <FontAwesomeIcon icon={faTrashCan} /> Supprimer
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
-              {users.length === 0 && <tr><td colSpan={6} className="empty-row">Aucun utilisateur</td></tr>}
+              {users.length === 0 && (
+                <tr><td colSpan={5} className="empty-row">Aucun utilisateur trouvé</td></tr>
+              )}
             </tbody>
           </table>
         </div>
       )}
 
+      {/* ══════════════════════════════════════════════
+          MODAL
+      ══════════════════════════════════════════════ */}
       {modal && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">{modal === 'create' ? 'Nouvel utilisateur' : 'Modifier'}</h2>
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div className="modal">
+            <div className="modal-header">
+              <h2 className="modal-title">
+                <FontAwesomeIcon
+                  icon={modal === 'create' ? faUserPlus : faPenToSquare}
+                  style={{ marginRight: 8, color: '#2563eb' }}
+                />
+                {modal === 'create' ? 'Ajouter un utilisateur' : "Modifier l'utilisateur"}
+              </h2>
+              <button className="modal-close" onClick={closeModal}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit}>
-              <div className="form-group"><label>Nom</label>
-                <input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} /></div>
-              <div className="form-group"><label>Email</label>
-                <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-              {modal === 'create' && (
-                <div className="form-group"><label>Mot de passe</label>
-                  <input required type="password" value={form.motDePasse}
-                    onChange={(e) => setForm({ ...form, motDePasse: e.target.value })} /></div>
-              )}
-              <div className="form-row">
-                <div className="form-group"><label>Rôle</label>
-                  <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                    {ROLES.map((r) => <option key={r}>{r}</option>)}</select></div>
-                <div className="form-group"><label>Statut</label>
-                  <select value={form.statut} onChange={(e) => setForm({ ...form, statut: e.target.value })}>
-                    {STATUTS.map((s) => <option key={s}>{s}</option>)}</select></div>
+              <div className="modal-body">
+                {error && (
+                  <div className="alert alert--error">
+                    {error}
+                    <button type="button" onClick={() => setError(null)}>
+                      <FontAwesomeIcon icon={faXmark} />
+                    </button>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="form-label">Nom complet</label>
+                  <input
+                    className="form-input"
+                    placeholder="Jean Dupont"
+                    value={form.nom}
+                    onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Adresse email</label>
+                  <input
+                    className="form-input"
+                    type="email"
+                    placeholder="jean@example.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {modal === 'create' && (
+                  <div className="form-group">
+                    <label className="form-label">Mot de passe</label>
+                    <input
+                      className="form-input"
+                      type="password"
+                      placeholder="••••••••"
+                      value={form.motDePasse}
+                      onChange={(e) => setForm({ ...form, motDePasse: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="two-col" style={{ gap: 12, marginBottom: 0 }}>
+                  <div className="form-group">
+                    <label className="form-label">Rôle</label>
+                    <select
+                      className="form-select"
+                      value={form.role}
+                      onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r} value={r}>
+                          {r === 'ROLE_ADMIN' ? 'Administrateur' : 'Utilisateur'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Statut</label>
+                    <select
+                      className="form-select"
+                      value={form.statut}
+                      onChange={(e) => setForm({ ...form, statut: e.target.value })}
+                    >
+                      {STATUTS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div className="modal-actions">
-                <button type="button" className="btn" onClick={() => setModal(null)}>Annuler</button>
-                <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? '…' : 'Confirmer'}</button>
+
+              <div className="modal-footer">
+                <button type="button" className="btn" onClick={closeModal}>
+                  <FontAwesomeIcon icon={faXmark} /> Annuler
+                </button>
+                <button type="submit" className="btn btn--primary" disabled={saving}>
+                  <FontAwesomeIcon icon={faFloppyDisk} />
+                  {saving ? ' Enregistrement…' : modal === 'create' ? ' Créer' : ' Enregistrer'}
+                </button>
               </div>
             </form>
           </div>
@@ -151,4 +313,9 @@ export default function UsersPage() {
   );
 }
 
-function initials(n) { return n?.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase() || '?'; }
+function fmt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('fr-FR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  });
+}

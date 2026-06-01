@@ -38,7 +38,6 @@ public class Utilisateur {
     @Column
     private LocalDate dateInscription = LocalDate.now();
 
-//pour verification email
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean emailVerified = false;
 

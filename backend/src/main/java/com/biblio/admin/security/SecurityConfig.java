@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Routes publiques
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/authentification/**").permitAll()
                         // Routes admin : ROLE_ADMIN uniquement
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Toutes autres routes : authentifié

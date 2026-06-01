@@ -1,19 +1,25 @@
 // src/pages/admin/MaintenancePage.jsx
-// Opérations de maintenance : base de données, cache, sessions, versions.
+// Maintenance avec icônes Font Awesome
 
 import { useState } from 'react';
 import { viderCache, reinitialiserSessions } from '../../services/adminService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faScrewdriverWrench, faDatabase, faServer,
+  faTrashCan, faFloppyDisk, faArrowsRotate,
+  faLockOpen, faBoxArchive, faCircleCheck, faCircleXmark,faTriangleExclamation
+} from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
 const VERSIONS = [
-  { composant: 'Frontend (React.js)',  version: 'v1.2.0', statut: 'OK',   date: '12 mai 2026' },
-  { composant: 'Backend (Spring Boot)', version: 'v1.1.3', statut: 'MAJ', date: '3 avril 2026' },
-  { composant: 'Base de données (PostgreSQL)', version: '15.4', statut: 'OK', date: 'Janv. 2026' },
+  { composant: 'Frontend (React.js)',          version: 'v1.2.0', statut: 'OK',  date: '12 mai 2026'   },
+  { composant: 'Backend (Spring Boot)',         version: 'v1.1.3', statut: 'MAJ', date: '3 avril 2026'  },
+  { composant: 'Base de données (PostgreSQL)',  version: '15.4',   statut: 'OK',  date: 'Janv. 2026'    },
 ];
 
 export default function MaintenancePage() {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading]   = useState({});
+  const [loading,  setLoading]  = useState({});
 
   function addMsg(msg, type = 'ok') {
     setMessages((prev) => [{ msg, type, id: Date.now() }, ...prev.slice(0, 4)]);
@@ -23,9 +29,9 @@ export default function MaintenancePage() {
     setLoading((l) => ({ ...l, [key]: true }));
     try {
       await fn();
-      addMsg(`✅ ${label} effectué avec succès`, 'ok');
+      addMsg(`${label} effectué avec succès`, 'ok');
     } catch (e) {
-      addMsg(`❌ Erreur : ${e.message}`, 'error');
+      addMsg(`Erreur : ${e.message}`, 'error');
     } finally {
       setLoading((l) => ({ ...l, [key]: false }));
     }
@@ -33,18 +39,34 @@ export default function MaintenancePage() {
 
   return (
     <div className="admin-page">
-      <h1 className="page-title">Maintenance</h1>
-      <p className="page-sub">Opérations système et base de données</p>
+      <div className="page-header">
+        <h1 className="page-title">
+          <FontAwesomeIcon icon={faScrewdriverWrench} style={{ marginRight: 10, color: '#2563eb' }} />
+          Maintenance
+        </h1>
+        <p className="page-sub">Opérations système et base de données</p>
+      </div>
 
-      {/* ── Messages d'action ────────────────────────────────────── */}
+      {/* ── Messages d'action ──────────────────────────────────── */}
       {messages.map((m) => (
-        <div key={m.id} className={`alert alert--${m.type}`}>{m.msg}</div>
+        <div key={m.id} className={`alert alert--${m.type}`}>
+          <span>
+            <FontAwesomeIcon
+              icon={m.type === 'ok' ? faCircleCheck : faCircleXmark}
+              style={{ marginRight: 8 }}
+            />
+            {m.msg}
+          </span>
+        </div>
       ))}
 
       <div className="two-col">
-        {/* ── Base de données ──────────────────────────────────────── */}
+
+        {/* ── Base de données ────────────────────────────────────── */}
         <section className="card">
-          <h2 className="card-title">🗄️ Base de données</h2>
+          <h2 className="card-title">
+            <FontAwesomeIcon icon={faDatabase} /> Base de données
+          </h2>
           <div className="action-list">
             <div className="action-item">
               <div>
@@ -56,9 +78,11 @@ export default function MaintenancePage() {
                 disabled={loading.dup}
                 onClick={() => run('dup', () => Promise.resolve(), 'Nettoyage des doublons')}
               >
-                {loading.dup ? '…' : '🧹 Lancer'}
+                <FontAwesomeIcon icon={faTrashCan} />
+                {loading.dup ? ' …' : ' Lancer'}
               </button>
             </div>
+
             <div className="action-item">
               <div>
                 <p className="action-label">Sauvegarde complète</p>
@@ -69,42 +93,49 @@ export default function MaintenancePage() {
                 disabled={loading.backup}
                 onClick={() => run('backup', () => Promise.resolve(), 'Sauvegarde')}
               >
-                {loading.backup ? '…' : '💾 Exporter'}
+                <FontAwesomeIcon icon={faFloppyDisk} />
+                {loading.backup ? ' …' : ' Sauvegarder'}
               </button>
             </div>
+
             <div className="action-item">
               <div>
                 <p className="action-label">Optimisation des index</p>
-                <p className="action-desc">Améliore les performances de recherche</p>
+                <p className="action-desc">Réindexation complète de la base</p>
               </div>
               <button
-                className="btn btn--sm"
-                disabled={loading.idx}
-                onClick={() => run('idx', () => Promise.resolve(), 'Optimisation')}
+                className="btn btn--sm btn--blue"
+                disabled={loading.reindex}
+                onClick={() => run('reindex', () => Promise.resolve(), 'Réindexation')}
               >
-                {loading.idx ? '…' : '⚡ Optimiser'}
+                <FontAwesomeIcon icon={faBoxArchive} />
+                {loading.reindex ? ' …' : ' Réindexer'}
               </button>
             </div>
           </div>
         </section>
 
-        {/* ── Système ──────────────────────────────────────────────── */}
+        {/* ── Serveur / Cache ────────────────────────────────────── */}
         <section className="card">
-          <h2 className="card-title">⚙️ Système</h2>
+          <h2 className="card-title">
+            <FontAwesomeIcon icon={faServer} /> Serveur &amp; Cache
+          </h2>
           <div className="action-list">
             <div className="action-item">
               <div>
                 <p className="action-label">Vider le cache</p>
-                <p className="action-desc">Cache des résultats API et requêtes</p>
+                <p className="action-desc">Purge complète du cache applicatif</p>
               </div>
               <button
-                className="btn btn--sm"
+                className="btn btn--sm btn--warn"
                 disabled={loading.cache}
                 onClick={() => run('cache', viderCache, 'Cache vidé')}
               >
-                {loading.cache ? '…' : '🔄 Vider'}
+                <FontAwesomeIcon icon={faArrowsRotate} />
+                {loading.cache ? ' …' : ' Vider'}
               </button>
             </div>
+
             <div className="action-item">
               <div>
                 <p className="action-label">Réinitialiser les sessions</p>
@@ -113,21 +144,21 @@ export default function MaintenancePage() {
               <button
                 className="btn btn--sm btn--danger"
                 disabled={loading.sessions}
-                onClick={() => {
-                  if (window.confirm('Déconnecter tous les utilisateurs ?'))
-                    run('sessions', reinitialiserSessions, 'Sessions réinitialisées');
-                }}
+                onClick={() => run('sessions', reinitialiserSessions, 'Sessions réinitialisées')}
               >
-                {loading.sessions ? '…' : '🔓 Forcer'}
+                <FontAwesomeIcon icon={faLockOpen} />
+                {loading.sessions ? ' …' : ' Forcer'}
               </button>
             </div>
           </div>
         </section>
       </div>
 
-      {/* ── Versions ─────────────────────────────────────────────── */}
+      {/* ── Versions ──────────────────────────────────────────────── */}
       <section className="card">
-        <h2 className="card-title">📦 Versions des composants</h2>
+        <h2 className="card-title">
+          <FontAwesomeIcon icon={faBoxArchive} /> Versions des composants
+        </h2>
         <table className="admin-table">
           <thead>
             <tr><th>Composant</th><th>Version</th><th>Statut</th><th>Mise à jour</th></tr>
@@ -139,6 +170,10 @@ export default function MaintenancePage() {
                 <td><code>{v.version}</code></td>
                 <td>
                   <span className={`badge badge--${v.statut === 'OK' ? 'green' : 'amber'}`}>
+                    <FontAwesomeIcon
+                      icon={v.statut === 'OK' ? faCircleCheck : faTriangleExclamation}
+                      style={{ marginRight: 5 }}
+                    />
                     {v.statut === 'OK' ? 'À jour' : 'Mise à jour disponible'}
                   </span>
                 </td>

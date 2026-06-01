@@ -1,18 +1,57 @@
 // backend/src/main/java/com/biblio/backend/config/SecurityConfig.java
+// ✅ Config unifiée — remplace les deux SecurityConfig séparées
+//    (com.biblio.backend.config.SecurityConfig  +  com.biblio.admin.security.SecurityConfig)
+//
+// Une seule SecurityFilterChain est autorisée par Spring.
+// L'ancienne dans com.biblio.admin.security.SecurityConfig doit être supprimée
+// (ou annotée @Configuration(proxyBeanMethods=false) sans @Bean filterChain).
 
 package com.biblio.backend.config;
 
+import com.biblio.admin.security.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+
+                        // ── Routes publiques ──────────────────────────────────────
+                        .requestMatchers("/api/authentification/**").permitAll()
+
+                        // ── Routes admin : ROLE_ADMIN requis ─────────────────────
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // ── Toutes les autres routes : authentifié ────────────────
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -20,18 +59,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/authentification/**").permitAll()
-                        .requestMatchers("/api/project-articles/**").permitAll()
-                        .requestMatchers("/api/recherche/**").permitAll()
-                        .requestMatchers("/api/export/**").permitAll()
-                        .requestMatchers("/api/dashboard/**").permitAll()
-                        .requestMatchers("/api/utilisateurs/**").permitAll()
-                        .anyRequest().permitAll()
-                );
-        return http.build();
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

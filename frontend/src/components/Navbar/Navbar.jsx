@@ -19,7 +19,7 @@ function Navbar() {
 
     const [showMenu, setShowMenu] = useState(false)
 
-    if (!user) return null  // ✅ ligne ajoutée
+    if (!user) return null 
 
     return (
         <nav className="navbar">
