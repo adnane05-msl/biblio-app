@@ -68,14 +68,15 @@ function ProjectDetail() {
                 ])
                 setProject(proj)
                 setArticles(arts)
-            } catch {
-                navigate('/projects')
+            } catch (err) {
+                setError('Erreur lors du chargement du projet : ' + (err.message || 'Vérifiez votre connexion'))
             } finally {
                 setLoading(false)
             }
         }
         load()
     }, [id, navigate])
+
 
     // Fonction pour changer le filtre et réinitialiser la page
     const handleFilterChange = (newFilter) => {
@@ -268,6 +269,20 @@ function ProjectDetail() {
             <div className="loading-state">Chargement...</div>
         </div>
     )
+    if (error && !project) return (
+        <div className="project-detail-page">
+            <Navbar />
+            <div className="alert alert-error" style={{margin:'2rem'}}>
+                {error}
+                <br/>
+                <button onClick={() => navigate('/projects')} style={{marginTop:'1rem'}}>
+                    ← Retour aux projets
+                </button>
+            </div>
+        </div>
+    )
+
+
 
     return (
         <div className="project-detail-page">

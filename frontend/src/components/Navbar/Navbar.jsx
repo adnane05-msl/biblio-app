@@ -43,7 +43,18 @@ function Navbar() {
                 >
                     Mes Projets
                 </Link>
+
+                {/* ← AJOUTER CES LIGNES */}
+                {(user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') && (
+                    <Link
+                        to="/admin"
+                        className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
+                    >
+                        Espace Admin
+                    </Link>
+                )}
             </div>
+
 
             <div className="navbar-user">
                 <div
