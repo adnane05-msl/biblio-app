@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class UserDto {
@@ -36,7 +37,7 @@ public class UserDto {
         private String email;
         private String role;
         private String statut;
-        private LocalDateTime createdAt;
+        private LocalDate dateInscription;   // ✅ LocalDate, pas LocalDateTime
         private LocalDateTime lastLogin;
 
         public static Response from(AdminUser u) {
@@ -46,11 +47,12 @@ public class UserDto {
                     .email(u.getEmail())
                     .role(u.getRole() != null ? u.getRole() : "ROLE_USER")
                     .statut(u.getStatut() != null ? u.getStatut() : "ACTIF")
-                    .createdAt(u.getCreatedAt())
+                    .dateInscription(u.getDateInscription())  // ✅
                     .lastLogin(u.getLastLogin())
                     .build();
         }
     }
+
 
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class Stats {

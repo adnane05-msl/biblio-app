@@ -13,7 +13,8 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
     long countByStatut(String statut);
 
-    List<AdminUser> findTop5ByOrderByCreatedAtDesc();
+    // ✅ Trié par dateInscription DESC (remplace createdAt qui n'existe plus)
+    List<AdminUser> findTop5ByOrderByDateInscriptionDesc();
 
     List<AdminUser> findByNomContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String nom, String email);

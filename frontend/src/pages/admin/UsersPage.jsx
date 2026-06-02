@@ -177,8 +177,11 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="text-muted">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}
+                    {u.dateInscription
+                      ? new Date(u.dateInscription).toLocaleDateString('fr-FR')
+                      : '—'}
                   </td>
+
                   <td>
                     <div className="action-btns">
                       <button className="btn btn--sm btn--blue" onClick={() => openEdit(u)}>

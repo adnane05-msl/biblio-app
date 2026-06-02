@@ -33,7 +33,8 @@ public class DashboardService {
                                 .collect(Collectors.toList())
                 )
                 .derniersInscrits(
-                        userRepository.findTop5ByOrderByCreatedAtDesc().stream()
+                        // ✅ Méthode renommée
+                        userRepository.findTop5ByOrderByDateInscriptionDesc().stream()
                                 .map(UserDto.Response::from)
                                 .collect(Collectors.toList())
                 )
