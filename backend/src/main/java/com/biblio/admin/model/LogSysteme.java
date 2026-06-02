@@ -33,8 +33,7 @@ public class LogSysteme {
     @Column(length = 100)
     private String ipSource;
 
-    // ← La relation vers User supprimée : User.java (admin) est remplacé par AdminUser.java
-    // et LogSysteme n'en a pas besoin pour son fonctionnement
+
     @Column(name = "user_email", length = 150)
     private String userEmail; // on stocke juste l'email si nécessaire
 

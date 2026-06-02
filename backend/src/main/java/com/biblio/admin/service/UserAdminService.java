@@ -53,7 +53,6 @@ public class UserAdminService {
         AdminUser user = AdminUser.builder()
                 .nom(req.getNom())
                 .email(req.getEmail())
-                // ← motDePasse supprimé (AdminUser ne le gère plus)
                 .role(req.getRole() != null ? req.getRole() : "ROLE_USER")
                 .statut("ACTIF")
                 .build();

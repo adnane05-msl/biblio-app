@@ -4,30 +4,26 @@ import {
 } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUserPlus,         // Ajouter utilisateur
-  faUserPen,          // Modifier
-  faUserXmark,        // Désactiver
-  faUserMinus,        // Supprimer
-  faMagnifyingGlass,  // Recherche
-  faUsersViewfinder,  // Titre page
-  faXmark,            // Fermer
-  faFloppyDisk,       // Sauvegarder
-  faUserShield,       // Admin role
-  faUser,             // User role
-  faCircleCheck,      // Actif
-  faCircleXmark,      // Inactif
-  faEnvelope,         // Email
-  faKey,              // Mot de passe
-  faIdCard,           // Nom
+  faUserPlus, faUserPen, faUserXmark, faUserMinus,
+  faMagnifyingGlass, faUsersViewfinder, faXmark, faFloppyDisk,
+  faUserShield, faUser, faCircleCheck, faCircleXmark,
+  faEnvelope, faIdCard,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
 const ROLES   = ['ROLE_USER', 'ROLE_ADMIN'];
 const STATUTS = ['ACTIF', 'INACTIF'];
-const EMPTY   = { nom: '', email: '', motDePasse: '', role: 'ROLE_USER', statut: 'ACTIF' };
+const EMPTY   = { nom: '', email: '', role: 'ROLE_USER', statut: 'ACTIF' };
 
 function initials(nom = '') {
   return nom.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+}
+
+// dateInscription arrive comme "2026-04-27" (LocalDate)
+function formatDate(d) {
+  if (!d) return '—';
+  const [year, month, day] = d.toString().split('-');
+  return `${day}/${month}/${year}`;
 }
 
 export default function UsersPage() {
@@ -57,11 +53,18 @@ export default function UsersPage() {
   }, [search]);
 
   function openCreate() { setForm(EMPTY); setEdit(null); setModal('create'); }
+
   function openEdit(u) {
-    setForm({ nom: u.nom, email: u.email, motDePasse: '', role: u.role, statut: u.statut });
+    setForm({
+      nom:    u.nom    ?? '',
+      email:  u.email  ?? '',
+      role:   u.role   ?? 'ROLE_USER',
+      statut: u.statut ?? 'ACTIF',
+    });
     setEdit(u);
     setModal('edit');
   }
+
   function closeModal() { setModal(null); setError(null); }
 
   async function handleSubmit(e) {
@@ -69,7 +72,7 @@ export default function UsersPage() {
     setSaving(true);
     try {
       if (modal === 'create') await createUser(form);
-      else { const { motDePasse, ...rest } = form; void motDePasse; await updateUser(editUser.id, rest); }
+      else await updateUser(editUser.id, form);
       closeModal();
       setSearch((s) => s);
     } catch (err) {
@@ -121,14 +124,12 @@ export default function UsersPage() {
         </div>
         <span className="text-muted">{users.length} utilisateur(s)</span>
         <button className="btn btn--primary" onClick={openCreate}>
-          <FontAwesomeIcon icon={faUserPlus} /> Ajouter un utilisateur
+          <FontAwesomeIcon icon={faUserPlus} /> Ajouter
         </button>
       </div>
 
       {loading ? (
-        <p className="page-loading">
-          <FontAwesomeIcon icon={faUsersViewfinder} spin /> Chargement…
-        </p>
+        <p className="page-loading">Chargement…</p>
       ) : (
         <div className="card table-card">
           <table className="admin-table">
@@ -173,22 +174,33 @@ export default function UsersPage() {
                         icon={u.statut === 'ACTIF' ? faCircleCheck : faCircleXmark}
                         style={{ marginRight: 5 }}
                       />
-                      {u.statut}
+                      {u.statut ?? 'ACTIF'}
                     </span>
                   </td>
-                  <td className="text-muted">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}
-                  </td>
+                  {/* ← dateInscription (vraie date d'inscription) */}
+                  <td className="text-muted">{formatDate(u.dateInscription)}</td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn btn--sm btn--blue" onClick={() => openEdit(u)}>
-                        <FontAwesomeIcon icon={faUserPen} /> Modifier
+                      <button
+                        className="icon-btn icon-btn--blue"
+                        title="Modifier"
+                        onClick={() => openEdit(u)}
+                      >
+                        <FontAwesomeIcon icon={faUserPen} />
                       </button>
-                      <button className="btn btn--sm btn--amber" onClick={() => handleDesactiver(u.id)}>
-                        <FontAwesomeIcon icon={faUserXmark} /> Désactiver
+                      <button
+                        className="icon-btn icon-btn--amber"
+                        title="Désactiver"
+                        onClick={() => handleDesactiver(u.id)}
+                      >
+                        <FontAwesomeIcon icon={faUserXmark} />
                       </button>
-                      <button className="btn btn--sm btn--red" onClick={() => handleSupprimer(u.id)}>
-                        <FontAwesomeIcon icon={faUserMinus} /> Supprimer
+                      <button
+                        className="icon-btn icon-btn--red"
+                        title="Supprimer"
+                        onClick={() => handleSupprimer(u.id)}
+                      >
+                        <FontAwesomeIcon icon={faUserMinus} />
                       </button>
                     </div>
                   </td>
@@ -199,78 +211,61 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* ── Modal création / édition ─────────────────────────── */}
+      {/* ── Modal créer / modifier ───────────────────────────── */}
       {modal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title">
                 <FontAwesomeIcon
                   icon={modal === 'create' ? faUserPlus : faUserPen}
                   style={{ marginRight: 10, color: '#2563eb' }}
                 />
-                {modal === 'create' ? 'Nouvel utilisateur' : 'Modifier l\'utilisateur'}
+                {modal === 'create' ? 'Nouvel utilisateur' : "Modifier l'utilisateur"}
               </h2>
               <button className="modal-close" onClick={closeModal}>
                 <FontAwesomeIcon icon={faXmark} />
               </button>
             </div>
 
-            {error && (
-              <div className="alert alert--error" style={{ margin: '0 0 16px' }}>
-                <FontAwesomeIcon icon={faCircleXmark} style={{ marginRight: 8 }} />
-                {error}
-              </div>
-            )}
+            <form onSubmit={handleSubmit}>
+              <div className="modal-form">
+                {error && (
+                  <div className="alert alert--error" style={{ marginBottom: 12 }}>
+                    <FontAwesomeIcon icon={faCircleXmark} style={{ marginRight: 8 }} />
+                    {error}
+                  </div>
+                )}
 
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label className="form-label">
-                  <FontAwesomeIcon icon={faIdCard} style={{ marginRight: 6, color: '#6b7280' }} />
-                  Nom complet
-                </label>
-                <input
-                  className="form-input"
-                  value={form.nom}
-                  onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                  placeholder="Prénom Nom"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  <FontAwesomeIcon icon={faEnvelope} style={{ marginRight: 6, color: '#6b7280' }} />
-                  Email
-                </label>
-                <input
-                  className="form-input"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="email@exemple.com"
-                  required
-                />
-              </div>
-
-              {modal === 'create' && (
                 <div className="form-group">
                   <label className="form-label">
-                    <FontAwesomeIcon icon={faKey} style={{ marginRight: 6, color: '#6b7280' }} />
-                    Mot de passe
+                    <FontAwesomeIcon icon={faIdCard} style={{ marginRight: 6, color: '#6b7280' }} />
+                    Nom complet
                   </label>
                   <input
                     className="form-input"
-                    type="password"
-                    value={form.motDePasse}
-                    onChange={(e) => setForm({ ...form, motDePasse: e.target.value })}
-                    placeholder="••••••••"
+                    value={form.nom}
+                    onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                    placeholder="Prénom Nom"
                     required
                   />
                 </div>
-              )}
 
-              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faEnvelope} style={{ marginRight: 6, color: '#6b7280' }} />
+                    Email
+                  </label>
+                  <input
+                    className="form-input"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="email@exemple.com"
+                    required
+                  />
+                </div>
+
                 <div className="form-group">
                   <label className="form-label">
                     <FontAwesomeIcon icon={faUserShield} style={{ marginRight: 6, color: '#6b7280' }} />
@@ -289,29 +284,31 @@ export default function UsersPage() {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">
-                    <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 6, color: '#6b7280' }} />
-                    Statut
-                  </label>
-                  <select
-                    className="form-input"
-                    value={form.statut}
-                    onChange={(e) => setForm({ ...form, statut: e.target.value })}
-                  >
-                    {STATUTS.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
+                {modal === 'edit' && (
+                  <div className="form-group">
+                    <label className="form-label">
+                      <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 6, color: '#6b7280' }} />
+                      Statut
+                    </label>
+                    <select
+                      className="form-input"
+                      value={form.statut}
+                      onChange={(e) => setForm({ ...form, statut: e.target.value })}
+                    >
+                      {STATUTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                )}
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn--ghost" onClick={closeModal}>
-                  <FontAwesomeIcon icon={faXmark} /> Annuler
-                </button>
-                <button type="submit" className="btn btn--primary" disabled={saving}>
-                  <FontAwesomeIcon icon={faFloppyDisk} />
-                  {saving ? ' Enregistrement…' : ' Enregistrer'}
-                </button>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn--ghost" onClick={closeModal}>
+                    Annuler
+                  </button>
+                  <button type="submit" className="btn btn--primary" disabled={saving}>
+                    <FontAwesomeIcon icon={faFloppyDisk} style={{ marginRight: 6 }} />
+                    {saving ? 'Enregistrement…' : 'Enregistrer'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

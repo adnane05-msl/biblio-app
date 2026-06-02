@@ -21,11 +21,10 @@ public class DashboardService {
         return DashboardDto.builder()
                 .totalUtilisateurs(userRepository.count())
                 .utilisateursActifs(userRepository.countByStatut("ACTIF"))
+                .utilisateursInactifs(userRepository.countByStatut("INACTIF"))
                 .sourcesEnLigne(sourceRepository.countByStatut(
                         AdminSource.StatutSource.EN_LIGNE))
                 .totalSources(sourceRepository.count())
-                .erreursAujourdhui(0L)
-                .uptimePct(99.9)
                 .versionBackend("1.0.0")
                 .versionFrontend("1.0.0")
                 .sourcesSummary(

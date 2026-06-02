@@ -7,8 +7,6 @@ import com.biblio.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class UtilisateurService {
 
@@ -18,9 +16,9 @@ public class UtilisateurService {
     private final VerificationService verificationService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository,
-                              PasswordEncoder passwordEncoder,
-                              JwtService jwtService,
-                              VerificationService verificationService) {
+                            PasswordEncoder passwordEncoder,
+                            JwtService jwtService,
+                            VerificationService verificationService) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder       = passwordEncoder;
         this.jwtService            = jwtService;

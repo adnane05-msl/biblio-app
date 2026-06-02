@@ -3,17 +3,16 @@ import { getDashboard } from '../../services/adminService';
 import StatCard from '../../components/admin/StatCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUsersViewfinder,      // Utilisateurs total
-  faPlugCircleCheck,      // Sources actives
-  faHeartPulse,           // Uptime
-  faBugSlash,             // Erreurs
-  faDatabase,             // État sources titre
-  faUserClock,            // Derniers inscrits titre
-  faCircle,               // Statut point
-  faWifi,                 // En ligne
-  faSignal,            // Hors ligne
-  faGaugeHigh,            // Latence élevée
-  faWrench,               // Maintenance
+  faUsersViewfinder,
+  faPlugCircleCheck,
+  faDatabase,
+  faUserClock,
+  faCircle,
+  faWifi,
+  faSignal,
+  faGaugeHigh,
+  faWrench,
+  faArrowsRotate,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
@@ -35,7 +34,7 @@ function initials(nom = '') {
   return nom.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 }
 
-export default function DashboardPage() {
+export default function DashboardAdminPage() {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
@@ -49,7 +48,7 @@ export default function DashboardPage() {
 
   if (loading) return (
     <div className="page-loading">
-      <FontAwesomeIcon icon={faHeartPulse} spin /> Chargement…
+      <FontAwesomeIcon icon={faArrowsRotate} spin /> Chargement…
     </div>
   );
   if (error) return <div className="page-error">Erreur : {error}</div>;
@@ -61,31 +60,19 @@ export default function DashboardPage() {
         <p className="page-sub">Vue d'ensemble de l'application</p>
       </div>
 
-      {/* ── Métriques ─────────────────────────────────────────── */}
-      <div className="stats-grid">
+      {/* ── 2 métriques essentielles ──────────────────────────── */}
+      <div className="stats-grid stats-grid--2">
         <StatCard
           icon={<FontAwesomeIcon icon={faUsersViewfinder} />}
-          label="Utilisateurs"
+          label="Total utilisateurs"
           value={data.totalUtilisateurs}
           color="blue"
         />
         <StatCard
           icon={<FontAwesomeIcon icon={faPlugCircleCheck} />}
           label="Sources actives"
-          value={`${data.sourcesEnLigne}/${data.totalSources}`}
+          value={`${data.sourcesEnLigne} / ${data.totalSources}`}
           color="green"
-        />
-        <StatCard
-          icon={<FontAwesomeIcon icon={faHeartPulse} />}
-          label="Uptime"
-          value={`${data.uptimePct}%`}
-          color="green"
-        />
-        <StatCard
-          icon={<FontAwesomeIcon icon={faBugSlash} />}
-          label="Erreurs (24h)"
-          value={data.erreursAujourdhui}
-          color={data.erreursAujourdhui > 0 ? 'amber' : 'default'}
         />
       </div>
 
@@ -93,7 +80,7 @@ export default function DashboardPage() {
         {/* ── État des sources ─────────────────────────────────── */}
         <section className="card">
           <h2 className="card-title">
-            <FontAwesomeIcon icon={faDatabase} style={{ color: '#2563eb' }} />
+            <FontAwesomeIcon icon={faDatabase} style={{ color: '#2563eb', marginRight: 8 }} />
             État des sources
           </h2>
           <table className="admin-table">
@@ -122,7 +109,7 @@ export default function DashboardPage() {
         {/* ── Derniers inscrits ─────────────────────────────────── */}
         <section className="card">
           <h2 className="card-title">
-            <FontAwesomeIcon icon={faUserClock} style={{ color: '#7c3aed' }} />
+            <FontAwesomeIcon icon={faUserClock} style={{ color: '#7c3aed', marginRight: 8 }} />
             Derniers inscrits
           </h2>
           <ul className="user-list">
@@ -134,11 +121,8 @@ export default function DashboardPage() {
                   <p className="user-list__email">{u.email}</p>
                 </div>
                 <span className={`badge badge--${u.statut === 'ACTIF' ? 'green' : 'gray'}`}>
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{ fontSize: 8, marginRight: 5 }}
-                  />
-                  {u.statut}
+                  <FontAwesomeIcon icon={faCircle} style={{ fontSize: 8, marginRight: 5 }} />
+                  {u.statut ?? 'ACTIF'}
                 </span>
               </li>
             )) : (
