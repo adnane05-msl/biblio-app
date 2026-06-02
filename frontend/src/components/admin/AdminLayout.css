@@ -18,6 +18,7 @@
 .admin-page-wrapper {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 /* ── Layout horizontal : sidebar + contenu ── */
@@ -26,6 +27,9 @@
   flex: 1;
   background: var(--admin-bg);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* ✅ FIX : la largeur totale ne dépasse pas le viewport */
+  width: 100%;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -37,16 +41,18 @@
   border-right: 1px solid var(--admin-border);
   display: flex;
   flex-direction: column;
+  /* ✅ FIX : transition synchronisée avec le contenu */
   transition: width 0.25s ease;
   flex-shrink: 0;
-  position: sticky;        /* ← fixed au lieu de sticky */
-  top: 60px;              /* ← juste en dessous de la Navbar */
+  position: sticky;
+  top: 60px;
   left: 0;
   height: calc(100vh - 60px);
   overflow: hidden;
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
   z-index: 50;
 }
+
 .admin-layout.collapsed .admin-sidebar {
   width: var(--admin-sidebar-collapsed);
 }
@@ -130,14 +136,24 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  /* ✅ FIX CRITIQUE : empêche le contenu de déborder */
   min-width: 0;
+  width: 0; /* force flex à recalculer la largeur disponible */
   min-height: calc(100vh - 60px);
+  /* ✅ FIX : transition fluide quand la sidebar s'ouvre/ferme */
+  transition: width 0.25s ease;
+  overflow: hidden;
 }
 
 .admin-main {
   flex: 1;
   padding: 28px 32px;
-  overflow: auto;
+  /* ✅ FIX : overflow-x hidden pour éviter l'agrandissement de page */
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* ✅ FIX : largeur calculée correctement dans flex */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -4,6 +4,9 @@
 
 .admin-page {
   max-width: 1200px;
+  /* ✅ FIX : remplit correctement l'espace disponible */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── En-tête de page ───────────────────────────────────────── */
@@ -72,6 +75,9 @@
   border: 1px solid #e5e7eb;
   margin-bottom: 16px;
   transition: box-shadow 0.2s;
+  /* ✅ FIX : empêche la carte de déborder de son conteneur grid */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -89,7 +95,7 @@
 }
 
 .table-card {
-  overflow-x: auto;   
+  overflow-x: auto;
 }
 .table-card .card-title {
   padding: 16px 20px 0;
@@ -103,9 +109,15 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 16px;
+  /* ✅ FIX : les cartes s'alignent par le haut, pas en hauteur égale */
+  align-items: start;
+  /* ✅ FIX : la grille ne dépasse pas son conteneur */
+  min-width: 0;
+  width: 100%;
 }
 
-@media (max-width: 900px) {
+/* ✅ FIX : seuil plus haut pour anticiper la sidebar ouverte */
+@media (max-width: 1100px) {
   .two-col { grid-template-columns: 1fr; }
 }
 
@@ -121,77 +133,79 @@
   flex-wrap: wrap;
 }
 
-.toolbar-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.toolbar-right { display: flex; align-items: center; gap: 8px;  flex-wrap: wrap; }
-
-/* ══════════════════════════════════════════════════════════════
-   SEARCH BOX — identique à ProjectsPage .projects-search-bar
-══════════════════════════════════════════════════════════════ */
 .search-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 9px 14px;
+  padding: 7px 12px;
+  max-width: 320px;
   flex: 1;
-  max-width: 380px;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-box:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.search-box__icon {
-  color: #9ca3af;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.search-box__input {
+.search-box input {
   border: none;
   outline: none;
   font-size: 14px;
   color: #374151;
-  background: none;
+  background: transparent;
   width: 100%;
   font-family: inherit;
 }
 
-.search-box__input::placeholder {
-  color: #9ca3af;
-}
-
-/* ancien .search-input conservé pour compatibilité */
-.search-input {
-  padding: 9px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  width: 280px;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  font-family: inherit;
-  background: #fff;
-  color: #374151;
-}
-.search-input::placeholder { color: #9ca3af; }
-.search-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
+.search-box-icon { color: #9ca3af; font-size: 13px; flex-shrink: 0; }
 
 /* ══════════════════════════════════════════════════════════════
-   FILTER BAR
+   FILTER BAR (Journaux & autres pages)
 ══════════════════════════════════════════════════════════════ */
 .filter-bar {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.filter-bar .btn {
+  border-radius: 20px;          /* pill shape */
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.filter-bar .btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+/* états actifs — reprend les couleurs badge */
+.filter-bar .btn--blue {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.filter-bar .btn--amber {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.filter-bar .btn--green {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -200,19 +214,16 @@
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 8px 16px;
   border-radius: 8px;
+  border: 1px solid transparent;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #374151;
-  transition: all 0.2s;
-  white-space: nowrap;
   font-family: inherit;
-  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
 .btn:hover:not(:disabled) {
@@ -254,7 +265,9 @@
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  /* ✅ FIX CRITIQUE : supprime le min-width fixe qui cassait la grille two-col */
+  min-width: 0;
+  table-layout: auto;
 }
 
 .admin-table th {
@@ -262,7 +275,7 @@
   font-size: 11px;
   font-weight: 600;
   color: #6b7280;
-  padding: 11px 20px;
+  padding: 10px 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-bottom: 1px solid #e5e7eb;
@@ -271,24 +284,16 @@
 }
 
 .admin-table td {
-  padding: 13px 20px;
+  padding: 10px 12px;
   border-bottom: 1px solid #f3f4f6;
   color: #374151;
   vertical-align: middle;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 10px 12px;
-  text-align: left;
   font-size: 13px;
-  border-bottom: 1px solid #f3f4f6;
-  white-space: nowrap;      /* ← tout sur une seule ligne */
 }
 
 .admin-table th:last-child,
 .admin-table td:last-child {
-  width: 1%;                /* ← prend le minimum d'espace */
+  width: 1%;
   white-space: nowrap;
 }
 
@@ -368,12 +373,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: nowrap;        /* ← JAMAIS de retour à la ligne */
+  flex-wrap: nowrap;
 }
 .icon-btn {
   width: 32px;
   height: 32px;
-  min-width: 32px;          /* ← ne se rétrécit pas */
+  min-width: 32px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -391,6 +396,7 @@
 .icon-btn--green { background: #f0fdf4; color: #16a34a; }
 .icon-btn--amber { background: #fffbeb; color: #d97706; }
 .icon-btn--red   { background: #fef2f2; color: #dc2626; }
+
 /* ══════════════════════════════════════════════════════════════
    USER LIST (dashboard)
 ══════════════════════════════════════════════════════════════ */
@@ -410,7 +416,7 @@
 .user-list__item .badge { margin-left: auto; }
 
 /* ══════════════════════════════════════════════════════════════
-   MODAL — identique aux modals de ProjectsPage
+   MODAL
 ══════════════════════════════════════════════════════════════ */
 .modal-overlay {
   position: fixed;
@@ -472,7 +478,7 @@
   margin-top: 4px;
 }
 
-/* ── Formulaire modal ─────────────────────────────────────── */
+/* ── Formulaire modal ── */
 .form-group {
   margin-bottom: 16px;
 }

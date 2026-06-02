@@ -1,42 +1,43 @@
+// src/pages/admin/LogsPage.jsx
 import { useEffect, useState } from 'react';
 import { getLogs } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList,      // Titre page
-  faCircleCheck,        // OK
-  faCircleInfo,         // INFO
-  faTriangleExclamation,// WARN
-  faFilter,             // Filtres
-  faCalendarDay,        // Date
-  faMicrochip,          // Composant
-  faArrowsRotate,       // Chargement
-  faInbox,              // Vide
+  faClipboardList,
+  faCircleCheck,
+  faCircleInfo,
+  faTriangleExclamation,
+  faFilter,
+  faCalendarDay,
+  faMicrochip,
+  faArrowsRotate,
+  faInbox,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
 const TYPES = [
-  { value: null,    label: 'Tout',    color: 'blue',  icon: faFilter        },
-  { value: 'WARN',  label: 'Alertes', color: 'amber', icon: faTriangleExclamation },
-  { value: 'INFO',  label: 'Info',    color: 'blue',  icon: faCircleInfo    },
-  { value: 'OK',    label: 'Succès',  color: 'green', icon: faCircleCheck   },
+  { value: null,   label: 'Tout',    color: 'blue',  icon: faFilter              },
+  { value: 'WARN', label: 'Alertes', color: 'amber', icon: faTriangleExclamation  },
+  { value: 'INFO', label: 'Info',    color: 'blue',  icon: faCircleInfo           },
+  { value: 'OK',   label: 'Succès',  color: 'green', icon: faCircleCheck          },
 ];
 
 const TYPE_ICON = {
-  OK:    faCircleCheck,
-  INFO:  faCircleInfo,
-  WARN:  faTriangleExclamation,
+  OK:   faCircleCheck,
+  INFO: faCircleInfo,
+  WARN: faTriangleExclamation,
 };
 
 const TYPE_COLOR = {
-  OK:    '#10b981',
-  INFO:  '#3b82f6',
-  WARN:  '#f59e0b',
+  OK:   '#10b981',
+  INFO: '#3b82f6',
+  WARN: '#f59e0b',
 };
 
 const TYPE_BG = {
-  OK:    '#ecfdf5',
-  INFO:  '#eff6ff',
-  WARN:  '#fffbeb',
+  OK:   '#ecfdf5',
+  INFO: '#eff6ff',
+  WARN: '#fffbeb',
 };
 
 function formatDate(dateStr) {
@@ -76,8 +77,16 @@ export default function LogsPage() {
         <p className="page-sub">Historique des événements et erreurs</p>
       </div>
 
-      {/* ── Filtres ──────────────────────────────────────────── */}
+      {/* ── Barre de filtres ─────────────────────────────────── */}
       <div className="filter-bar">
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af', marginRight: 4, whiteSpace: 'nowrap' }}>
+          <FontAwesomeIcon icon={faFilter} style={{ marginRight: 5 }} />
+          Filtrer :
+        </span>
+
+        {/* séparateur vertical */}
+        <span style={{ width: 1, height: 20, background: '#e5e7eb', flexShrink: 0 }} />
+
         {TYPES.map((t) => (
           <button
             key={t.label}
@@ -90,6 +99,7 @@ export default function LogsPage() {
         ))}
       </div>
 
+      {/* ── Table ────────────────────────────────────────────── */}
       {loading ? (
         <p className="page-loading">
           <FontAwesomeIcon icon={faArrowsRotate} spin /> Chargement…
@@ -98,7 +108,10 @@ export default function LogsPage() {
         <div className="card table-card">
           {logs.length === 0 ? (
             <div className="empty-row" style={{ padding: '3rem', textAlign: 'center' }}>
-              <FontAwesomeIcon icon={faInbox} style={{ fontSize: 32, color: '#d1d5db', marginBottom: 12, display: 'block' }} />
+              <FontAwesomeIcon
+                icon={faInbox}
+                style={{ fontSize: 32, color: '#d1d5db', marginBottom: 12, display: 'block' }}
+              />
               Aucun journal trouvé
             </div>
           ) : (
@@ -117,8 +130,8 @@ export default function LogsPage() {
                     <td>
                       <span
                         className={`badge badge--${
-                          l.type === 'OK'    ? 'green' :
-                          l.type === 'WARN'  ? 'amber' : 'blue'
+                          l.type === 'OK'   ? 'green' :
+                          l.type === 'WARN' ? 'amber' : 'blue'
                         }`}
                         style={{ background: TYPE_BG[l.type] }}
                       >
