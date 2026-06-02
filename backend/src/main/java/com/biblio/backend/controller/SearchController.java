@@ -28,11 +28,13 @@ public class SearchController {
             @RequestParam String query,
             @RequestParam(defaultValue = "true") boolean crossref,
             @RequestParam(defaultValue = "true") boolean openalex,
-            @RequestParam(defaultValue = "false") boolean arxiv) {
+            @RequestParam(defaultValue = "false") boolean arxiv,
+            @RequestParam(defaultValue = "50") int maxResults) {
 
         List<ArticleDTO> results = searchService.search(query, crossref, openalex, arxiv);
         return ResponseEntity.ok(results);
     }
+
 
     // ── Sauvegarder dans l'historique (query + résultats JSON) ────────────
     @PostMapping("/historique")

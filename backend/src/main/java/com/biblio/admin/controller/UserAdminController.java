@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -39,8 +38,10 @@ public class UserAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto.Response> create(@Valid @RequestBody UserDto.CreateRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userAdminService.create(req));
+    public ResponseEntity<UserDto.Response> create(
+            @Valid @RequestBody UserDto.CreateRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userAdminService.create(req));
     }
 
     @PutMapping("/{id}")

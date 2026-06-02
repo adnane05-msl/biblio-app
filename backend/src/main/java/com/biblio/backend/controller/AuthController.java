@@ -8,15 +8,21 @@ import com.biblio.backend.dto.VerifyCodeRequest;
 import com.biblio.backend.dto.ApiResponse;
 import com.biblio.backend.service.UtilisateurService;
 import com.biblio.backend.service.VerificationService;
-// import lombok.Getter;
-// import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/authentification")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:3000",
+        "http://localhost:3008",
+        "http://127.0.0.1:3008",
+        "http://127.0.0.1:5173"
+})
 public class AuthController {
 
     private final UtilisateurService utilisateurService;
@@ -63,6 +69,4 @@ public class AuthController {
                     .body(new ApiResponse(false, "Code invalide ou expiré"));
         }
     }
-
-
 }

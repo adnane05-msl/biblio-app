@@ -4,12 +4,10 @@ import com.biblio.admin.dto.DashboardDto;
 import com.biblio.admin.dto.SourceDto;
 import com.biblio.admin.dto.UserDto;
 import com.biblio.admin.model.AdminSource;
-import com.biblio.admin.model.AdminUser;
 import com.biblio.admin.repository.AdminSourceRepository;
 import com.biblio.admin.repository.AdminUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.stream.Collectors;
 
 @Service
@@ -22,8 +20,9 @@ public class DashboardService {
     public DashboardDto getDashboard() {
         return DashboardDto.builder()
                 .totalUtilisateurs(userRepository.count())
-                .utilisateursActifs(userRepository.countByStatut(AdminUser.Statut.ACTIF))
-                .sourcesEnLigne(sourceRepository.countByStatut(AdminSource.StatutSource.EN_LIGNE))
+                .utilisateursActifs(userRepository.countByStatut("ACTIF"))
+                .sourcesEnLigne(sourceRepository.countByStatut(
+                        AdminSource.StatutSource.EN_LIGNE))
                 .totalSources(sourceRepository.count())
                 .erreursAujourdhui(0L)
                 .uptimePct(99.9)

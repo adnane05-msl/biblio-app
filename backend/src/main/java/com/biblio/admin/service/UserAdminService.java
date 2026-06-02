@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +18,7 @@ public class UserAdminService {
     private final PasswordEncoder passwordEncoder;
 
     public List<UserDto.Response> findAll() {
-        return userRepository.findAll()
-                .stream()
+        return userRepository.findAll().stream()
                 .map(UserDto.Response::from)
                 .collect(Collectors.toList());
     }
@@ -36,8 +34,8 @@ public class UserAdminService {
     public UserDto.Stats getStats() {
         return UserDto.Stats.builder()
                 .total(userRepository.count())
-                .actifs(userRepository.countByStatut(AdminUser.Statut.ACTIF))
-                .inactifs(userRepository.countByStatut(AdminUser.Statut.INACTIF))
+                .actifs(userRepository.countByStatut("ACTIF"))
+                .inactifs(userRepository.countByStatut("INACTIF"))
                 .admins(userRepository.findAll().stream()
                         .filter(u -> "ROLE_ADMIN".equals(u.getRole()))
                         .count())
@@ -45,8 +43,9 @@ public class UserAdminService {
     }
 
     public UserDto.Response findById(Long id) {
-        return UserDto.Response.from(userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable : " + id)));
+        return UserDto.Response.from(
+                userRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Utilisateur introuvable : " + id)));
     }
 
     @Transactional
@@ -54,9 +53,9 @@ public class UserAdminService {
         AdminUser user = AdminUser.builder()
                 .nom(req.getNom())
                 .email(req.getEmail())
-                .motDePasse(passwordEncoder.encode(req.getMotDePasse()))
+                // ← motDePasse supprimé (AdminUser ne le gère plus)
                 .role(req.getRole() != null ? req.getRole() : "ROLE_USER")
-                .statut(AdminUser.Statut.ACTIF)
+                .statut("ACTIF")
                 .build();
         return UserDto.Response.from(userRepository.save(user));
     }
@@ -76,7 +75,7 @@ public class UserAdminService {
     public void desactiver(Long id) {
         AdminUser user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable : " + id));
-        user.setStatut(AdminUser.Statut.INACTIF);
+        user.setStatut("INACTIF");
         userRepository.save(user);
     }
 
