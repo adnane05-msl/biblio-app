@@ -21,21 +21,5 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getDashboard());
     }
 
-    /** POST /api/admin/maintenance/vider-cache */
-    @PostMapping("/maintenance/vider-cache")
-    public ResponseEntity<String> viderCache() {
-        return ResponseEntity.ok("Cache vidé avec succès");
-    }
 
-    /** POST /api/admin/maintenance/reinitialiser-sessions */
-    @PostMapping("/maintenance/reinitialiser-sessions")
-    public ResponseEntity<String> reinitialiserSessions() {
-        return ResponseEntity.ok("Sessions réinitialisées");
-    }
-
-    /** GET /api/admin/logs — retourne une liste vide pour l'instant */
-    @GetMapping("/logs")
-    public ResponseEntity<?> getLogs() {
-        return ResponseEntity.ok(java.util.List.of());
-    }
 }

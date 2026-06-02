@@ -59,12 +59,3 @@ export const supprimerSource = (id) =>
 // ═══════════════════════════════════════════════════════════════
 export const getLogs = (type = null) =>
   apiClient.get('/api/admin/logs', { params: type ? { type } : {} }).then((r) => r.data);
-
-// ═══════════════════════════════════════════════════════════════
-// MAINTENANCE
-// ═══════════════════════════════════════════════════════════════
-export const viderCache = () =>
-  apiClient.post('/api/admin/maintenance/vider-cache').then((r) => r.data);
-
-export const reinitialiserSessions = () =>
-  apiClient.post('/api/admin/maintenance/reinitialiser-sessions').then((r) => r.data);

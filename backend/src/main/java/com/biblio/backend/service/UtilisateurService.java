@@ -1,5 +1,6 @@
 package com.biblio.backend.service;
 
+import com.biblio.admin.service.LogService;
 import com.biblio.backend.dto.*;
 import com.biblio.backend.model.Utilisateur;
 import com.biblio.backend.repository.UtilisateurRepository;
@@ -14,19 +15,25 @@ public class UtilisateurService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final VerificationService verificationService;
+    private final LogService logService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository,
-                            PasswordEncoder passwordEncoder,
-                            JwtService jwtService,
-                            VerificationService verificationService) {
+                              PasswordEncoder passwordEncoder,
+                              JwtService jwtService,
+                              VerificationService verificationService,
+                              LogService logService) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder       = passwordEncoder;
         this.jwtService            = jwtService;
         this.verificationService   = verificationService;
+        this.logService            = logService;
     }
 
     public UtilisateurDTO register(RegisterRequest request) {
         if (utilisateurRepository.existsByEmail(request.getEmail())) {
+            logService.warn("Authentification",
+                    "Tentative d'inscription avec email déjà utilisé : " + request.getEmail(),
+                    request.getEmail());
             throw new RuntimeException("Cet email est déjà utilisé");
         }
         if (!verificationService.isEmailVerified(request.getEmail())) {
@@ -45,24 +52,33 @@ public class UtilisateurService {
         Utilisateur saved = utilisateurRepository.save(user);
         verificationService.clearVerificationCode(request.getEmail());
 
-        // ← Le role est maintenant inclus dans le token
-        String token = jwtService.generateToken(saved.getEmail(), saved.getRole());
+        logService.ok("Authentification",
+                "Nouvel utilisateur inscrit : " + saved.getNom() + " (" + saved.getEmail() + ")",
+                saved.getEmail());
 
+        String token = jwtService.generateToken(saved.getEmail(), saved.getRole());
         return toDTO(saved, token);
     }
 
     public UtilisateurDTO login(LoginRequest request) {
+        // ✅ orElseThrow avec UN SEUL return — pas de bloc {}
         Utilisateur user = utilisateurRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
 
         if (!passwordEncoder.matches(request.getMotDePasse(), user.getMotDePasse())) {
+            logService.warn("Authentification",
+                    "Mot de passe incorrect pour : " + request.getEmail(),
+                    request.getEmail());
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
-        String role  = user.getRole() != null ? user.getRole() : "ROLE_USER";
-        // ← Le role est maintenant inclus dans le token → JwtAuthFilter peut lire ROLE_ADMIN
-        String token = jwtService.generateToken(user.getEmail(), role);
+        String role = user.getRole() != null ? user.getRole() : "ROLE_USER";
 
+        logService.ok("Authentification",
+                "Connexion réussie : " + user.getNom() + " (" + user.getEmail() + ")",
+                user.getEmail());
+
+        String token = jwtService.generateToken(user.getEmail(), role);
         return toDTO(user, token);
     }
 

@@ -11,7 +11,7 @@ import Statistiques from './pages/Statistiques/StatistiquesPage'
 import HomePage from './pages/HomePage/HomePage'
 import ProfilPage from './pages/Profil/ProfilPage'
 import PrismaDashboardPage from './pages/PrismaDashboard/PrismaDashboardPage'
-import AdminRoutes from './pages/admin/AdminRoutes'   // ← AJOUTER
+import AdminRoutes from './pages/admin/AdminRoutes' 
 
 function ProtectedRoute({ children }) {
     const { user } = useAuth()

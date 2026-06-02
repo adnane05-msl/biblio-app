@@ -44,7 +44,6 @@ public class LogSysteme {
     public enum TypeLog {
         INFO,
         WARN,
-        ERROR,
         OK
     }
 }

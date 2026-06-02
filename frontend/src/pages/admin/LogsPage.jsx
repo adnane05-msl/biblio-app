@@ -6,7 +6,6 @@ import {
   faCircleCheck,        // OK
   faCircleInfo,         // INFO
   faTriangleExclamation,// WARN
-  faCircleXmark,        // ERROR
   faFilter,             // Filtres
   faCalendarDay,        // Date
   faMicrochip,          // Composant
@@ -17,7 +16,6 @@ import './AdminPages.css';
 
 const TYPES = [
   { value: null,    label: 'Tout',    color: 'blue',  icon: faFilter        },
-  { value: 'ERROR', label: 'Erreurs', color: 'red',   icon: faCircleXmark   },
   { value: 'WARN',  label: 'Alertes', color: 'amber', icon: faTriangleExclamation },
   { value: 'INFO',  label: 'Info',    color: 'blue',  icon: faCircleInfo    },
   { value: 'OK',    label: 'Succès',  color: 'green', icon: faCircleCheck   },
@@ -27,21 +25,18 @@ const TYPE_ICON = {
   OK:    faCircleCheck,
   INFO:  faCircleInfo,
   WARN:  faTriangleExclamation,
-  ERROR: faCircleXmark,
 };
 
 const TYPE_COLOR = {
   OK:    '#10b981',
   INFO:  '#3b82f6',
   WARN:  '#f59e0b',
-  ERROR: '#ef4444',
 };
 
 const TYPE_BG = {
   OK:    '#ecfdf5',
   INFO:  '#eff6ff',
   WARN:  '#fffbeb',
-  ERROR: '#fef2f2',
 };
 
 function formatDate(dateStr) {
@@ -123,7 +118,6 @@ export default function LogsPage() {
                       <span
                         className={`badge badge--${
                           l.type === 'OK'    ? 'green' :
-                          l.type === 'ERROR' ? 'red'   :
                           l.type === 'WARN'  ? 'amber' : 'blue'
                         }`}
                         style={{ background: TYPE_BG[l.type] }}
