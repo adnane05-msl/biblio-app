@@ -15,6 +15,10 @@ public class AdminUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // ── Champs partagés avec Utilisateur.java ──────────────────
+    // AUCUN @Column → Hibernate utilise la même convention que Utilisateur.java
+    // Pas de motDePasse : inutile dans l'admin + cause le conflit
     private String nom;
     private String prenom;
     private String email;
