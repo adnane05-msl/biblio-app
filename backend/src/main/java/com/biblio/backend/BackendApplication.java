@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.cache.annotation.EnableCaching;
+
 
 @SpringBootApplication(scanBasePackages = {
 		"com.biblio.backend",
@@ -17,6 +19,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"com.biblio.backend.model",
 		"com.biblio.admin.model"
 })
+@EnableCaching
 public class BackendApplication {
 
 	public static void main(String[] args) {

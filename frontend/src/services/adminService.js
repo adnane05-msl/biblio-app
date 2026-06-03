@@ -59,3 +59,15 @@ export const supprimerSource = (id) =>
 // ═══════════════════════════════════════════════════════════════
 export const getLogs = (type = null) =>
   apiClient.get('/api/admin/logs', { params: type ? { type } : {} }).then((r) => r.data);
+
+// ── MAINTENANCE ──────────────────────────────────────────────
+export const testerSource = (id) =>
+  apiClient.post(`/api/admin/maintenance/tester-source/${id}`).then((r) => r.data);
+
+export const viderHistorique = () =>
+  apiClient.delete('/api/admin/maintenance/vider-historique').then((r) => r.data);
+
+// Vider le cache de l'application
+
+export const viderCache = () =>
+  apiClient.post('/api/admin/maintenance/vider-cache').then((r) => r.data);

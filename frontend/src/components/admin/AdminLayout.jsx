@@ -4,7 +4,7 @@ import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChartLine, faUsers, faPlug,
-  faScroll, faChevronLeft, 
+  faScroll, faChevronLeft, faScrewdriverWrench
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/useAuth';
 import Navbar from '../Navbar/Navbar';
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { path: '/admin',             icon: faChartLine,         label: 'Tableau de bord' },
   { path: '/admin/users',       icon: faUsers,             label: 'Utilisateurs'    },
   { path: '/admin/sources',     icon: faPlug,              label: 'Sources'         },
+  { path: '/admin/maintenance', icon: faScrewdriverWrench, label: 'Maintenance' },
   { path: '/admin/logs',        icon: faScroll,            label: 'Journaux'        },
 ];
 

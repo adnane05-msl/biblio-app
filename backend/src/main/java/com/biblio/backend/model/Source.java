@@ -8,16 +8,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entité Source utilisée par le module de recherche bibliographique.
- * Distinct de com.biblio.admin.model.Source (supervision admin).
- * Le nom JPA "SourceSearch" évite le conflit Hibernate.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "SourceSearch")   // ← nom JPA unique, évite DuplicateMappingException
-@Table(name = "source")          // ← table SQL inchangée
+@Entity(name = "SourceSearch")
+@Table(name = "source")
 public class Source {
 
     @Id

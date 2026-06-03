@@ -4,6 +4,7 @@ import DashboardPage    from './DashboardAdminPage';
 import UsersPage        from './UsersPage';
 import SourcesPage      from './SourcesPage';
 import LogsPage         from './LogsPage';
+import MaintenancePage   from './MaintenancePage';
 import AdminProfilPage  from './AdminProfilPage';
 import { AdminProvider } from '../../context/AdminContext';
 
@@ -17,6 +18,7 @@ export default function AdminRoutes() {
           <Route path="sources"     element={<SourcesPage />}     />
           <Route path="logs"        element={<LogsPage />}        />
           <Route path="profil"      element={<AdminProfilPage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
         </Route>
       </Routes>
     </AdminProvider>
