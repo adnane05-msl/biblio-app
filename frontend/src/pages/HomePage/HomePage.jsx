@@ -124,7 +124,7 @@ function HomePage() {
                     <p className="hero-subtitle">
                         BiblioApp interroge automatiquement les bases de données
                         scientifiques, déduplique les résultats et génère vos
-                        fichiers BibTeX, CSV et RIS en un clic.
+                        fichiers BibTeX, CSV et RIS, et offre un dashboard bibliométrique pour analyser vos publications en un clic. en un clic.
                     </p>
 
 
