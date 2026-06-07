@@ -1,13 +1,8 @@
-import { useState } from 'react'
 import './SearchBar.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-    faMagnifyingGlass,
-    faHourglass
-} from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faHourglass } from '@fortawesome/free-solid-svg-icons'
 
-function SearchBar({ onSearch, loading }) {
-    const [query, setQuery] = useState('')
+function SearchBar({ onSearch, loading, query, onQueryChange }) {
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -24,14 +19,10 @@ function SearchBar({ onSearch, loading }) {
                         type="text"
                         placeholder="Ex: artificial intelligence, machine learning..."
                         value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        onChange={(e) => onQueryChange(e.target.value)}
                         required
                     />
-                    <button
-                        className="searchbar-btn"
-                        type="submit"
-                        disabled={loading}
-                    >
+                    <button className="searchbar-btn" type="submit" disabled={loading}>
                         {loading
                             ? <><FontAwesomeIcon icon={faHourglass} /> Recherche...</>
                             : <><FontAwesomeIcon icon={faMagnifyingGlass} /> Rechercher</>}

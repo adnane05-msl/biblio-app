@@ -27,11 +27,9 @@ public class SearchController {
     public ResponseEntity<List<ArticleDTO>> search(
             @RequestParam String query,
             @RequestParam(defaultValue = "true") boolean crossref,
-            @RequestParam(defaultValue = "true") boolean openalex,
-            @RequestParam(defaultValue = "false") boolean arxiv,
-            @RequestParam(defaultValue = "50") int maxResults) {
+            @RequestParam(defaultValue = "true") boolean openalex) {
 
-        List<ArticleDTO> results = searchService.search(query, crossref, openalex, arxiv);
+        List<ArticleDTO> results = searchService.search(query, crossref, openalex);
         return ResponseEntity.ok(results);
     }
 
@@ -53,7 +51,7 @@ public class SearchController {
                     request.getResultatsJson()
             );
         } catch (Exception e) {
-            System.err.println("❌ Erreur: " + e.getMessage());
+            System.err.println("Erreur: " + e.getMessage());
             e.printStackTrace();
         }
         return ResponseEntity.ok().build();

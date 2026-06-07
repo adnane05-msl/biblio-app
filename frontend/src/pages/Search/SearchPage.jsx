@@ -68,6 +68,8 @@ function SearchPage() {
     const [availableTypes,  setAvailableTypes]  = useState([])
     const [publishers,      setPublishers]      = useState([])
     const [yearRange,       setYearRange]       = useState({ min: 2000, max: 2025 })
+    const [searchBarQuery, setSearchBarQuery] = useState('')
+
 
     // ── Chargement projets ─────────────────────────────────────────────────
     useEffect(() => {
@@ -114,6 +116,7 @@ function SearchPage() {
         setHasSearched(true)
         setCurrentPage(1)
         setCurrentQuery(query)
+        setSearchBarQuery(query)
         resetFilters()
         setSelectedArticles([])
 
@@ -196,7 +199,7 @@ function SearchPage() {
         try {
             const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche)
             setSelectedArticles([])
-            setSuccess(`✅ ${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
+            setSuccess(`${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
             setTimeout(() => setSuccess(''), 4000)
         } catch {
             setError('Erreur lors de la sauvegarde groupée')
@@ -269,6 +272,9 @@ function SearchPage() {
 
     useEffect(() => { syncIndeterminate() }, [syncIndeterminate])
 
+
+
+
     // ── Rendu ──────────────────────────────────────────────────────────────
     return (
         <div className="search-page">
@@ -293,7 +299,12 @@ function SearchPage() {
                                 Trouvez et sauvegardez des références pour vos projets de recherche
                             </p>
                         </div>
-                        <SearchBar onSearch={handleSearch} loading={loading} />
+                        <SearchBar
+                            onSearch={handleSearch}
+                            loading={loading}
+                            query={searchBarQuery}
+                            onQueryChange={setSearchBarQuery}
+                        />
                     </div>
 
                     {error && (

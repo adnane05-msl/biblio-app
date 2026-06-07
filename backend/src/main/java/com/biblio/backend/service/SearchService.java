@@ -17,8 +17,7 @@ public class SearchService {
 
     public List<ArticleDTO> search(String query,
                                    boolean includeCrossref,
-                                   boolean includeOpenAlex,
-                                   boolean includeArxiv) {
+                                   boolean includeOpenAlex ){
 
         List<ArticleDTO> allResults = new ArrayList<>();
 

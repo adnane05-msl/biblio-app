@@ -42,7 +42,7 @@ public class RechercheService {
                 last.setNbResultats(nbResultats);
                 last.setResultatsJson(resultatsJson);
                 rechercheRepository.save(last);
-                System.out.println("♻️ Résultats mis à jour pour: " + requete);
+                System.out.println("Résultats mis à jour pour: " + requete);
                 return;
             }
         }
@@ -55,7 +55,7 @@ public class RechercheService {
         r.setUtilisateur(utilisateur);
         rechercheRepository.save(r);
 
-        System.out.println("✅ Sauvegardé dans `recherche`: "
+        System.out.println("Sauvegardé dans `recherche`: "
                 + requete + " (" + nbResultats + " résultats) userId=" + userId);
     }
 
@@ -72,14 +72,14 @@ public class RechercheService {
     @Transactional
     public void deleteRecherche(Long id) {
         rechercheRepository.deleteDefinitivement(id);
-        System.out.println("🗑️ Entrée id=" + id + " supprimée de `recherche`");
+        System.out.println("Entrée id=" + id + " supprimée de `recherche`");
     }
 
     // ── Suppression définitive de tout l'historique ───────────────────────
     @Transactional
     public void clearHistorique(Long userId) {
         rechercheRepository.deleteAllByUtilisateurId(userId);
-        System.out.println("🗑️ Historique vidé pour userId=" + userId);
+        System.out.println("Historique vidé pour userId=" + userId);
     }
 
     private RechercheDTO toDTO(Recherche r) {
