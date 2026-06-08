@@ -12,7 +12,7 @@ import java.util.List;
 public class OpenAlexService {
 
     private static final String API_URL = "https://api.openalex.org/works";
-    private static final int MAX_RESULTS = 200;
+    private static final int MAX_RESULTS = 100;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
