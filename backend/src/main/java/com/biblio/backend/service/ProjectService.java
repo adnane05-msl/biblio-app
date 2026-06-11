@@ -1,4 +1,7 @@
-// service/ProjetService.java
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  REMPLACE ton fichier existant :                                         ║
+// ║  src/main/java/com/biblio/backend/service/ProjectService.java            ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 package com.biblio.backend.service;
 
 import com.biblio.backend.dto.ProjectDTO;
@@ -18,13 +21,18 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final CollaborationService collaborationService;   // ← AJOUTÉ
 
-    public ProjectService(ProjectRepository projectRepository, UtilisateurRepository utilisateurRepository) {
-        this.projectRepository = projectRepository;
-        this.utilisateurRepository = utilisateurRepository;
+    // ── Injection par constructeur (cohérent avec ton code existant) ───────
+    public ProjectService(ProjectRepository projectRepository,
+                          UtilisateurRepository utilisateurRepository,
+                          CollaborationService collaborationService) {   // ← AJOUTÉ
+        this.projectRepository      = projectRepository;
+        this.utilisateurRepository  = utilisateurRepository;
+        this.collaborationService   = collaborationService;   // ← AJOUTÉ
     }
 
-    // Créer un projet
+    // ── Créer un projet ────────────────────────────────────────────────────
     public ProjectDTO createProject(Long utilisateurId, ProjectRequest request) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
@@ -35,10 +43,14 @@ public class ProjectService {
         project.setUtilisateur(utilisateur);
 
         Project saved = projectRepository.save(project);
+
+        // ← AJOUTÉ : enregistrer le créateur comme PROPRIETAIRE
+        collaborationService.initProprietaire(saved, utilisateur);
+
         return convertToDTO(saved);
     }
 
-    // Récupérer tous les projets d'un utilisateur
+    // ── Récupérer tous les projets d'un utilisateur ────────────────────────
     public List<ProjectDTO> getProjectsByUtilisateur(Long utilisateurId) {
         List<Project> projets = projectRepository.findByUtilisateurId(utilisateurId);
         return projets.stream()
@@ -46,14 +58,14 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    // Récupérer un projet par ID
+    // ── Récupérer un projet par ID ─────────────────────────────────────────
     public ProjectDTO getProjectById(Long projetId) {
         Project projet = projectRepository.findById(projetId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
         return convertToDTO(projet);
     }
 
-    // Modifier un projet
+    // ── Modifier un projet ─────────────────────────────────────────────────
     public ProjectDTO updateProject(Long projetId, ProjectRequest request) {
         Project projet = projectRepository.findById(projetId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
@@ -66,12 +78,12 @@ public class ProjectService {
         return convertToDTO(updated);
     }
 
-    // Supprimer un projet
+    // ── Supprimer un projet ────────────────────────────────────────────────
     public void deleteProject(Long projetId) {
         projectRepository.deleteById(projetId);
     }
 
-    // Conversion Entity → DTO
+    // ── Conversion Entity → DTO ────────────────────────────────────────────
     private ProjectDTO convertToDTO(Project project) {
         ProjectDTO dto = new ProjectDTO();
         dto.setId(project.getId());
@@ -79,7 +91,8 @@ public class ProjectService {
         dto.setDescription(project.getDescription());
         dto.setDateCreation(project.getDateCreation());
         dto.setDateModification(project.getDateModification());
-        dto.setNombreArticles(project.getProjectArticles() != null ? project.getProjectArticles().size() : 0);
+        dto.setNombreArticles(project.getProjectArticles() != null
+                ? project.getProjectArticles().size() : 0);
         return dto;
     }
 }

@@ -1,0 +1,399 @@
+/* ═══════════════════════════════════════════════════════════════
+   CollaborationPage.css — Page gestion des collaborateurs
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ────────────────────────────────────────────── */
+.cp-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+/* ── Chargement ──────────────────────────────────────────────── */
+.cp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 60vh;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+/* ── Bouton retour ───────────────────────────────────────────── */
+.cp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 24px;
+    transition: gap 0.15s;
+}
+.cp-back:hover { gap: 12px; text-decoration: underline; }
+
+/* ── En-tête ─────────────────────────────────────────────────── */
+.cp-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.cp-header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.cp-title {
+    margin: 0 0 2px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.cp-subtitle {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* ── Alert feedback ──────────────────────────────────────────── */
+.cp-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+    animation: slideIn 0.2s ease;
+}
+.cp-alert span { flex: 1; }
+.cp-alert button {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.1rem; opacity: 0.6; color: inherit;
+}
+.cp-alert button:hover { opacity: 1; }
+.cp-alert--ok    { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+.cp-alert--error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Layout 2 colonnes ───────────────────────────────────────── */
+.cp-body {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ── Card générique ──────────────────────────────────────────── */
+.cp-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.cp-full-width {
+    grid-column: 1 / -1;
+}
+
+.cp-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+.cp-card-title svg { color: #2563eb; }
+
+.cp-card-desc {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+/* ── Formulaire d'invitation ─────────────────────────────────── */
+.cp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.cp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cp-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.02em;
+}
+
+.cp-input {
+    padding: 10px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+    font-family: inherit;
+}
+.cp-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+/* ── Options rôle (radio cards) ──────────────────────────────── */
+.cp-role-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cp-role-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+}
+.cp-role-option input[type="radio"] { display: none; }
+.cp-role-option svg {
+    font-size: 1rem;
+    color: #6b7280;
+    flex-shrink: 0;
+    width: 18px;
+}
+.cp-role-option div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.cp-role-option strong {
+    font-size: 0.88rem;
+    color: #1e293b;
+}
+.cp-role-option span {
+    font-size: 0.76rem;
+    color: #6b7280;
+}
+.cp-role-option.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+.cp-role-option.selected svg { color: #2563eb; }
+.cp-role-option:hover:not(.selected) { border-color: #93c5fd; background: #f8faff; }
+
+/* ── Bouton inviter ──────────────────────────────────────────── */
+.cp-btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    font-family: inherit;
+}
+.cp-btn-submit:hover:not(:disabled) { background: #1d4ed8; }
+.cp-btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Liste membres ───────────────────────────────────────────── */
+.cp-members-count {
+    margin-left: auto;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 99px;
+    padding: 1px 9px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.cp-members-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cp-member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    background: #fafafa;
+    transition: background 0.15s;
+}
+.cp-member-item:hover { background: #f0f4ff; }
+
+/* Avatar */
+.cp-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Infos membre */
+.cp-member-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+.cp-member-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.cp-member-email {
+    font-size: 0.78rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tag "Vous" */
+.cp-you-tag {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 7px;
+}
+
+/* ── Badges rôle ─────────────────────────────────────────────── */
+.cp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.cp-badge--owner  { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+.cp-badge--editor { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.cp-badge--reader { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+/* ── Actions membre ──────────────────────────────────────────── */
+.cp-member-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.cp-role-select {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+.cp-role-select:focus { border-color: #2563eb; }
+
+.cp-btn-remove {
+    width: 32px;
+    height: 32px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+}
+.cp-btn-remove:hover { background: #fee2e2; }
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.cp-empty {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    padding: 24px 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 700px) {
+    .cp-body {
+        grid-template-columns: 1fr;
+    }
+    .cp-member-item {
+        flex-wrap: wrap;
+    }
+    .cp-member-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 4px;
+    }
+    .cp-header { gap: 12px; }
+    .cp-title { font-size: 1.2rem; }
+}

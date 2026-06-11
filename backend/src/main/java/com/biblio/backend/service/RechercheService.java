@@ -68,20 +68,6 @@ public class RechercheService {
                 .collect(Collectors.toList());
     }
 
-    // ── Suppression définitive d'une entrée ───────────────────────────────
-    @Transactional
-    public void deleteRecherche(Long id) {
-        rechercheRepository.deleteDefinitivement(id);
-        System.out.println("Entrée id=" + id + " supprimée de `recherche`");
-    }
-
-    // ── Suppression définitive de tout l'historique ───────────────────────
-    @Transactional
-    public void clearHistorique(Long userId) {
-        rechercheRepository.deleteAllByUtilisateurId(userId);
-        System.out.println("Historique vidé pour userId=" + userId);
-    }
-
     private RechercheDTO toDTO(Recherche r) {
         RechercheDTO dto = new RechercheDTO();
         dto.setId(r.getId());

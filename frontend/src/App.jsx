@@ -12,6 +12,7 @@ import HomePage from './pages/HomePage/HomePage'
 import ProfilPage from './pages/Profil/ProfilPage'
 import PrismaDashboardPage from './pages/PrismaDashboard/PrismaDashboardPage'
 import AdminRoutes from './pages/admin/AdminRoutes' 
+import CollaborationPage from './pages/CollaborationPage/CollaborationPage'
 
 function ProtectedRoute({ children }) {
     const { user } = useAuth()
@@ -41,6 +42,9 @@ function AppRoutes() {
             <Route path="/" element={<HomePage />} />
             <Route path="/profil" element={
                 <ProtectedRoute><ProfilPage /></ProtectedRoute>
+            } />
+            <Route path="/projets/:projetId/collaboration" element={
+                <ProtectedRoute><CollaborationPage /></ProtectedRoute>
             } />
 
             {/* ← AJOUTER CES 2 LIGNES */}

@@ -286,8 +286,8 @@ function ProjectsPage() {
                                     project={project}
                                     onEdit={p => setEditingProject(p)}
                                     onDelete={handleDelete}
-                                    onClick={() =>
-                                        navigate(`/projects/${project.id}`)}
+                                    onClick={() => navigate(`/projects/${project.id}`)}
+                                    onCollaborer={() => navigate(`/projets/${project.id}/collaboration`)}
                                 />
                             ))}
 

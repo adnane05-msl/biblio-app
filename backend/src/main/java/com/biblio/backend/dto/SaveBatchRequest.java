@@ -10,4 +10,5 @@ public class SaveBatchRequest {
     private Long projectId;
     private Integer totalRecherche;
     private List<SaveArticleRequest> articles;
+    private String query;
 }

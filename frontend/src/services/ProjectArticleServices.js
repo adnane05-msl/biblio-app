@@ -18,13 +18,11 @@ export const saveArticleToProject = async (article, projectId) => {
     return response.data
 }
 
-// ── Sauvegarde en lot ────────────────────────────────────────────────────────
-// CORRECTION : on passe maintenant totalRecherche (nb résultats API) au backend
-// pour qu'il soit persisté dans le projet et affiché correctement dans PRISMA.
-export const saveArticlesToProject = async (articles, projectId, totalRecherche = 0) => {
+export const saveArticlesToProject = async (articles, projectId, totalRecherche = 0, query = '') => {
     const payload = {
         projectId,
-        totalRecherche,          // ← NOUVEAU : nombre total retourné par les API
+        totalRecherche,
+        query,                   // ← NOUVEAU
         articles: articles.map(article => ({
             projectId,
             titre:        article.title,
@@ -41,7 +39,6 @@ export const saveArticlesToProject = async (articles, projectId, totalRecherche 
     }
     const response = await api.post('/api/projet-articles/save-batch', payload)
     return response.data
-    // Retourne : { total, saved, existing, failed, errors }
 }
 
 // ── Autres fonctions (inchangées) ────────────────────────────────────────────

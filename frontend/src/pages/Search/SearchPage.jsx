@@ -184,7 +184,7 @@ function SearchPage() {
     const handleSave = async (article, projectId) => {
         try {
             await saveArticleToProject(article, projectId)
-            setSuccess('✅ Article sauvegardé !')
+            setSuccess('Article sauvegardé !')
             setTimeout(() => setSuccess(''), 3000)
         } catch {
             setError('Erreur lors de la sauvegarde')
@@ -197,7 +197,7 @@ function SearchPage() {
         setBulkLoading(true)
         setShowBulkMenu(false)
         try {
-            const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche)
+            const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche, currentQuery)
             setSelectedArticles([])
             setSuccess(`${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
             setTimeout(() => setSuccess(''), 4000)
@@ -342,7 +342,8 @@ function SearchPage() {
                                                 <span className="sidebar-stat-num">{filteredArticles.length}</span>
                                                 <span className="sidebar-stat-lbl">
                                                     {filteredArticles.length !== articles.length
-                                                        ? `/ ${articles.length} total` : 'articles'}
+                                                        ? `sur ${articles.length}`
+                                                        : ' '}
                                                 </span>
                                             </div>
                                         </div>
@@ -418,7 +419,7 @@ function SearchPage() {
                                 {!loading && filteredArticles.length > 0 && (
                                     <div className="results-header">
                                         <span className="results-count">
-                                            {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''}
+                                            {filteredArticles.length} résultat{filteredArticles.length > 1 ? 's' : ''}
                                             {filteredArticles.length !== articles.length && ` (sur ${articles.length})`}
                                         </span>
                                         <div className="sort-control">

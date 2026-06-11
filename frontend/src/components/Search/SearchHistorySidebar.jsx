@@ -3,12 +3,11 @@ import { useEffect, useState, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faClockRotateLeft,
-    faTrash,
     faXmark,
     faMagnifyingGlass,
     faChevronLeft,
 } from '@fortawesome/free-solid-svg-icons'
-import { getHistorique, deleteHistoriqueEntry, clearHistorique } from '../../services/SearchServices'
+import { getHistorique } from '../../services/SearchServices'
 import './SearchHistorySidebar.css'
 
 function timeAgo(dateStr) {
@@ -59,18 +58,6 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
         }
     }, [searchActive])
 
-    const handleDelete = async (e, id) => {
-        e.stopPropagation()
-        await deleteHistoriqueEntry(id)
-        setHistorique(prev => prev.filter(h => h.id !== id))
-    }
-
-    const handleClear = async () => {
-        if (!window.confirm("Vider tout l'historique ?")) return
-        await clearHistorique(userId)
-        setHistorique([])
-    }
-
     const handleCloseSearch = () => {
         setSearchActive(false)
         setSearchText('')
@@ -80,7 +67,7 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
     const filteredHistorique = searchText.trim()
         ? historique.filter(h =>
             h.requete.toLowerCase().includes(searchText.toLowerCase().trim())
-          )
+        )
         : historique
 
     if (!userId) return null
@@ -123,16 +110,6 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
                                     title="Rechercher dans l'historique"
                                 >
                                     <FontAwesomeIcon icon={faMagnifyingGlass} />
-                                </button>
-                            )}
-                            {/* Bouton vider */}
-                            {historique.length > 0 && (
-                                <button
-                                    className="history-clear-btn"
-                                    onClick={handleClear}
-                                    title="Vider l'historique"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
                                 </button>
                             )}
                             {/* Bouton réduire */}
@@ -221,13 +198,6 @@ function SearchHistorySidebar({ userId, onSelectQuery, currentQuery }) {
                                         )}
                                     </div>
                                 </div>
-                                <button
-                                    className="history-item-delete"
-                                    onClick={(e) => handleDelete(e, entry.id)}
-                                    title="Supprimer"
-                                >
-                                    <FontAwesomeIcon icon={faXmark} />
-                                </button>
                             </div>
                         ))}
                     </div>

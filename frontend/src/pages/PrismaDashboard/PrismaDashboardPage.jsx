@@ -186,7 +186,7 @@ function PrismaDashboardPage() {
                         <div className="flow-card card-saved">
                             <div className="flow-card-icon"><FontAwesomeIcon icon={faSave} /></div>
                             <div className="flow-card-body">
-                                <div className="flow-card-label">ARTICLES SAUVEGARDÉS</div>
+                                <div className="flow-card-label">ARTICLES SÉLECTIONNÉS</div>
                                 <div className="flow-card-value">{data?.totalSauvegardes || 0}</div>
                                 <div className="flow-card-desc">importés dans le projet</div>
                             </div>

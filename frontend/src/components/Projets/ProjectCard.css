@@ -94,4 +94,17 @@
     background-color: #fee2e2;
 }
 
+.btn-collab {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
 
+.btn-collab:hover {
+    background-color: #dbeafe;
+}

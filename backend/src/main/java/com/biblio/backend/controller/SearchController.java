@@ -63,17 +63,4 @@ public class SearchController {
         return ResponseEntity.ok(rechercheService.getHistorique(userId));
     }
 
-    // ── Supprimer une entrée définitivement ───────────────────────────────
-    @DeleteMapping("/historique/{id}")
-    public ResponseEntity<Void> deleteHistorique(@PathVariable Long id) {
-        rechercheService.deleteRecherche(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ── Vider tout l'historique définitivement ────────────────────────────
-    @DeleteMapping("/historique/utilisateur/{userId}")
-    public ResponseEntity<Void> clearHistorique(@PathVariable Long userId) {
-        rechercheService.clearHistorique(userId);
-        return ResponseEntity.noContent().build();
-    }
 }

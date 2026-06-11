@@ -1,0 +1,302 @@
+/* ═══════════════════════════════════════════════════════════════
+   CollaborationPanel.css — Styles pour le panneau collaborateurs
+   ═══════════════════════════════════════════════════════════════ */
+
+.collab-panel {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+}
+
+/* ── En-tête ─────────────────────────────────────────────────── */
+.collab-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.collab-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+}
+
+.collab-header svg {
+    color: var(--color-primary, #2563eb);
+    font-size: 1.1rem;
+}
+
+.collab-count {
+    background: var(--color-primary, #2563eb);
+    color: #fff;
+    border-radius: 99px;
+    padding: 1px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* ── Message retour ──────────────────────────────────────────── */
+.collab-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 14px;
+}
+
+.collab-message.ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.collab-message.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.collab-message-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+}
+
+.collab-message-close:hover {
+    opacity: 1;
+}
+
+/* ── Formulaire d'invitation ─────────────────────────────────── */
+.collab-invite-form {
+    background: var(--bg-soft, #f9fafb);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 18px;
+}
+
+.collab-invite-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.collab-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.collab-input:focus {
+    border-color: var(--color-primary, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.collab-select {
+    padding: 9px 12px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.collab-btn-invite {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    background: var(--color-primary, #2563eb);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    white-space: nowrap;
+}
+
+.collab-btn-invite:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.collab-btn-invite:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.collab-hint {
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted, #6b7280);
+}
+
+/* ── Liste des membres ───────────────────────────────────────── */
+.collab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.collab-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    background: var(--bg-soft, #f9fafb);
+    transition: background 0.15s;
+}
+
+.collab-item:hover {
+    background: #f0f4ff;
+}
+
+/* Avatar initiales */
+.collab-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.collab-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.collab-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.collab-email {
+    font-size: 0.78rem;
+    color: var(--text-muted, #6b7280);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badges rôle */
+.collab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.badge-proprietaire {
+    background: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fde047;
+}
+
+.badge-editeur {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.badge-lecteur {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+/* Actions (modifier rôle + retirer) */
+.collab-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.collab-role-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.collab-btn-retirer {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    border-radius: 6px;
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.collab-btn-retirer:hover {
+    background: #fee2e2;
+}
+
+/* États vides / chargement */
+.collab-loading,
+.collab-empty {
+    text-align: center;
+    color: var(--text-muted, #6b7280);
+    font-size: 0.875rem;
+    padding: 20px 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .collab-invite-row {
+        flex-direction: column;
+    }
+
+    .collab-item {
+        flex-wrap: wrap;
+    }
+
+    .collab-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

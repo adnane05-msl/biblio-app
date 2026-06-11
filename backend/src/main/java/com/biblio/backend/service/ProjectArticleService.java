@@ -55,8 +55,23 @@ public class ProjectArticleService {
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
         if (batchRequest.getTotalRecherche() != null && batchRequest.getTotalRecherche() > 0) {
-            project.setTotalRecherche(batchRequest.getTotalRecherche());
-            projectRepository.save(project);
+
+            String nouvelleRequete = batchRequest.getQuery() != null
+                    ? batchRequest.getQuery().trim().toLowerCase()
+                    : null;
+            String derniereRequete = project.getDerniereRequeteComptee();
+
+            boolean memeRequete = nouvelleRequete != null
+                    && nouvelleRequete.equals(derniereRequete);
+
+            if (!memeRequete) {
+                int totalExistant = project.getTotalRecherche() != null
+                        ? project.getTotalRecherche()
+                        : 0;
+                project.setTotalRecherche(totalExistant + batchRequest.getTotalRecherche());
+                project.setDerniereRequeteComptee(nouvelleRequete);
+                projectRepository.save(project);
+            }
         }
 
         int total  = batchRequest.getArticles().size();

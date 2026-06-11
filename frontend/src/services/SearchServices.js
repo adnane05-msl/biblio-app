@@ -25,13 +25,3 @@ export const getHistorique = async (userId) => {
     const response = await api.get(`/api/recherche/historique/${userId}`)
     return response.data
 }
-
-// ── Supprimer une entrée définitivement ──────────────────────────────────
-export const deleteHistoriqueEntry = async (id) => {
-    await api.delete(`/api/recherche/historique/${id}`)
-}
-
-// ── Vider tout l'historique définitivement ───────────────────────────────
-export const clearHistorique = async (userId) => {
-    await api.delete(`/api/recherche/historique/utilisateur/${userId}`)
-}
