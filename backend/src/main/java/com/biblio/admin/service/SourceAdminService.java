@@ -31,22 +31,6 @@ public class SourceAdminService {
     }
 
     @Transactional
-    public SourceDto.Response create(SourceDto.CreateRequest req) {
-        if (sourceRepository.existsByNom(req.getNom())) {
-            throw new RuntimeException("Source déjà existante : " + req.getNom());
-        }
-        AdminSource source = AdminSource.builder()
-                .nom(req.getNom())
-                .urlBase(req.getUrlBase())
-                .typeApi(req.getTypeApi())
-                .limiteRequetes(req.getLimiteRequetes())
-                .cleApi(req.getCleApi())
-                .statut(AdminSource.StatutSource.EN_LIGNE)
-                .build();
-        return SourceDto.Response.from(sourceRepository.save(source));
-    }
-
-    @Transactional
     public SourceDto.Response update(Long id, SourceDto.UpdateRequest req) {
         AdminSource source = sourceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Source introuvable : " + id));

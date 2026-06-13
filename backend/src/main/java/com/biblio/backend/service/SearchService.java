@@ -1,9 +1,13 @@
 package com.biblio.backend.service;
 
 import com.biblio.backend.dto.ArticleDTO;
+import com.biblio.admin.model.AdminSource;
+import com.biblio.admin.repository.AdminSourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,30 +19,51 @@ public class SearchService {
     @Autowired
     private OpenAlexService openAlexService;
 
+    @Autowired
+    private AdminSourceRepository adminSourceRepository;
+
+    private boolean isSourceActive(String nom) {
+        return adminSourceRepository.findFirstByNomIgnoreCaseContaining(nom)
+                .map(s -> s.getStatut() == AdminSource.StatutSource.EN_LIGNE
+                        || s.getStatut() == AdminSource.StatutSource.LATENCE_ELEVEE)
+                .orElse(true);
+    }
+
+    //  Recherche multi-sources
+
     public List<ArticleDTO> search(String query,
                                    boolean includeCrossref,
-                                   boolean includeOpenAlex ){
+                                   boolean includeOpenAlex) {
 
         List<ArticleDTO> allResults = new ArrayList<>();
 
+        // Crossref
         if (includeCrossref) {
-            try {
-                allResults.addAll(crossrefService.search(query));
-            } catch (Exception e) {
-                System.err.println("Erreur Crossref: " + e.getMessage());
+            if (isSourceActive("crossref")) {
+                try {
+                    allResults.addAll(crossrefService.search(query));
+                } catch (Exception e) {
+                    System.err.println("Erreur Crossref: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Crossref désactivée par l'admin — source ignorée");
             }
         }
 
+        // OpenAlex
         if (includeOpenAlex) {
-            try {
-                allResults.addAll(openAlexService.search(query));
-            } catch (Exception e) {
-                System.err.println("Erreur OpenAlex: " + e.getMessage());
+            if (isSourceActive("openalex")) {
+                try {
+                    allResults.addAll(openAlexService.search(query));
+                } catch (Exception e) {
+                    System.err.println("Erreur OpenAlex: " + e.getMessage());
+                }
+            } else {
+                System.out.println("OpenAlex désactivée par l'admin — source ignorée");
             }
         }
 
-        // Nettoyer les DOI Invalides avant de filtrer
-
+        // Nettoyer les DOI invalides avant de filtrer
         allResults.forEach(a -> {
             if (a.getDoi() != null) {
                 String doi = a.getDoi().trim();
@@ -53,13 +78,13 @@ public class SearchService {
             }
         });
 
-        // Garder uniquement les articles avec DOI valide
+        // ── Garder uniquement les articles avec DOI valide ────────────────
         // Les articles sans DOI ne peuvent pas être sauvegardés de façon fiable
         List<ArticleDTO> withDoi = allResults.stream()
                 .filter(a -> a.getDoi() != null && !a.getDoi().trim().isEmpty())
                 .collect(Collectors.toList());
 
-        // Trier par année décroissante
+        // ── Trier par année décroissante ──────────────────────────────────
         withDoi.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
             if (a.getYear() == null) return 1;

@@ -35,6 +35,9 @@ public class Utilisateur {
     @Column(length = 50)
     private String profil;
 
+    @Column(name = "statut", length = 20)
+    private String statut = "ACTIF";
+
     @Column
     private LocalDate dateInscription = LocalDate.now();
 

@@ -11,17 +11,6 @@ import java.time.LocalDateTime;
 
 public class SourceDto {
 
-    @Data @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class CreateRequest {
-        @NotBlank(message = "Le nom est obligatoire")
-        private String nom;
-        @NotBlank(message = "L'URL de base est obligatoire")
-        private String urlBase;
-        private String typeApi;
-        private Integer limiteRequetes;
-        private String cleApi;
-    }
-
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class UpdateRequest {
         private String nom;

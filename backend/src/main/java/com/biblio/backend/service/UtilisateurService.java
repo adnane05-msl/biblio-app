@@ -61,7 +61,6 @@ public class UtilisateurService {
     }
 
     public UtilisateurDTO login(LoginRequest request) {
-        // ✅ orElseThrow avec UN SEUL return — pas de bloc {}
         Utilisateur user = utilisateurRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
 
@@ -70,6 +69,15 @@ public class UtilisateurService {
                     "Mot de passe incorrect pour : " + request.getEmail(),
                     request.getEmail());
             throw new RuntimeException("Email ou mot de passe incorrect");
+        }
+
+        // ── NOUVEAU : bloquer les comptes désactivés par l'admin ───────────
+        if ("INACTIF".equalsIgnoreCase(user.getStatut())) {
+            logService.warn("Authentification",
+                    "Tentative de connexion sur compte désactivé : " + request.getEmail(),
+                    request.getEmail());
+            throw new RuntimeException(
+                    "Votre compte a été désactivé. Contactez l'administrateur.");
         }
 
         String role = user.getRole() != null ? user.getRole() : "ROLE_USER";
@@ -81,7 +89,7 @@ public class UtilisateurService {
         String token = jwtService.generateToken(user.getEmail(), role);
         return toDTO(user, token);
     }
-
+    
     public UtilisateurDTO updateProfil(Long id, UpdateProfilRequest request) {
         Utilisateur user = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));

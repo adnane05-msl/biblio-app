@@ -2,7 +2,6 @@ package com.biblio.admin.controller;
 
 import com.biblio.admin.model.AdminSource;
 import com.biblio.admin.repository.AdminSourceRepository;
-import com.biblio.backend.repository.RechercheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +19,6 @@ import java.util.Map;
 public class MaintenanceController {
 
     private final AdminSourceRepository sourceRepository;
-    private final RechercheRepository   rechercheRepository;
     private final CacheManager cacheManager;
 
 
@@ -63,16 +61,6 @@ public class MaintenanceController {
         }
     }
 
-    // ── Section 4 : Vider l'historique des recherches ─────────
-    @DeleteMapping("/vider-historique")
-    public ResponseEntity<Map<String, Object>> viderHistorique() {
-        long count = rechercheRepository.count();
-        rechercheRepository.deleteAll();
-        return ResponseEntity.ok(Map.of(
-                "message",  count + " recherche(s) supprimée(s)",
-                "supprime", count
-        ));
-    }
 
     @PostMapping("/vider-cache")
     public ResponseEntity<Map<String, Object>> viderCache() {

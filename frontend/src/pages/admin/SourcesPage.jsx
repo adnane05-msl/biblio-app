@@ -1,26 +1,22 @@
 import { useEffect, useState } from 'react';
 import {
   getSources, rafraichirSource, changerStatutSource,
-  supprimerSource, createSource,
+  supprimerSource,
 } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDatabase,           // Titre page
-  faPlus,               // Ajouter
   faArrowsRotate,       // Rafraîchir
   faToggleOn,           // Activer
   faToggleOff,          // Désactiver
   faTrashCan,           // Supprimer
   faXmark,              // Fermer
-  faFloppyDisk,         // Sauvegarder
   faWifi,               // En ligne
   faSignal,          // Hors ligne
   faTriangleExclamation,// Latence élevée
   faWrench,             // Maintenance
   faLink,               // URL
   faTag,                // Type API
-  faKey,                // Clé API
-  faHashtag,            // Limite requêtes
   faCircleXmark,        // Erreur
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
@@ -39,15 +35,10 @@ const STATUS_ICON = {
   MAINTENANCE:    faWrench,
 };
 
-const EMPTY = { nom: '', urlBase: '', typeApi: 'REST / JSON', limiteRequetes: '', cleApi: '' };
-
 export default function SourcesPage() {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tick,    setTick]    = useState(0);
-  const [modal,   setModal]   = useState(false);
-  const [form,    setForm]    = useState(EMPTY);
-  const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState(null);
 
   useEffect(() => {
@@ -78,20 +69,6 @@ export default function SourcesPage() {
     await supprimerSource(id);
     refresh();
   }
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await createSource({ ...form, limiteRequetes: form.limiteRequetes || null });
-      setModal(false);
-      setForm(EMPTY);
-      refresh();
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <div className="admin-page">
@@ -113,9 +90,6 @@ export default function SourcesPage() {
 
       <div className="toolbar">
         <span className="text-muted">{sources.length} source(s)</span>
-        <button className="btn btn--primary" onClick={() => setModal(true)}>
-          <FontAwesomeIcon icon={faPlus} /> Ajouter une source
-        </button>
       </div>
 
       {loading ? (
@@ -193,111 +167,7 @@ export default function SourcesPage() {
         </div>
       )}
 
-      {/* ── Modal ajout source ───────────────────────────────── */}
-      {modal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <div className="modal-header">
-              <h2 className="modal-title">
-                <FontAwesomeIcon icon={faDatabase} style={{ marginRight: 10, color: '#059669' }} />
-                Nouvelle source
-              </h2>
-              <button className="modal-close" onClick={() => { setModal(false); setError(null); }}>
-                <FontAwesomeIcon icon={faXmark} />
-              </button>
-            </div>
-
-            {error && (
-              <div className="alert alert--error" style={{ margin: '0 0 16px' }}>
-                <FontAwesomeIcon icon={faCircleXmark} style={{ marginRight: 8 }} /> {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label className="form-label">
-                  <FontAwesomeIcon icon={faDatabase} style={{ marginRight: 6, color: '#6b7280' }} />
-                  Nom de la source
-                </label>
-                <input
-                  className="form-input"
-                  value={form.nom}
-                  onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                  placeholder="Ex : OpenAlex, CrossRef…"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  <FontAwesomeIcon icon={faLink} style={{ marginRight: 6, color: '#6b7280' }} />
-                  URL de base
-                </label>
-                <input
-                  className="form-input"
-                  value={form.urlBase}
-                  onChange={(e) => setForm({ ...form, urlBase: e.target.value })}
-                  placeholder="https://api.exemple.com"
-                  required
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">
-                    <FontAwesomeIcon icon={faTag} style={{ marginRight: 6, color: '#6b7280' }} />
-                    Type API
-                  </label>
-                  <input
-                    className="form-input"
-                    value={form.typeApi}
-                    onChange={(e) => setForm({ ...form, typeApi: e.target.value })}
-                    placeholder="REST / JSON"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    <FontAwesomeIcon icon={faHashtag} style={{ marginRight: 6, color: '#6b7280' }} />
-                    Limite requêtes/jour
-                  </label>
-                  <input
-                    className="form-input"
-                    type="number"
-                    value={form.limiteRequetes}
-                    onChange={(e) => setForm({ ...form, limiteRequetes: e.target.value })}
-                    placeholder="Illimité"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  <FontAwesomeIcon icon={faKey} style={{ marginRight: 6, color: '#6b7280' }} />
-                  Clé API (optionnel)
-                </label>
-                <input
-                  className="form-input"
-                  value={form.cleApi}
-                  onChange={(e) => setForm({ ...form, cleApi: e.target.value })}
-                  placeholder="Clé d'accès…"
-                />
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="btn btn--ghost"
-                  onClick={() => { setModal(false); setError(null); }}>
-                  <FontAwesomeIcon icon={faXmark} /> Annuler
-                </button>
-                <button type="submit" className="btn btn--primary" disabled={saving}>
-                  <FontAwesomeIcon icon={faFloppyDisk} />
-                  {saving ? ' Enregistrement…' : ' Enregistrer'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

@@ -3,9 +3,7 @@ package com.biblio.admin.controller;
 import com.biblio.admin.dto.SourceDto;
 import com.biblio.admin.model.AdminSource;
 import com.biblio.admin.service.SourceAdminService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,11 +26,6 @@ public class SourceAdminController {
     @GetMapping("/{id}")
     public ResponseEntity<SourceDto.Response> findById(@PathVariable Long id) {
         return ResponseEntity.ok(sourceAdminService.findById(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<SourceDto.Response> create(@Valid @RequestBody SourceDto.CreateRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(sourceAdminService.create(req));
     }
 
     @PutMapping("/{id}")

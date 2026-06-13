@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSources, testerSource, viderHistorique, viderCache } from '../../services/adminService';
+import { getSources, testerSource, viderCache } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faScrewdriverWrench,
@@ -11,7 +11,6 @@ import {
     faGaugeHigh,
     faArrowsRotate,
     faPlay,
-    faTrashCan,
     faEraser,
     faTriangleExclamation,
     faCircleXmark,
@@ -46,8 +45,7 @@ const COMPOSANTS = [
     const [sources,       setSources]       = useState([]);
     const [testResults,   setTestResults]   = useState({});
     const [testLoading,   setTestLoading]   = useState({});
-    const [actionMsg,     setActionMsg]     = useState(null); // ✅ utilisé pour TOUT (cache + historique)
-    const [actionLoading, setActionLoading] = useState(false);
+    const [actionMsg,     setActionMsg]     = useState(null); 
     const [cacheLoading,  setCacheLoading]  = useState(false);
 
     useEffect(() => {
@@ -80,21 +78,6 @@ const COMPOSANTS = [
         setActionMsg({ text: e.message, type: 'error' });
         } finally {
         setCacheLoading(false);
-        setTimeout(() => setActionMsg(null), 4000);
-        }
-    }
-
-    // ── Vider l'historique ─────────────────────────────────────
-    async function handleViderHistorique() {
-        if (!window.confirm("Vider tout l'historique des recherches ?")) return;
-        setActionLoading(true);
-        try {
-        const res = await viderHistorique();
-        setActionMsg({ text: res.message, type: 'ok' });
-        } catch (e) {
-        setActionMsg({ text: e.message, type: 'error' });
-        } finally {
-        setActionLoading(false);
         setTimeout(() => setActionMsg(null), 4000);
         }
     }
@@ -205,7 +188,7 @@ const COMPOSANTS = [
             Actions rapides
             </h2>
 
-            {/* ✅ Un seul message pour les deux actions */}
+            {/*Un seul message pour les deux actions */}
             {actionMsg && (
             <div className={`alert alert--${actionMsg.type}`} style={{ marginBottom: 16 }}>
                 <FontAwesomeIcon
@@ -238,29 +221,6 @@ const COMPOSANTS = [
                 {cacheLoading ? ' …' : ' Vider'}
                 </button>
             </div>
-
-            {/* ── Vider l'historique ────────────────────────────── */}
-            <div className="action-item">
-                <div>
-                <p className="action-label">
-                    <FontAwesomeIcon icon={faTrashCan}
-                    style={{ marginRight: 6, color: '#dc2626' }} />
-                    Vider l'historique des recherches
-                </p>
-                <p className="action-desc">
-                    Supprime définitivement toutes les recherches sauvegardées par les utilisateurs.
-                </p>
-                </div>
-                <button
-                className="btn btn--sm btn--red"
-                disabled={actionLoading}
-                onClick={handleViderHistorique}
-                >
-                <FontAwesomeIcon icon={faTrashCan} />
-                {actionLoading ? ' …' : ' Vider'}
-                </button>
-            </div>
-
             </div>
         </section>
 

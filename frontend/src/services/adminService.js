@@ -64,9 +64,6 @@ export const getLogs = (type = null) =>
 export const testerSource = (id) =>
   apiClient.post(`/api/admin/maintenance/tester-source/${id}`).then((r) => r.data);
 
-export const viderHistorique = () =>
-  apiClient.delete('/api/admin/maintenance/vider-historique').then((r) => r.data);
-
 // Vider le cache de l'application
 
 export const viderCache = () =>
