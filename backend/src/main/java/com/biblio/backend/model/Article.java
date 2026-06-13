@@ -19,17 +19,14 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Correction : length augmenté de façon à éviter toute troncature silencieuse
     @Column(nullable = false, length = 2000)
     private String titre;
 
-    // Correction : était 100 → troncature causait des faux-positifs dans findByTitre/findByDoi
     @Column(length = 2000)
     private String auteurs;
 
     private Integer annee;
 
-    // Correction : length explicite pour les DOI longs
     @Column(length = 500)
     private String doi;
 
@@ -45,7 +42,6 @@ public class Article {
     @Column(name = "mot_cles", length = 1000)
     private String motCles;
 
-    // Correction : journal et source ajoutés au modèle pour éviter la perte d'info
     @Column(length = 500)
     private String journal;
 
@@ -61,7 +57,4 @@ public class Article {
     @ManyToOne
     @JoinColumn(name = "id_source")
     private Source source;
-
-    @OneToMany(mappedBy = "article")
-    private List<Historique> historiques = new ArrayList<>();
 }

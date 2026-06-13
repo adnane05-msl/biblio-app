@@ -36,7 +36,6 @@ public class AuthController {
 
     @PostMapping("/inscription")
     public ResponseEntity<UtilisateurDTO> register(@RequestBody RegisterRequest request) {
-        System.out.println("=== REGISTER CONTROLLER ===");
         System.out.println("Email: " + request.getEmail());
         System.out.println("Nom: " + request.getNom());
         System.out.println("VerificationCode: " + request.getVerificationCode());

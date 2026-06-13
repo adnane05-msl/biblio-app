@@ -4,10 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-/**
- * Journal système : trace les actions importantes de l'application.
- * La référence à User a été supprimée (User admin n'est plus nécessaire ici).
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +31,7 @@ public class LogSysteme {
 
 
     @Column(name = "user_email", length = 150)
-    private String userEmail; // on stocke juste l'email si nécessaire
+    private String userEmail;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

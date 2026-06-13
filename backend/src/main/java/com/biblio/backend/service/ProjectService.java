@@ -1,7 +1,3 @@
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  REMPLACE ton fichier existant :                                         ║
-// ║  src/main/java/com/biblio/backend/service/ProjectService.java            ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
 package com.biblio.backend.service;
 
 import com.biblio.backend.dto.ProjectDTO;
