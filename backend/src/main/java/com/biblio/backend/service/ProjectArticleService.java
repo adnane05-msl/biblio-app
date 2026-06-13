@@ -50,10 +50,14 @@ public class ProjectArticleService {
     }
 
     // ── Sauvegarde en lot ─────────────────────────────────────────────────────
+    // Chaque article est sauvegardé INDÉPENDAMMENT dans son propre try/catch :
+    // si l'un échoue, il est ignoré sans bloquer les autres. Aucune erreur n'est
+    // remontée à l'utilisateur, tous les articles valides sont enregistrés.
     public Map<String, Object> saveBatch(SaveBatchRequest batchRequest) {
         Project project = projectRepository.findById(batchRequest.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
+        // ── Cumul du total de recherche (fusion des recherches du projet) ──
         if (batchRequest.getTotalRecherche() != null && batchRequest.getTotalRecherche() > 0) {
 
             String nouvelleRequete = batchRequest.getQuery() != null
@@ -93,6 +97,7 @@ public class ProjectArticleService {
             } catch (Exception e) {
                 failed++;
                 errors.add(e.getMessage());
+                System.err.println("Article ignoré (non sauvegardable) : " + e.getMessage());
             }
         }
 
@@ -107,14 +112,13 @@ public class ProjectArticleService {
     // ── Déduplication intelligente ────────────────────────────────────────────
     //
     // Critères (ordre de priorité) :
-    //   1. DOI identique (non vide)                          → doublon certain
-    //   2. Titre très proche (similarité ≥ 85%)
-    //      ET (mêmes auteurs OU même année)                  → doublon probable
-    //   3. Titre très proche seul (similarité ≥ 85%)        → doublon possible
+    //   1. DOI identique (non vide)                          -> doublon certain
+    //   2. Titre très proche (similarité >= 85%)
+    //      ET (mêmes auteurs OU même année)                  -> doublon probable
+    //   3. Titre très proche seul (similarité >= 85%)        -> doublon possible
     //
     // Dans chaque groupe, le 1er article (plus ancien dateAjout) est conservé,
     // les suivants sont marqués DOUBLON.
-    //
     public Map<String, Object> deduplicate(Long projectId) {
         List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
 
@@ -198,7 +202,7 @@ public class ProjectArticleService {
             boolean memeAnnee    = a.getAnnee() != null && a.getAnnee().equals(b.getAnnee());
             boolean memesAuteurs = sameAuthors(a.getAuteurs(), b.getAuteurs());
 
-            // Titre très proche seul (≥ 0.95) suffit aussi
+            // Titre très proche seul (>= 0.95) suffit aussi
             if (simTitre >= 0.95 || memeAnnee || memesAuteurs) {
                 return true;
             }
@@ -271,14 +275,23 @@ public class ProjectArticleService {
         String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
         String titre = request.getTitre() != null ? request.getTitre().trim() : null;
 
+        // Réutilise un article existant SEULEMENT si même DOI ET même année.
+        // Si l'année diffère, on crée une nouvelle entrée (ce sont des
+        // exemplaires distincts du point de vue de l'utilisateur).
         if (doi != null && !doi.isEmpty()) {
-            Article existing = articleRepository.findByDoi(doi).orElse(null);
+            // On ne réutilise un article existant que s'il a la MÊME année.
+            // findAllByDoi évite le plantage quand plusieurs lignes ont ce DOI.
+            Article existing = articleRepository.findAllByDoi(doi).stream()
+                    .filter(a -> a.getAnnee() != null
+                            && a.getAnnee().equals(request.getAnnee()))
+                    .findFirst()
+                    .orElse(null);
             if (existing != null) {
-                updateMetadata(existing, request);
-                return articleRepository.save(existing);
+                return existing;
             }
         }
 
+        // Titre toujours non vide (contrainte NOT NULL)
         if (titre == null || titre.isEmpty()) {
             String suffix = UUID.randomUUID().toString().substring(0, 8);
             titre = (doi != null && !doi.isEmpty())
@@ -287,30 +300,29 @@ public class ProjectArticleService {
         }
 
         Article article = new Article();
-        article.setTitre(titre);
-        article.setDoi(doi != null && !doi.isEmpty() ? doi : null);
-        article.setAuteurs(request.getAuteurs());
+        article.setTitre(cut(titre, 2000));
+        article.setDoi(doi != null && !doi.isEmpty() ? cut(doi, 500) : null);
+        article.setAuteurs(cut(request.getAuteurs(), 2000));
         article.setAnnee(request.getAnnee());
-        article.setJournal(request.getJournal());
-        article.setDocumentType(request.getDocumentType());
-        article.setSourceNom(request.getSource());
-        article.setResume(request.getResume());
-        article.setUrl(request.getUrl());
+        article.setJournal(cut(request.getJournal(), 500));
+        article.setDocumentType(cut(request.getDocumentType(), 100));
+        article.setSourceNom(cut(request.getSource(), 100));
+        article.setResume(cut(request.getResume(), 5000));
+        article.setUrl(cut(request.getUrl(), 2000));
         article.setNbCitations(request.getNbCitations());
 
         return articleRepository.save(article);
     }
 
-    private void updateMetadata(Article article, SaveArticleRequest request) {
-        if (request.getDocumentType() != null) article.setDocumentType(request.getDocumentType());
-        if (request.getJournal()      != null) article.setJournal(request.getJournal());
-        if (request.getAuteurs()      != null) article.setAuteurs(request.getAuteurs());
-        if (request.getResume()       != null) article.setResume(request.getResume());
-        if (request.getNbCitations()  != null) article.setNbCitations(request.getNbCitations());
-        if (request.getUrl()          != null) article.setUrl(request.getUrl());
+    // Tronque une chaîne à la longueur max de la colonne pour éviter
+    // toute erreur d'insertion (valeur trop longue).
+    private String cut(String s, int max) {
+        if (s == null) return null;
+        s = s.trim();
+        return s.length() > max ? s.substring(0, max) : s;
     }
 
-    // ── Autres méthodes inchangées ────────────────────────────────────────────
+    // ── Autres méthodes ─────────────────────────────────────────────────────
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
         return projectArticleRepository.findByProject_Id(projectId)
                 .stream()

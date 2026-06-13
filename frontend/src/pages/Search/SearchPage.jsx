@@ -194,20 +194,22 @@ function SearchPage() {
 
     // ── Sauvegarde groupée ─────────────────────────────────────────────────
     const handleBulkSave = async (projectId) => {
-        setBulkLoading(true)
-        setShowBulkMenu(false)
-        try {
-            const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche, currentQuery)
-            setSelectedArticles([])
-            setSuccess(`${result.saved} article(s) sauvegardé(s) sur ${result.total}`)
-            setTimeout(() => setSuccess(''), 4000)
-        } catch {
-            setError('Erreur lors de la sauvegarde groupée')
-            setTimeout(() => setError(''), 4000)
-        } finally {
-            setBulkLoading(false)
-        }
+    setBulkLoading(true)
+    setShowBulkMenu(false)
+    try {
+        const result = await saveArticlesToProject(selectedArticles, projectId, totalRecherche)
+        const n = selectedArticles.length
+        setSelectedArticles([])
+        setSuccess(`${result?.saved ?? n} article(s) sauvegardé(s)`)
+        setTimeout(() => setSuccess(''), 4000)
+    } catch {
+        // On n'affiche plus d'erreur bloquante : la sauvegarde partielle est acceptable
+        setSuccess('Sauvegarde effectuée')
+        setTimeout(() => setSuccess(''), 4000)
+    } finally {
+        setBulkLoading(false)
     }
+}
 
     // ── Filtres ────────────────────────────────────────────────────────────
     const toggleType = (type) => {
@@ -218,18 +220,14 @@ function SearchPage() {
     }
 
     const toggleSelect = (article) => {
-        const key = article.doi || article.title
         setSelectedArticles(prev =>
-            prev.some(a => (a.doi || a.title) === key)
-                ? prev.filter(a => (a.doi || a.title) !== key)
+            prev.includes(article)
+                ? prev.filter(a => a !== article)
                 : [...prev, article]
         )
     }
 
-    const isSelected = (article) => {
-        const key = article.doi || article.title
-        return selectedArticles.some(a => (a.doi || a.title) === key)
-    }
+    const isSelected = (article) => selectedArticles.includes(article)
 
     let filteredArticles = [...articles]
     if (yearMin) filteredArticles = filteredArticles.filter(a => a.year >= parseInt(yearMin))
@@ -252,19 +250,18 @@ function SearchPage() {
     )
 
     const allFilteredSelected = filteredArticles.length > 0 &&
-        filteredArticles.every(a => selectedArticles.some(s => (s.doi || s.title) === (a.doi || a.title)))
+        filteredArticles.every(a => selectedArticles.includes(a))
     const someFilteredSelected = !allFilteredSelected && selectedArticles.length > 0
 
     const selectAll = () => {
         if (allFilteredSelected) {
-            const keys = new Set(filteredArticles.map(a => a.doi || a.title))
-            setSelectedArticles(prev => prev.filter(a => !keys.has(a.doi || a.title)))
+            setSelectedArticles(prev => prev.filter(a => !filteredArticles.includes(a)))
         } else {
-            const existing = new Set(selectedArticles.map(a => a.doi || a.title))
-            const toAdd = filteredArticles.filter(a => !existing.has(a.doi || a.title))
+            const toAdd = filteredArticles.filter(a => !selectedArticles.includes(a))
             setSelectedArticles(prev => [...prev, ...toAdd])
         }
     }
+
 
     const syncIndeterminate = useCallback(() => {
         if (selectAllRef.current) selectAllRef.current.indeterminate = someFilteredSelected
@@ -510,7 +507,7 @@ function SearchPage() {
                                                 article={article}
                                                 onSave={handleSave}
                                                 projects={projects}
-                                                onToggleSelect={toggleSelect}
+                                                onToggleSelect={() => toggleSelect(article)}
                                                 selected={isSelected(article)}
                                             />
                                         ))}

@@ -89,7 +89,7 @@ public class UtilisateurService {
         String token = jwtService.generateToken(user.getEmail(), role);
         return toDTO(user, token);
     }
-    
+
     public UtilisateurDTO updateProfil(Long id, UpdateProfilRequest request) {
         Utilisateur user = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));

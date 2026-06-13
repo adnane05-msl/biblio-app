@@ -29,7 +29,7 @@ function ArticleCard({ article, onSave, projects, selected, onToggleSelect}) {
                             type="checkbox"
                             className="article-checkbox"
                             checked={selected || false}
-                            onChange={() => onToggleSelect(article)}
+                            onChange={() => onToggleSelect()}
                             onClick={e => e.stopPropagation()}
                         />
                     )}

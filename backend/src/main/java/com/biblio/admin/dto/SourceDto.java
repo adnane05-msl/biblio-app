@@ -1,7 +1,6 @@
 package com.biblio.admin.dto;
 
 import com.biblio.admin.model.AdminSource;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

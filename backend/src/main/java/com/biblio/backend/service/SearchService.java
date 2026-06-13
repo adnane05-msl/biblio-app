@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SearchService {
@@ -22,6 +21,14 @@ public class SearchService {
     @Autowired
     private AdminSourceRepository adminSourceRepository;
 
+    // ════════════════════════════════════════════════════════════════════
+    //  Vérification du statut admin d'une source
+    // ════════════════════════════════════════════════════════════════════
+    //  La page admin "Sources" permet d'activer / désactiver une source.
+    //    - Active      : EN_LIGNE ou LATENCE_ELEVEE
+    //    - Désactivée  : HORS_LIGNE ou MAINTENANCE
+    //  Si la source n'est pas référencée dans la table, elle est considérée
+    //  active par défaut (fallback de sécurité).
     private boolean isSourceActive(String nom) {
         return adminSourceRepository.findFirstByNomIgnoreCaseContaining(nom)
                 .map(s -> s.getStatut() == AdminSource.StatutSource.EN_LIGNE
@@ -29,15 +36,16 @@ public class SearchService {
                 .orElse(true);
     }
 
+    // ════════════════════════════════════════════════════════════════════
     //  Recherche multi-sources
-
+    // ════════════════════════════════════════════════════════════════════
     public List<ArticleDTO> search(String query,
                                    boolean includeCrossref,
                                    boolean includeOpenAlex) {
 
         List<ArticleDTO> allResults = new ArrayList<>();
 
-        // Crossref
+        // ── Crossref ──────────────────────────────────────────────────────
         if (includeCrossref) {
             if (isSourceActive("crossref")) {
                 try {
@@ -50,7 +58,7 @@ public class SearchService {
             }
         }
 
-        // OpenAlex
+        // ── OpenAlex ──────────────────────────────────────────────────────
         if (includeOpenAlex) {
             if (isSourceActive("openalex")) {
                 try {
@@ -63,11 +71,11 @@ public class SearchService {
             }
         }
 
-        // Nettoyer les DOI invalides avant de filtrer
+        // ── Nettoyage des DOI invalides (transforme un faux DOI en null) ──
+        // On ne SUPPRIME plus l'article : on remet juste son DOI à null.
         allResults.forEach(a -> {
             if (a.getDoi() != null) {
                 String doi = a.getDoi().trim();
-                // Crossref retourne parfois "null" comme string ou un DOI vide
                 if (doi.isEmpty()
                         || doi.equalsIgnoreCase("null")
                         || doi.equalsIgnoreCase("undefined")
@@ -78,20 +86,17 @@ public class SearchService {
             }
         });
 
-        // ── Garder uniquement les articles avec DOI valide ────────────────
-        // Les articles sans DOI ne peuvent pas être sauvegardés de façon fiable
-        List<ArticleDTO> withDoi = allResults.stream()
-                .filter(a -> a.getDoi() != null && !a.getDoi().trim().isEmpty())
-                .collect(Collectors.toList());
-
+        // ── On garde TOUS les articles, avec ou sans DOI ──────────────────
+        // Les articles sans DOI (livres, chapitres, etc.) sont des références
+        // valides : ils doivent pouvoir être affichés ET sauvegardés.
         // ── Trier par année décroissante ──────────────────────────────────
-        withDoi.sort((a, b) -> {
+        allResults.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
             if (a.getYear() == null) return 1;
             if (b.getYear() == null) return -1;
             return b.getYear().compareTo(a.getYear());
         });
 
-        return withDoi;
+        return allResults;
     }
 }
