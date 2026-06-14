@@ -182,3 +182,84 @@
     background-color: #fff0f0;
     color: #dc2626;
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — Navbar mobile (menu burger)
+   N'affecte RIEN sur grand écran (≥ 901px).
+   ════════════════════════════════════════════════════════════ */
+
+/* Bouton burger : caché par défaut (desktop) */
+.navbar-burger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #2563eb;
+    cursor: pointer;
+    padding: 6px 10px;
+}
+
+/* ── Tablette et mobile (≤ 900px) ───────────────────────────── */
+@media (max-width: 900px) {
+
+    .navbar {
+        padding: 0 16px;
+    }
+
+    /* Ordre sur mobile :
+       logo (1) … avatar profil (2) … burger (3) tout à droite */
+    .navbar-brand  { order: 1; }
+    .navbar-user   { order: 2; margin-left: auto; }
+    .navbar-burger { order: 3; display: block; margin-left: 4px; }
+
+    /* Les liens deviennent un panneau déroulant sous la navbar */
+    .navbar-links {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        background-color: #ffffff;
+        border-bottom: 1px solid #d1d5db;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+        padding: 8px 0;
+        z-index: 150;
+        display: none;
+        order: 4;
+    }
+
+    /* Ouvert via le bouton burger (classe ajoutée par le JSX) */
+    .navbar-links.mobile-open {
+        display: flex;
+    }
+
+    .navbar-links .nav-link {
+        border-radius: 0;
+        padding: 14px 20px;
+        width: 100%;
+    }
+
+    /* On garde l'avatar de profil visible, on masque juste le texte */
+    .user-details {
+        display: none;
+    }
+
+    .navbar-user .chevron {
+        display: none;
+    }
+
+    /* Le menu profil s'ouvre décalé pour ne pas être sous le burger */
+    .user-dropdown {
+        right: 52px;
+        top: 60px;
+    }
+}
+
+/* ── Petit mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 17px;
+    }
+}

@@ -21,7 +21,7 @@ const NAV_ITEMS = [
 export default function AdminLayout() {
   const location                  = useLocation();
   const { user }                  = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(window.innerWidth <= 768);
 
   // ── Vérification du rôle admin ────────────────────────────
   const role    = user?.role ?? '';

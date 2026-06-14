@@ -97,11 +97,12 @@
 }
 
 /* ── Cartes statistique ── */
+/* GRILLE : 3 cartes par ligne sur desktop (s'adapte automatiquement) */
 .stats-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 14px;
     margin-bottom: 32px;
-    flex-wrap: wrap;
 }
 
 .stat-card {
@@ -110,8 +111,6 @@
     align-items: center;
     padding: 20px 24px;
     border-radius: 12px;
-    min-width: 110px;
-    flex: 1;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
@@ -279,15 +278,76 @@
     color: #9ca3af;
 }
 
-/* Responsive */
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Tablette (≤ 768px) ── */
 @media (max-width: 768px) {
+
+    .statistiques-container {
+        padding: 24px 16px;
+    }
+
+    .statistiques-title {
+        font-size: 21px;
+    }
+
+    /* Cartes stats : 2 par ligne */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Graphiques : 1 colonne */
     .charts-grid {
         grid-template-columns: 1fr;
     }
     .chart-wide {
         grid-column: 1;
     }
+    .chart-card {
+        padding: 16px;
+    }
+
+    /* Barre Retour + Export PDF : empilée */
+    .stats-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .stats-topbar .btn-export-pdf {
+        justify-content: center;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+}
+
+/* ── Petit mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+
+    /* On garde 2 cartes par ligne (compact mais lisible) */
     .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+    }
+    .stat-card-num {
+        font-size: 24px;
+    }
+    .stat-card {
+        padding: 14px 10px;
+    }
+
+    /* Item "top article" : passe en colonne */
+    .top-article-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .top-article-citations {
+        flex-direction: row;
+        gap: 6px;
+        align-items: baseline;
+        min-width: 0;
     }
 }

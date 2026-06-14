@@ -108,3 +108,18 @@
 .btn-collab:hover {
     background-color: #dbeafe;
 }
+
+@media (max-width: 480px) {
+    .project-card {
+        padding: 18px;
+    }
+    .project-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .project-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}

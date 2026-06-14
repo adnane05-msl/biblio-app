@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faBookOpen, faChevronDown } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faBookOpen, faChevronDown, faBars, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useState } from 'react'
 import './Navbar.css'
 
@@ -18,8 +18,12 @@ function Navbar() {
     const isActive = (path) => location.pathname === path
 
     const [showMenu, setShowMenu] = useState(false)
+    const [mobileOpen, setMobileOpen] = useState(false)
 
-    if (!user) return null 
+    // Ferme le menu mobile après un clic sur un lien
+    const closeMobile = () => setMobileOpen(false)
+
+    if (!user) return null
 
     return (
         <nav className="navbar">
@@ -27,34 +31,36 @@ function Navbar() {
                 <FontAwesomeIcon icon={faBookOpen} /> BiblioApp
             </div>
 
-            <div className="navbar-links">
-                <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+            {/* Bouton burger — visible uniquement sur mobile via le CSS */}
+            <button
+                className="navbar-burger"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Menu"
+            >
+                <FontAwesomeIcon icon={mobileOpen ? faXmark : faBars} />
+            </button>
+
+            <div className={`navbar-links ${mobileOpen ? 'mobile-open' : ''}`}>
+                <Link to="/" onClick={closeMobile}
+                    className={`nav-link ${isActive('/') ? 'active' : ''}`}>
                     Accueil
                 </Link>
-                <Link
-                    to="/search"
-                    className={`nav-link ${isActive('/search') ? 'active' : ''}`}
-                >
+                <Link to="/search" onClick={closeMobile}
+                    className={`nav-link ${isActive('/search') ? 'active' : ''}`}>
                     Recherche
                 </Link>
-                <Link
-                    to="/projects"
-                    className={`nav-link ${isActive('/projects') ? 'active' : ''}`}
-                >
+                <Link to="/projects" onClick={closeMobile}
+                    className={`nav-link ${isActive('/projects') ? 'active' : ''}`}>
                     Mes Projets
                 </Link>
 
-                {/* ← AJOUTER CES LIGNES */}
                 {(user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') && (
-                    <Link
-                        to="/admin"
-                        className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
-                    >
+                    <Link to="/admin" onClick={closeMobile}
+                        className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
                         Espace Admin
                     </Link>
                 )}
             </div>
-
 
             <div className="navbar-user">
                 <div

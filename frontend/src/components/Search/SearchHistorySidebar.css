@@ -53,7 +53,6 @@
     border: 1px solid #dbeafe;
 }
 
-
 /* Bouton ouvrir — flèche droite claire */
 .history-expand-btn {
     width: 36px;
@@ -127,7 +126,6 @@
     align-items: center;
     gap: 4px;
 }
-
 
 /* Bouton fermer/réduire — clairement identifiable */
 .history-collapse-btn {
@@ -245,7 +243,6 @@
     color: #2563eb;
 }
 
-
 /* ══════════════════════════════════════════════════════
    ÉTATS VIDE / LOADING
 ══════════════════════════════════════════════════════ */
@@ -300,7 +297,6 @@
     0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
     40%           { transform: scale(1);   opacity: 1;   }
 }
-
 
 /* ══════════════════════════════════════════════════════
    BOUTON RECHERCHE DANS L'HISTORIQUE
@@ -438,4 +434,48 @@
     border-radius: 2px;
     padding: 0 1px;
     font-style: normal;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE — Historique flottant sur mobile
+   La barre reste à GAUCHE, s'ouvre/ferme avec son bouton,
+   passe AU-DESSUS du contenu mais SOUS la navbar.
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* La sidebar flotte SOUS la navbar (navbar = z-index 100) */
+    .history-sidebar {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        height: calc(100vh - 64px);
+        z-index: 90;                       /* < 100 => sous la navbar */
+        box-shadow: 2px 0 16px rgba(0,0,0,0.12);
+    }
+
+    /* Réduite : juste le petit bouton flottant à gauche (52px) */
+    .history-sidebar--collapsed {
+        width: 52px;
+        min-width: 52px;
+    }
+
+    /* Ouverte : largeur confortable, sans dépasser l'écran */
+    .history-sidebar:not(.history-sidebar--collapsed) {
+        width: 280px;
+        min-width: 280px;
+        max-width: 85vw;
+    }
+
+    /* Voile sombre derrière la barre quand elle est OUVERTE */
+    .history-sidebar:not(.history-sidebar--collapsed)::before {
+        content: '';
+        position: fixed;
+        top: 64px;
+        left: 280px;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.35);
+        z-index: -1;
+    }
 }

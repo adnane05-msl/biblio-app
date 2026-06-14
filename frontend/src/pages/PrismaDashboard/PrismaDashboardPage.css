@@ -97,7 +97,7 @@
 
 /* ZONE CAPTURÉE — wrapper du diagramme */
 .prisma-diagram-wrapper {
-    background: #f0f4f8;   /* fond identique à la page pour la capture */
+    background: #f0f4f8;
     padding: 24px 0 8px;
     border-radius: 16px;
 }
@@ -220,10 +220,75 @@
 .ldot-red     { background: #dc2626; }
 .ldot-emerald { background: #059669; }
 
-/* RESPONSIVE */
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
 @media (max-width: 520px) {
-    .flow-card { width: 100%; max-width: 360px; }
-    .flow-fork-cards .flow-card { width: 100%; max-width: 360px; }
-    .fork-svg { max-width: 340px; }
-    .prisma-topbar { flex-direction: column; align-items: flex-start; }
+
+    .prisma-container {
+        padding: 20px 14px 56px;
+    }
+
+    .prisma-title {
+        font-size: 21px;
+        gap: 8px;
+    }
+    .prisma-subtitle {
+        font-size: 13px;
+    }
+
+    /* Les cartes simples (haut du flux) passent pleine largeur */
+    .flow-card {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    /* IMPORTANT : les 2 cartes finales (Exclus / Retenus) restent
+       CÔTE À CÔTE pour rester alignées avec les 2 flèches de la fourche.
+       On enlève le wrap et on passe en 2 colonnes égales compactes. */
+    .flow-fork-cards {
+        flex-wrap: nowrap;
+        gap: 12px;
+        width: 100%;
+        max-width: 360px;
+    }
+    .flow-fork-cards .flow-card {
+        width: 50%;
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 14px 12px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+    }
+    /* Dans les 2 cartes finales, l'icône au-dessus du texte */
+    .flow-fork-cards .flow-card-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+    .flow-fork-cards .flow-card-value {
+        font-size: 24px;
+    }
+
+    /* La fourche s'adapte à la largeur compacte */
+    .fork-svg {
+        max-width: 340px;
+    }
+
+    /* Topbar empilé + bouton PDF pleine largeur */
+    .prisma-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .prisma-topbar .btn-export-pdf {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .prisma-legend {
+        gap: 10px 16px;
+        margin-top: 32px;
+    }
 }

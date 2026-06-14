@@ -27,7 +27,6 @@
   flex: 1;
   background: var(--admin-bg);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  /* ✅ FIX : la largeur totale ne dépasse pas le viewport */
   width: 100%;
   overflow: hidden;
 }
@@ -41,7 +40,6 @@
   border-right: 1px solid var(--admin-border);
   display: flex;
   flex-direction: column;
-  /* ✅ FIX : transition synchronisée avec le contenu */
   transition: width 0.25s ease;
   flex-shrink: 0;
   position: sticky;
@@ -136,11 +134,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* ✅ FIX CRITIQUE : empêche le contenu de déborder */
   min-width: 0;
-  width: 0; /* force flex à recalculer la largeur disponible */
+  width: 0;
   min-height: calc(100vh - 60px);
-  /* ✅ FIX : transition fluide quand la sidebar s'ouvre/ferme */
   transition: width 0.25s ease;
   overflow: hidden;
 }
@@ -148,19 +144,79 @@
 .admin-main {
   flex: 1;
   padding: 28px 32px;
-  /* ✅ FIX : overflow-x hidden pour éviter l'agrandissement de page */
   overflow-x: hidden;
   overflow-y: auto;
-  /* ✅ FIX : largeur calculée correctement dans flex */
   width: 100%;
   box-sizing: border-box;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — sidebar admin flottante (comme la page Recherche)
 ══════════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
+
+/* ── Tablette (≤ 900px) : sidebar réduite en icônes, dans le flux ── */
+@media (max-width: 900px) and (min-width: 769px) {
   .admin-sidebar { width: var(--admin-sidebar-collapsed); }
   .brand-name, .nav-label, .nav-section-label, .collapse-label { display: none; }
   .admin-main { padding: 20px 16px; }
+}
+
+/* ── Mobile (≤ 768px) : sidebar flottante par-dessus le contenu ── */
+@media (max-width: 768px) {
+
+  /* La sidebar flotte SOUS la navbar (navbar = z-index 100) */
+  .admin-sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    height: calc(100vh - 64px);
+    z-index: 90;                       /* < 100 => sous la navbar */
+    box-shadow: 2px 0 16px rgba(0,0,0,0.12);
+    width: var(--admin-sidebar-collapsed);
+  }
+
+  /* Par défaut sur mobile : barre fine d'icônes (labels masqués) */
+  .admin-sidebar .nav-label,
+  .admin-sidebar .nav-section-label,
+  .admin-sidebar .collapse-label {
+    display: none;
+  }
+  .admin-sidebar .nav-link {
+    justify-content: center;
+  }
+
+  /* Quand l'admin l'ouvre (état NON-collapsed) : sidebar large par-dessus */
+  .admin-layout:not(.collapsed) .admin-sidebar {
+    width: 230px;
+  }
+  .admin-layout:not(.collapsed) .admin-sidebar .nav-label,
+  .admin-layout:not(.collapsed) .admin-sidebar .nav-section-label,
+  .admin-layout:not(.collapsed) .admin-sidebar .collapse-label {
+    display: inline;
+  }
+  .admin-layout:not(.collapsed) .admin-sidebar .nav-link {
+    justify-content: flex-start;
+  }
+
+  /* Voile sombre derrière la sidebar quand elle est OUVERTE */
+  .admin-layout:not(.collapsed) .admin-sidebar::after {
+    content: '';
+    position: fixed;
+    top: 64px;
+    left: 230px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: -1;
+  }
+
+  /* Le contenu est décalé de la largeur de la sidebar réduite (60px)
+     pour ne pas passer dessous */
+  .admin-content-wrapper {
+    padding-left: 60px;
+  }
+
+  .admin-main {
+    padding: 16px 14px;
+  }
 }

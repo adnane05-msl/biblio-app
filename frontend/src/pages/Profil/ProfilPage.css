@@ -309,3 +309,36 @@
         flex-direction: column;
     }
 }
+
+/* Tablette : grille 2 colonnes → 1 colonne */
+@media (max-width: 900px) {
+    .profil-container {
+        padding: 24px 16px;
+    }
+    .profil-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile : en-tête vertical, champs empilés */
+@media (max-width: 600px) {
+    .profil-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+        padding: 24px 20px;
+    }
+    .profil-email {
+        justify-content: center;
+    }
+    .profil-tags {
+        justify-content: center;
+    }
+    .profil-card {
+        padding: 20px;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+}

@@ -423,3 +423,19 @@
     .features-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: 1fr; }
 }
+/* ════════ RESPONSIVE — petits ajustements complémentaires ════════ */
+@media (max-width: 600px) {
+    .cta-section {
+        padding: 48px 20px;
+    }
+    .cta-title {
+        font-size: 22px;
+    }
+    .section-title {
+        font-size: 20px;
+        padding: 0 16px;
+    }
+    .stats-section {
+        padding: 24px 16px;
+    }
+}

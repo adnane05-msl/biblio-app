@@ -98,3 +98,19 @@
     text-decoration: none;
     font-weight: 500;
 }
+
+/* ════════════ RESPONSIVE — Login mobile ════════════ */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 16px;
+    }
+    .login-card {
+        padding: 28px 22px;
+    }
+    .login-title {
+        font-size: 24px;
+    }
+    .login-subtitle {
+        font-size: 16px;
+    }
+}

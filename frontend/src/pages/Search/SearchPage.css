@@ -607,20 +607,76 @@ button:disabled {
     min-width: 0;
 }
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — SearchPage
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Tablette (≤ 900px) : la sidebar de filtres passe au-dessus ── */
+@media (max-width: 900px) {
     .search-layout {
         grid-template-columns: 1fr;
     }
     .search-sidebar {
         position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
+    .search-sidebar .sidebar-card {
+        flex: 1;
+        min-width: 200px;
+    }
+}
+
+/* ── Mobile (≤ 768px) ───────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* On garde la barre d'historique à GAUCHE (pas en colonne) */
+    .search-page-with-history {
+        flex-direction: row;
+    }
+
+    /* CORRECTION : la barre d'historique réduite est en position fixed
+       (52px de large). On décale donc le contenu de 52px vers la droite
+       pour qu'il commence APRÈS la barre et ne passe pas dessous. */
+    .search-page-inner {
+        padding: 16px 14px 16px 64px;
+    }
+
+    .search-title {
+        font-size: 20px;
+    }
+
+    /* Les filtres reviennent en colonne pour ne pas être trop serrés */
+    .search-sidebar {
+        flex-direction: column;
+    }
+
     .selection-bar {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
     .bulk-menu {
         right: auto;
         left: 0;
+    }
+}
+
+/* ── Petit mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+    .pagination-controls {
+        gap: 3px;
+    }
+    .page-btn {
+        min-width: 32px;
+        height: 32px;
+        font-size: 13px;
     }
 }

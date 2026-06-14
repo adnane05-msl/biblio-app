@@ -57,3 +57,25 @@
     background-color: #93c5fd;
     cursor: not-allowed;
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — Barre de recherche en colonne sur mobile
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .searchbar-container {
+        padding: 16px;
+    }
+
+    /* Champ au-dessus, bouton en dessous (plus de débordement à droite) */
+    .searchbar-input-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Le bouton "Rechercher" prend toute la largeur, centré */
+    .searchbar-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
