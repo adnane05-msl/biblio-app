@@ -8,14 +8,14 @@ import {
     faCode,
     faCircleCheck,
     faWifi,
-    faGaugeHigh,
     faArrowsRotate,
     faPlay,
     faEraser,
-    faTriangleExclamation,
     faCircleXmark,
+    faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
+import './MaintenancePage.css';
 
 const COMPOSANTS = [
     {
@@ -24,6 +24,8 @@ const COMPOSANTS = [
         valeur: 'React.js',
         detail: 'Interface utilisateur — port 5173',
         color: '#3b82f6',
+        bgColor: '#eff6ff',
+        borderColor: '#bfdbfe',
     },
     {
         icon: faServer,
@@ -31,6 +33,8 @@ const COMPOSANTS = [
         valeur: 'Spring Boot 3.5',
         detail: 'API REST — port 9090',
         color: '#7c3aed',
+        bgColor: '#f5f3ff',
+        borderColor: '#ddd6fe',
     },
     {
         icon: faDatabase,
@@ -38,220 +42,250 @@ const COMPOSANTS = [
         valeur: 'PostgreSQL 16.13',
         detail: 'Base : bibliodb',
         color: '#059669',
+        bgColor: '#f0fdf4',
+        borderColor: '#bbf7d0',
     },
-    ];
+];
 
-    export default function MaintenancePage() {
-    const [sources,       setSources]       = useState([]);
-    const [testResults,   setTestResults]   = useState({});
-    const [testLoading,   setTestLoading]   = useState({});
-    const [actionMsg,     setActionMsg]     = useState(null); 
-    const [cacheLoading,  setCacheLoading]  = useState(false);
+export default function MaintenancePage() {
+    const [sources,      setSources]      = useState([]);
+    const [testResults,  setTestResults]  = useState({});
+    const [testLoading,  setTestLoading]  = useState({});
+    const [actionMsg,    setActionMsg]    = useState(null);
+    const [cacheLoading, setCacheLoading] = useState(false);
 
     useEffect(() => {
         getSources().then(setSources).catch(() => {});
     }, []);
 
-    // ── Tester une source ──────────────────────────────────────
+    /* ── Tester une source ── */
     async function handleTester(source) {
         setTestLoading((l) => ({ ...l, [source.id]: true }));
         try {
-        const res = await testerSource(source.id);
-        setTestResults((r) => ({ ...r, [source.id]: res }));
+            const res = await testerSource(source.id);
+            setTestResults((r) => ({ ...r, [source.id]: res }));
         } catch (e) {
-        setTestResults((r) => ({
-            ...r,
-            [source.id]: { statut: 'ERREUR', latence: -1, message: e.message },
-        }));
+            setTestResults((r) => ({
+                ...r,
+                [source.id]: { statut: 'ERREUR', latence: -1, message: e.message },
+            }));
         } finally {
-        setTestLoading((l) => ({ ...l, [source.id]: false }));
+            setTestLoading((l) => ({ ...l, [source.id]: false }));
         }
     }
 
-  // ── Vider le cache ─────────────────────────────────────────
+    /* ── Vider le cache ── */
     async function handleViderCache() {
         setCacheLoading(true);
         try {
-        const res = await viderCache();
-        setActionMsg({ text: res.message, type: 'ok' });
+            const res = await viderCache();
+            setActionMsg({ text: res.message, type: 'ok' });
         } catch (e) {
-        setActionMsg({ text: e.message, type: 'error' });
+            setActionMsg({ text: e.message, type: 'error' });
         } finally {
-        setCacheLoading(false);
-        setTimeout(() => setActionMsg(null), 4000);
+            setCacheLoading(false);
+            setTimeout(() => setActionMsg(null), 4000);
         }
     }
 
     return (
         <div className="admin-page">
 
-        {/* ── En-tête ──────────────────────────────────────────── */}
-        <div className="page-header">
-            <h1 className="page-title">
-            <FontAwesomeIcon icon={faScrewdriverWrench}
-                style={{ marginRight: 10, color: '#d97706' }} />
-            Maintenance
-            </h1>
-            <p className="page-sub">État et outils de l'application</p>
-        </div>
+            {/* ── En-tête ── */}
+            <div className="page-header">
+                <h1 className="page-title">
+                    <FontAwesomeIcon icon={faScrewdriverWrench} style={{ color: '#d97706' }} />
+                    Maintenance
+                </h1>
+                <p className="page-sub">État et outils de l'application</p>
+            </div>
 
-        
-
-        {/* ── Section 2 : Test des sources ─────────────────────── */}
-        <section className="card" style={{ marginBottom: 24 }}>
-            <h2 className="card-title">
-            <FontAwesomeIcon icon={faWifi}
-                style={{ color: '#2563eb', marginRight: 8 }} />
-            Test des sources API
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 16 }}>
-            Vérifie la disponibilité de chaque source académique en temps réel.
-            </p>
-
-            {sources.length === 0 ? (
-            <p style={{ color: '#6b7280', fontSize: 13 }}>Aucune source configurée.</p>
-            ) : (
-            <table className="admin-table">
-                <thead>
-                <tr>
-                    <th>Source</th>
-                    <th>URL</th>
-                    <th>Résultat</th>
-                    <th>Latence</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                {sources.map((s) => {
-                    const res     = testResults[s.id];
-                    const loading = testLoading[s.id];
-                    return (
-                    <tr key={s.id}>
-                        <td style={{ fontWeight: 600 }}>{s.nom}</td>
-                        <td style={{ fontSize: 12, color: '#6b7280' }}>{s.urlBase}</td>
-                        <td>
-                        {!res && !loading && (
-                            <span style={{ color: '#9ca3af', fontSize: 13 }}>— non testé</span>
-                        )}
-                        {loading && (
-                            <span style={{ color: '#2563eb', fontSize: 13 }}>
-                            <FontAwesomeIcon icon={faArrowsRotate} spin
-                                style={{ marginRight: 5 }} />
-                            Test en cours…
-                            </span>
-                        )}
-                        {res && !loading && (
-                            <span className={`badge badge--${res.statut === 'OK' ? 'green' : 'red'}`}>
-                            <FontAwesomeIcon
-                                icon={res.statut === 'OK' ? faCircleCheck : faCircleXmark}
-                                style={{ marginRight: 5 }} />
-                            {res.statut === 'OK' ? 'Accessible' : 'Inaccessible'}
-                            </span>
-                        )}
-                        </td>
-                        <td>
-                        {res && !loading && res.latence > 0 ? (
-                            <span style={{
-                            fontWeight: 600,
-                            color: res.latence > 2000 ? '#dc2626'
-                                : res.latence > 1000 ? '#d97706'
-                                : '#059669',
-                            }}>
-                            <FontAwesomeIcon icon={faGaugeHigh} style={{ marginRight: 5 }} />
-                            {res.latence} ms
-                            </span>
-                        ) : '—'}
-                        </td>
-                        <td>
-                        <button
-                            className="btn btn--sm btn--primary"
-                            disabled={loading}
-                            onClick={() => handleTester(s)}
-                        >
-                            <FontAwesomeIcon icon={faPlay} style={{ marginRight: 5 }} />
-                            {loading ? 'Test…' : 'Tester'}
-                        </button>
-                        </td>
-                    </tr>
-                    );
-                })}
-                </tbody>
-            </table>
-            )}
-        </section>
-
-        {/* ── Section 4 : Actions rapides ──────────────────────── */}
-        <section className="card">
-            <h2 className="card-title">
-            <FontAwesomeIcon icon={faScrewdriverWrench}
-                style={{ color: '#d97706', marginRight: 8 }} />
-            Actions rapides
-            </h2>
-
-            {/*Un seul message pour les deux actions */}
+            {/* ── Message action ── */}
             {actionMsg && (
-            <div className={`alert alert--${actionMsg.type}`} style={{ marginBottom: 16 }}>
-                <FontAwesomeIcon
-                icon={actionMsg.type === 'ok' ? faCircleCheck : faTriangleExclamation}
-                style={{ marginRight: 8 }} />
-                {actionMsg.text}
-            </div>
+                <div className={`maintenance-alert maintenance-alert--${actionMsg.type}`}>
+                    <FontAwesomeIcon
+                        icon={actionMsg.type === 'ok' ? faCircleCheck : faCircleXmark}
+                    />
+                    {actionMsg.text}
+                </div>
             )}
 
-            <div className="action-list">
+            {/* ══ Section 1 : Outils cache ══ */}
+            <section className="card">
+                <h2 className="card-title">
+                    <FontAwesomeIcon icon={faTrash} style={{ color: '#d97706' }} />
+                    Outils de maintenance
+                </h2>
 
-            {/* ── Vider le cache ────────────────────────────────── */}
-            <div className="action-item">
-                <div>
-                <p className="action-label">
-                    <FontAwesomeIcon icon={faEraser}
-                    style={{ marginRight: 6, color: '#d97706' }} />
-                    Vider le cache applicatif
-                </p>
-                <p className="action-desc">
-                    Purge le cache Spring Boot — libère la mémoire et force le rechargement des données.
-                </p>
+                <div className="maintenance-tools-grid">
+                    <div className="maintenance-tool-item">
+                        <div className="maintenance-tool-info">
+                            <p className="maintenance-tool-name">Cache applicatif</p>
+                            <p className="maintenance-tool-desc">
+                                Vider les données mises en cache pour forcer le rechargement depuis la base.
+                            </p>
+                        </div>
+                        <button
+                            className="btn btn--sm btn--amber"
+                            disabled={cacheLoading}
+                            onClick={handleViderCache}
+                        >
+                            <FontAwesomeIcon icon={cacheLoading ? faArrowsRotate : faEraser} spin={cacheLoading} />
+                            {cacheLoading ? 'En cours…' : 'Vider'}
+                        </button>
+                    </div>
                 </div>
-                <button
-                className="btn btn--sm btn--amber"
-                disabled={cacheLoading}
-                onClick={handleViderCache}
-                >
-                <FontAwesomeIcon icon={faEraser} />
-                {cacheLoading ? ' …' : ' Vider'}
-                </button>
-            </div>
-            </div>
-        </section>
+            </section>
 
+            {/* ══ Section 2 : État des composants ══ */}
+            <section className="card">
+                <h2 className="card-title">
+                    <FontAwesomeIcon icon={faServer} style={{ color: '#7c3aed' }} />
+                    État des composants
+                </h2>
 
-        {/* ── Section 1 : État des composants ──────────────────── */}
-        <section className="card" style={{ marginBottom: 24 }}>
-            <h2 className="card-title">
-            <FontAwesomeIcon icon={faServer}
-                style={{ color: '#7c3aed', marginRight: 8 }} />
-            État des composants
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-            {COMPOSANTS.map((c) => (
-                <div key={c.label} style={{
-                border: '1px solid #e5e7eb', borderRadius: 10,
-                padding: '20px 16px', textAlign: 'center',
-                }}>
-                <FontAwesomeIcon icon={c.icon}
-                    style={{ fontSize: 28, color: c.color, marginBottom: 10 }} />
-                <p style={{ fontWeight: 700, marginBottom: 2 }}>{c.label}</p>
-                <p style={{ color: c.color, fontWeight: 600, marginBottom: 6 }}>{c.valeur}</p>
-                <p style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>{c.detail}</p>
-                <span className="badge badge--green">
-                    <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 4 }} />
-                    Opérationnel
-                </span>
+                <div className="composants-grid">
+                    {COMPOSANTS.map((c) => (
+                        <div
+                            key={c.label}
+                            className="composant-card"
+                            style={{ borderColor: c.borderColor, background: c.bgColor }}
+                        >
+                            <div className="composant-icon" style={{ color: c.color }}>
+                                <FontAwesomeIcon icon={c.icon} />
+                            </div>
+                            <div className="composant-card-body">
+                                <p className="composant-label">{c.label}</p>
+                                <p className="composant-valeur" style={{ color: c.color }}>{c.valeur}</p>
+                                <p className="composant-detail">{c.detail}</p>
+                                <span className="badge badge--green">
+                                    <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 4 }} />
+                                    Opérationnel
+                                </span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
-            </div>
-        </section>
+            </section>
+
+            {/* ══ Section 3 : Test des sources ══ */}
+            <section className="card">
+                <h2 className="card-title">
+                    <FontAwesomeIcon icon={faWifi} style={{ color: '#2563eb' }} />
+                    Test des sources API
+                </h2>
+                <p className="maintenance-desc">
+                    Vérifie la disponibilité de chaque source académique en temps réel.
+                </p>
+
+                {sources.length === 0 ? (
+                    <p className="maintenance-empty">Aucune source configurée.</p>
+                ) : (
+                    <>
+                        {/* ── Version desktop : tableau ── */}
+                        <div className="sources-table-wrap">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Source</th>
+                                        <th>URL</th>
+                                        <th>Résultat</th>
+                                        <th>Latence</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sources.map((s) => {
+                                        const res     = testResults[s.id];
+                                        const loading = testLoading[s.id];
+                                        return (
+                                            <tr key={s.id}>
+                                                <td style={{ fontWeight: 600 }}>{s.nom}</td>
+                                                <td className="sources-url-cell">{s.urlBase}</td>
+                                                <td>{renderResultat(res, loading)}</td>
+                                                <td>
+                                                    {res?.latence != null && res.latence >= 0
+                                                        ? `${res.latence} ms`
+                                                        : '—'}
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn--sm btn--blue"
+                                                        disabled={loading}
+                                                        onClick={() => handleTester(s)}
+                                                    >
+                                                        <FontAwesomeIcon
+                                                            icon={loading ? faArrowsRotate : faPlay}
+                                                            spin={loading}
+                                                        />
+                                                        {loading ? 'Test…' : 'Tester'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* ── Version mobile : cartes ── */}
+                        <div className="sources-cards">
+                            {sources.map((s) => {
+                                const res     = testResults[s.id];
+                                const loading = testLoading[s.id];
+                                return (
+                                    <div key={s.id} className="source-mobile-card">
+                                        <div className="source-mobile-header">
+                                            <span className="source-mobile-name">{s.nom}</span>
+                                            <button
+                                                className="btn btn--sm btn--blue"
+                                                disabled={loading}
+                                                onClick={() => handleTester(s)}
+                                            >
+                                                <FontAwesomeIcon
+                                                    icon={loading ? faArrowsRotate : faPlay}
+                                                    spin={loading}
+                                                />
+                                                {loading ? 'Test…' : 'Tester'}
+                                            </button>
+                                        </div>
+                                        <p className="source-mobile-url">{s.urlBase}</p>
+                                        <div className="source-mobile-footer">
+                                            <div>{renderResultat(res, loading)}</div>
+                                            {res?.latence != null && res.latence >= 0 && (
+                                                <span className="source-mobile-latence">
+                                                    {res.latence} ms
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+            </section>
 
         </div>
     );
-    }
+}
+
+/* ── Helper résultat test ── */
+function renderResultat(res, loading) {
+    if (loading) return (
+        <span style={{ color: '#2563eb', fontSize: 13, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <FontAwesomeIcon icon={faArrowsRotate} spin />
+            Test en cours…
+        </span>
+    );
+    if (!res) return <span style={{ color: '#9ca3af', fontSize: 13 }}>— non testé</span>;
+    return (
+        <span className={`badge badge--${res.statut === 'OK' ? 'green' : 'red'}`}>
+            <FontAwesomeIcon
+                icon={res.statut === 'OK' ? faCircleCheck : faCircleXmark}
+                style={{ marginRight: 5 }}
+            />
+            {res.statut === 'OK' ? 'Accessible' : res.statut}
+        </span>
+    );
+}

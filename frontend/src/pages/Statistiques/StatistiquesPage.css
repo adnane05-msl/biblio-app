@@ -1,28 +1,73 @@
+/* ══════════════════════════════════════════════════════════════
+   StatistiquesPage.css — design unifié (SearchPage / AdminPages)
+   Responsive : desktop → tablette → mobile → petit mobile
+══════════════════════════════════════════════════════════════ */
+
+/* ── Variables cohérentes avec AdminLayout.css ── */
+:root {
+    --stats-bg:        #f0f4f8;
+    --stats-white:     #ffffff;
+    --stats-navy:      #1e3a5f;
+    --stats-blue:      #2563eb;
+    --stats-blue-dark: #1d4ed8;
+    --stats-blue-soft: #eff6ff;
+    --stats-text:      #374151;
+    --stats-muted:     #6b7280;
+    --stats-border:    #e5e7eb;
+    --stats-shadow:    0 2px 8px rgba(0, 0, 0, 0.06);
+    --stats-shadow-lg: 0 4px 16px rgba(37, 99, 235, 0.10);
+    --stats-radius:    10px;
+    --stats-radius-lg: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE WRAPPER
+══════════════════════════════════════════════════════════════ */
 .statistiques-page {
     min-height: 100vh;
-    background-color: #f0f4f8;
+    background-color: var(--stats-bg);
+    display: flex;
+    flex-direction: column;
 }
 
 .statistiques-container {
-    max-width: 1100px;
+    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
-    padding: 40px 24px;
+    padding: 32px 24px;
+    flex: 1;
+    box-sizing: border-box;
 }
 
+/* ── États chargement / erreur ── */
 .statistiques-loading,
 .statistiques-error {
     text-align: center;
-    padding: 60px;
-    color: #6b7280;
-    font-size: 16px;
+    padding: 60px 24px;
+    color: var(--stats-muted);
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
-/* ── BARRE HAUT : retour + bouton PDF ── */
+.statistiques-error {
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--stats-radius);
+    margin: 24px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOP-BAR  (Retour + Export PDF)
+══════════════════════════════════════════════════════════════ */
 .stats-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 12px;
 }
@@ -30,61 +75,58 @@
 .btn-back {
     background: none;
     border: none;
-    color: #2563eb;
+    color: var(--stats-blue);
     font-size: 14px;
-    cursor: pointer;
-    padding: 0;
     font-weight: 500;
+    cursor: pointer;
+    padding: 6px 0;
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: color 0.15s;
 }
+.btn-back:hover { color: var(--stats-blue-dark); text-decoration: underline; }
 
-.btn-back:hover { text-decoration: underline; }
-
-/* ── Bouton Export PDF (identique à PRISMA) ── */
 .btn-export-pdf {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 9px 18px;
-    background: #2563eb;
+    background: var(--stats-blue);
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--stats-radius);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, .25);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.25);
+    white-space: nowrap;
 }
 .btn-export-pdf:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: var(--stats-blue-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, .35);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
-.btn-export-pdf:active:not(:disabled) {
-    transform: translateY(0);
-}
+.btn-export-pdf:active:not(:disabled) { transform: translateY(0); }
 .btn-export-pdf--loading,
 .btn-export-pdf:disabled {
     background: #93c5fd;
     cursor: not-allowed;
     box-shadow: none;
+    transform: none;
 }
 
-/* ── ZONE CAPTURÉE — fond identique à la page pour la capture ── */
-.stats-capture-wrapper {
-    background: #f0f4f8;
-    padding: 16px 0 8px;
-    border-radius: 16px;
-}
+/* ══════════════════════════════════════════════════════════════
+   EN-TÊTE  (identique à .page-header dans AdminPages)
+══════════════════════════════════════════════════════════════ */
+.stats-page-header { margin-bottom: 24px; }
 
 .statistiques-title {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
-    color: #374151;
-    margin: 0 0 6px 0;
+    color: var(--stats-navy);
+    margin: 0 0 4px 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -92,98 +134,117 @@
 
 .statistiques-subtitle {
     font-size: 14px;
-    color: #6b7280;
-    margin: 0 0 32px 0;
+    color: var(--stats-muted);
+    margin: 0;
 }
 
-/* ── Cartes statistique ── */
-/* GRILLE : 3 cartes par ligne sur desktop (s'adapte automatiquement) */
+/* ══════════════════════════════════════════════════════════════
+   ZONE PDF
+══════════════════════════════════════════════════════════════ */
+.stats-capture-wrapper {
+    background: var(--stats-bg);
+    border-radius: var(--stats-radius-lg);
+    padding: 4px 0 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 14px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .stat-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 24px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 20px 16px;
+    border-radius: var(--stats-radius);
+    box-shadow: var(--stats-shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+    text-align: center;
+}
+.stat-card:hover {
+    box-shadow: var(--stats-shadow-lg);
+    transform: translateY(-2px);
 }
 
-.stat-card.stat-blue {
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-}
+.stat-card.stat-blue   { background: #eff6ff; border: 1px solid #bfdbfe; }
+.stat-card.stat-green  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.stat-card.stat-gray   { background: #f9fafb; border: 1px solid var(--stats-border); }
+.stat-card.stat-red    { background: #fef2f2; border: 1px solid #fecaca; }
+.stat-card.stat-yellow { background: #fffbeb; border: 1px solid #fde68a; }
 
-.stat-card.stat-green {
-    background-color: #f0fdf4;
-    border: 1px solid #bbf7d0;
-}
-
-.stat-card.stat-gray {
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
-}
-
-.stat-card.stat-red {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-}
-
-.stat-card.stat-yellow {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-}
-
-.stat-icon {
-    font-size: 18px;
-    margin-bottom: 6px;
-    color: #6b7280;
-}
+.stat-icon { font-size: 20px; margin-bottom: 8px; }
+.stat-card.stat-blue   .stat-icon { color: var(--stats-blue); }
+.stat-card.stat-green  .stat-icon { color: #16a34a; }
+.stat-card.stat-gray   .stat-icon { color: var(--stats-muted); }
+.stat-card.stat-red    .stat-icon { color: #dc2626; }
+.stat-card.stat-yellow .stat-icon { color: #d97706; }
 
 .stat-card-num {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
-    color: #374151;
+    color: var(--stats-text);
+    line-height: 1;
 }
+.stat-card.stat-blue   .stat-card-num { color: var(--stats-blue); }
+.stat-card.stat-green  .stat-card-num { color: #16a34a; }
+.stat-card.stat-red    .stat-card-num { color: #dc2626; }
+.stat-card.stat-yellow .stat-card-num { color: #d97706; }
 
 .stat-card-lbl {
     font-size: 12px;
-    color: #6b7280;
-    margin-top: 4px;
-    text-align: center;
+    font-weight: 500;
+    color: var(--stats-muted);
+    margin-top: 6px;
 }
 
-/* ── Graphiques ── */
-.charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
+/* ══════════════════════════════════════════════════════════════
+   CHART CARDS
+══════════════════════════════════════════════════════════════ */
 .chart-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    border: 1px solid #e5e7eb;
+    background: var(--stats-white);
+    border-radius: var(--stats-radius);
+    padding: 20px 24px;
+    box-shadow: var(--stats-shadow);
+    border: 1px solid var(--stats-border);
+    transition: box-shadow 0.2s;
+    min-width: 0;
+    overflow: hidden;
 }
+.chart-card:hover { box-shadow: var(--stats-shadow-lg); }
 
-.chart-wide {
-    grid-column: 1 / -1;
-}
-
+/* Titre de section avec badge icône coloré */
 .chart-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
-    color: #374151;
-    margin: 0 0 20px 0;
+    color: var(--stats-navy);
+    margin: 0 0 18px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+
+/* Badge rond coloré autour de l'icône */
+.chart-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.chart-title-icon--blue   { background: #eff6ff; color: var(--stats-blue); }
+.chart-title-icon--green  { background: #f0fdf4; color: #16a34a; }
+.chart-title-icon--purple { background: #f5f3ff; color: #7c3aed; }
+.chart-title-icon--amber  { background: #fffbeb; color: #d97706; }
 
 .chart-empty {
     text-align: center;
@@ -192,162 +253,227 @@
     font-size: 14px;
 }
 
-/* ── Top articles ── */
-.top-articles-section {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    border: 1px solid #e5e7eb;
+/* ══════════════════════════════════════════════════════════════
+   GRILLE GRAPHIQUES (2 colonnes)
+══════════════════════════════════════════════════════════════ */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: start;
+    min-width: 0;
 }
+
+.chart-wide { grid-column: 1 / -1; }
+
+/* ══════════════════════════════════════════════════════════════
+   TOP ARTICLES
+══════════════════════════════════════════════════════════════ */
+.top-articles-section { margin-bottom: 16px; }
 
 .top-articles-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+/* ── Liste desktop : items en colonne ── */
+.top-articles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
 }
 
 .top-article-item {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     padding: 14px 16px;
-    border-radius: 10px;
-    background-color: #f9fafb;
+    border-radius: var(--stats-radius);
+    background: #f9fafb;
     border: 1px solid #f3f4f6;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
 }
-
 .top-article-item:hover {
     border-color: #bfdbfe;
-    background-color: #f0f4f8;
+    background: var(--stats-blue-soft);
 }
 
+/* Bloc rang : icône + numéro empilés */
 .top-article-rank {
-    font-size: 18px;
-    font-weight: 700;
-    color: #2563eb;
-    min-width: 32px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 36px;
+    flex-shrink: 0;
 }
 
-.top-article-info {
-    flex: 1;
-}
+.rank-icon { font-size: 16px; }
+.rank-num  { font-size: 11px; font-weight: 700; }
+
+.top-article-info { flex: 1; min-width: 0; }
 
 .top-article-title {
     font-size: 14px;
     font-weight: 600;
-    color: #374151;
+    color: var(--stats-text);
     margin: 0 0 4px 0;
     line-height: 1.4;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-
-.top-article-title a {
-    color: #374151;
-    text-decoration: none;
-}
-
-.top-article-title a:hover {
-    color: #2563eb;
-    text-decoration: underline;
-}
+.top-article-title a { color: var(--stats-text); text-decoration: none; }
+.top-article-title a:hover { color: var(--stats-blue); text-decoration: underline; }
 
 .top-article-meta {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--stats-muted);
     margin: 0;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .top-article-citations {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 70px;
+    min-width: 60px;
+    flex-shrink: 0;
 }
 
 .citations-badge {
     font-size: 16px;
     font-weight: 700;
-    color: #374151;
+    color: var(--stats-text);
 }
 
-.citations-lbl {
-    font-size: 11px;
-    color: #9ca3af;
-}
+.citations-lbl { font-size: 11px; color: #9ca3af; }
 
-/* ════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    RESPONSIVE
-   ════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 
-/* ── Tablette (≤ 768px) ── */
+/* ── Grande tablette (≤ 1024px) : 3 cartes par ligne ── */
+@media (max-width: 1024px) {
+    .statistiques-container { max-width: 900px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tablette (≤ 768px) : 2 cartes par ligne + charts 1 colonne ── */
 @media (max-width: 768px) {
+    .statistiques-container { padding: 24px 16px; }
+    .statistiques-title     { font-size: 20px; }
 
-    .statistiques-container {
-        padding: 24px 16px;
-    }
-
-    .statistiques-title {
-        font-size: 21px;
-    }
-
-    /* Cartes stats : 2 par ligne */
+    /* ✅ 2 cartes stat par ligne */
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
     }
 
-    /* Graphiques : 1 colonne */
+    /* Cartes un peu plus compactes */
+    .stat-card    { padding: 16px 12px; }
+    .stat-card-num { font-size: 26px; }
+
+    /* Charts en colonne unique */
     .charts-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
-    .chart-wide {
-        grid-column: 1;
-    }
-    .chart-card {
-        padding: 16px;
-    }
+    .chart-wide { grid-column: 1; }
+    .chart-card { padding: 16px; }
 
-    /* Barre Retour + Export PDF : empilée */
+    /* Top-bar empilée */
     .stats-topbar {
         flex-direction: column;
         align-items: stretch;
     }
     .stats-topbar .btn-export-pdf {
         justify-content: center;
+        width: 100%;
     }
 
-    .stat-card {
-        padding: 16px;
-    }
-}
-
-/* ── Petit mobile (≤ 480px) ── */
-@media (max-width: 480px) {
-
-    /* On garde 2 cartes par ligne (compact mais lisible) */
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    .stat-card-num {
-        font-size: 24px;
-    }
-    .stat-card {
-        padding: 14px 10px;
-    }
-
-    /* Item "top article" : passe en colonne */
-    .top-article-item {
+    /* ✅ Top 5 articles : liste verticale (comme PC) */
+    .top-articles-list {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: 8px;
     }
-    .top-article-citations {
+
+    /* Item article compact sur mobile */
+    .top-article-item {
         flex-direction: row;
-        gap: 6px;
-        align-items: baseline;
-        min-width: 0;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
     }
+
+    .top-article-rank {
+        flex-direction: column;
+        align-items: center;
+        min-width: 30px;
+        gap: 2px;
+        padding-top: 2px;
+    }
+    .rank-icon { font-size: 13px; }
+    .rank-num  { font-size: 10px; }
+
+    .top-article-title {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .top-article-meta   { font-size: 11px; }
+
+    .top-article-citations {
+        flex-direction: column;
+        align-items: center;
+        min-width: 52px;
+    }
+    .citations-badge { font-size: 14px; }
+    .citations-lbl   { font-size: 10px; }
+}
+
+/* ── Mobile (≤ 480px) : encore plus compact ── */
+@media (max-width: 480px) {
+    .statistiques-container  { padding: 14px 10px; }
+    .statistiques-title      { font-size: 17px; gap: 8px; }
+    .statistiques-subtitle   { font-size: 12px; }
+
+    /* ✅ 2 cartes stat par ligne, très compactes */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+        margin-bottom: 14px;
+    }
+    .stat-card     { padding: 12px 8px; }
+    .stat-card-num { font-size: 22px; }
+    .stat-card-lbl { font-size: 10px; }
+    .stat-icon     { font-size: 16px; margin-bottom: 5px; }
+
+    .chart-card       { padding: 12px 10px; }
+    .chart-title      { font-size: 13px; gap: 7px; }
+    .chart-title-icon { width: 24px; height: 24px; font-size: 11px; border-radius: 6px; }
+
+    .btn-export-pdf   { font-size: 13px; padding: 8px 12px; }
+}
+
+/* ── Très petit mobile (≤ 360px) ── */
+@media (max-width: 360px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+    .stat-card-num { font-size: 19px; }
+    .stat-card     { padding: 10px 6px; }
+    .chart-title   { font-size: 12px; }
 }
