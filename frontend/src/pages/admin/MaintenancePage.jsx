@@ -15,7 +15,6 @@ import {
     faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
-import './MaintenancePage.css';
 
 const COMPOSANTS = [
     {

@@ -5,19 +5,8 @@ import {
 } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faDatabase,           // Titre page
-  faArrowsRotate,       // Rafraîchir
-  faToggleOn,           // Activer
-  faToggleOff,          // Désactiver
-  faTrashCan,           // Supprimer
-  faXmark,              // Fermer
-  faWifi,               // En ligne
-  faSignal,          // Hors ligne
-  faTriangleExclamation,// Latence élevée
-  faWrench,             // Maintenance
-  faLink,               // URL
-  faTag,                // Type API
-  faCircleXmark,        // Erreur
+  faDatabase, faArrowsRotate, faToggleOn, faToggleOff, faTrashCan, faXmark,
+  faWifi, faSignal, faTriangleExclamation,faWrench, faLink,faTag,faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 

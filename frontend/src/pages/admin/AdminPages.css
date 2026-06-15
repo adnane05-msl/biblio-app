@@ -1,10 +1,5 @@
-/* ══════════════════════════════════════════════════════════════
-   AdminPages.css — design unifié avec SearchPage & ProjectsPage
-══════════════════════════════════════════════════════════════ */
-
 .admin-page {
   max-width: 1200px;
-  /* ✅ FIX : remplit correctement l'espace disponible */
   width: 100%;
   box-sizing: border-box;
 }
