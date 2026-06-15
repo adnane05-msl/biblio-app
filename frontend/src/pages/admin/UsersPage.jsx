@@ -4,21 +4,21 @@ import {
 } from '../../services/adminService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUserPlus,         // Ajouter utilisateur
-  faUserPen,          // Modifier
-  faUserXmark,        // Désactiver
-  faUserMinus,        // Supprimer
-  faMagnifyingGlass,  // Recherche
-  faUsersViewfinder,  // Titre page
-  faXmark,            // Fermer
-  faFloppyDisk,       // Sauvegarder
-  faUserShield,       // Admin role
-  faUser,             // User role
-  faCircleCheck,      // Actif
-  faCircleXmark,      // Inactif
-  faEnvelope,         // Email
-  faKey,              // Mot de passe
-  faIdCard,           // Nom
+  faUserPlus,
+  faUserPen, 
+  faUserXmark,
+  faUserMinus,
+  faMagnifyingGlass,
+  faUsersViewfinder,
+  faXmark,
+  faFloppyDisk,
+  faUserShield,
+  faUser,
+  faCircleCheck,
+  faCircleXmark,
+  faEnvelope,
+  faKey,
+  faIdCard,
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 

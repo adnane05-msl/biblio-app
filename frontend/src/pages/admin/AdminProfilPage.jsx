@@ -18,7 +18,6 @@ import {
   faShield,
 } from '@fortawesome/free-solid-svg-icons';
 
-// Réutilise exactement le CSS de ProfilPage utilisateur
 import '../../pages/Profil/ProfilPage.css';
 
 export default function AdminProfilPage() {

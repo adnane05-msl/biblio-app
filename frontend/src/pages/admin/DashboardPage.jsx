@@ -1,6 +1,3 @@
-// src/pages/admin/DashboardPage.jsx
-// Tableau de bord principal : métriques, sources, logs récents.
-
 import { useEffect, useState } from 'react';
 import { getDashboard } from '../../services/adminService';
 import StatCard from '../../components/admin/StatCard';
