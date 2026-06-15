@@ -27,11 +27,11 @@ public class VerificationService {
 
             sendEmail(email, code);
 
-            System.out.println("✅ Email envoyé à: " + email);
+            System.out.println("Email envoyé à: " + email);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Erreur envoi: " + e.getMessage());
+            System.out.println("Erreur envoi: " + e.getMessage());
             return false;
         }
     }
@@ -40,7 +40,7 @@ public class VerificationService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("biblioapp.support@gmail.com");
         message.setTo(toEmail);
-        message.setSubject("✅ Code de vérification - BiblioApp");
+        message.setSubject("Code de vérification - BiblioApp");
         message.setText("Bienvenue sur BiblioApp !\n\n" +
                 "Votre code de vérification est : " + code + "\n\n" +
                 "Ce code expire dans 15 minutes.\n\n" +
