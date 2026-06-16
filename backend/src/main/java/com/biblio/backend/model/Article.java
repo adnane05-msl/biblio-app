@@ -53,8 +53,4 @@ public class Article {
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private List<ProjectArticle> projectArticles = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "id_source")
-    private Source source;
 }
