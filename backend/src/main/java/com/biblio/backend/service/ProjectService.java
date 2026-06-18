@@ -7,6 +7,7 @@ import com.biblio.backend.model.Utilisateur;
 import com.biblio.backend.repository.ProjectRepository;
 import com.biblio.backend.repository.UtilisateurRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,15 +18,11 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UtilisateurRepository utilisateurRepository;
-    private final CollaborationService collaborationService;   // ← AJOUTÉ
 
-    // ── Injection par constructeur (cohérent avec ton code existant) ───────
     public ProjectService(ProjectRepository projectRepository,
-                          UtilisateurRepository utilisateurRepository,
-                          CollaborationService collaborationService) {   // ← AJOUTÉ
-        this.projectRepository      = projectRepository;
-        this.utilisateurRepository  = utilisateurRepository;
-        this.collaborationService   = collaborationService;   // ← AJOUTÉ
+                          UtilisateurRepository utilisateurRepository) {
+        this.projectRepository     = projectRepository;
+        this.utilisateurRepository = utilisateurRepository;
     }
 
     // ── Créer un projet ────────────────────────────────────────────────────
@@ -39,10 +36,6 @@ public class ProjectService {
         project.setUtilisateur(utilisateur);
 
         Project saved = projectRepository.save(project);
-
-        // ← AJOUTÉ : enregistrer le créateur comme PROPRIETAIRE
-        collaborationService.initProprietaire(saved, utilisateur);
-
         return convertToDTO(saved);
     }
 
@@ -75,8 +68,11 @@ public class ProjectService {
     }
 
     // ── Supprimer un projet ────────────────────────────────────────────────
+    @Transactional
     public void deleteProject(Long projetId) {
-        projectRepository.deleteById(projetId);
+        Project projet = projectRepository.findById(projetId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        projectRepository.delete(projet);
     }
 
     // ── Conversion Entity → DTO ────────────────────────────────────────────

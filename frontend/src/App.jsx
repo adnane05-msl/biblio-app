@@ -11,8 +11,7 @@ import Statistiques from './pages/Statistiques/StatistiquesPage'
 import HomePage from './pages/HomePage/HomePage'
 import ProfilPage from './pages/Profil/ProfilPage'
 import PrismaDashboardPage from './pages/PrismaDashboard/PrismaDashboardPage'
-import AdminRoutes from './pages/admin/AdminRoutes' 
-import CollaborationPage from './pages/CollaborationPage/CollaborationPage'
+import AdminRoutes from './pages/admin/AdminRoutes'
 
 function ProtectedRoute({ children }) {
     const { user } = useAuth()
@@ -43,11 +42,7 @@ function AppRoutes() {
             <Route path="/profil" element={
                 <ProtectedRoute><ProfilPage /></ProtectedRoute>
             } />
-            <Route path="/projets/:projetId/collaboration" element={
-                <ProtectedRoute><CollaborationPage /></ProtectedRoute>
-            } />
 
-            {/* ← AJOUTER CES 2 LIGNES */}
             <Route path="/admin/*" element={<AdminRoutes />} />
             <Route path="/unauthorized" element={<div style={{padding:'2rem'}}>Accès refusé</div>} />
         </Routes>

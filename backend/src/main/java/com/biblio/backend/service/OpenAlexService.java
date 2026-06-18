@@ -84,7 +84,6 @@ public class OpenAlexService {
                 .trim();
     }
 
-    // OpenAlex stocke le résumé en index inversé {mot: [positions]}
     // Cette méthode reconstruit le texte original
     private String reconstructAbstract(JsonNode invertedIndex) {
         try {

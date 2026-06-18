@@ -38,13 +38,7 @@ function ProjectCard({ project, onEdit, onDelete, onClick }) {
                     >
                         <FontAwesomeIcon icon={faPencil} /> Modifier
                     </button>
-                    {/* <button
-                        className="btn-collab"
-                        title="Gérer les collaborateurs"
-                        onClick={(e) => { e.stopPropagation(); onCollaborer() }}
-                    >
-                        <FontAwesomeIcon icon={faUsers} /> Collaborateurs
-                    </button> */}
+                    
                     <button
                         className="btn-delete"
                         onClick={(e) => { e.stopPropagation(); onDelete(project.id) }}
