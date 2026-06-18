@@ -24,7 +24,6 @@
    PAGE WRAPPER
 ══════════════════════════════════════════════════════════════ */
 .statistiques-page {
-    min-height: 100vh;
     background-color: var(--stats-bg);
     display: flex;
     flex-direction: column;

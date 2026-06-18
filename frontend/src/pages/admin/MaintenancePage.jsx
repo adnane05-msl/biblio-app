@@ -16,6 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import './AdminPages.css';
 
+
 const COMPOSANTS = [
     {
         icon: faCode,
