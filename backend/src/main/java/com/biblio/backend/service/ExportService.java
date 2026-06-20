@@ -70,8 +70,6 @@ public class ExportService {
                 sb.append("  journal      = {").append(cleanBibtex(a.getJournal())).append("},\n");
             if (a.getDocumentType() != null && !a.getDocumentType().isEmpty())
                 sb.append("  type         = {").append(cleanBibtex(a.getDocumentType())).append("},\n");
-            if (a.getSourceNom() != null && !a.getSourceNom().isEmpty())
-                sb.append("  source       = {").append(cleanBibtex(a.getSourceNom())).append("},\n");
             if (a.getDoi() != null && !a.getDoi().isEmpty())
                 sb.append("  doi          = {").append(a.getDoi()).append("},\n");
             if (a.getUrl() != null && !a.getUrl().isEmpty())
@@ -103,7 +101,7 @@ public class ExportService {
         StringBuilder sb = new StringBuilder();
         sb.append('\uFEFF'); // BOM UTF-8
 
-        sb.append("Titre;Auteurs;Annee;Journal;TypeDocument;Source;DOI;URL;Citations;Resume;Statut;Note;DateAjout\n");
+        sb.append("Titre;Auteurs;Annee;Journal;TypeDocument;DOI;URL;Citations;Resume;Statut;Note;DateAjout\n");
 
         for (ProjectArticle pa : list) {
             Article a = pa.getArticle();
@@ -112,7 +110,6 @@ public class ExportService {
             sb.append(a.getAnnee() != null ? a.getAnnee() : "").append(";");
             sb.append(csvField(a.getJournal())).append(";");
             sb.append(csvField(a.getDocumentType())).append(";");
-            sb.append(csvField(a.getSourceNom())).append(";");
             sb.append(csvField(a.getDoi())).append(";");
             sb.append(csvField(a.getUrl())).append(";");
             sb.append(a.getNbCitations() != null ? a.getNbCitations() : "").append(";");
@@ -151,8 +148,6 @@ public class ExportService {
                 sb.append("JO  - ").append(a.getJournal()).append("\n");
             if (a.getDocumentType() != null && !a.getDocumentType().isEmpty())
                 sb.append("M3  - ").append(a.getDocumentType()).append("\n");
-            if (a.getSourceNom() != null && !a.getSourceNom().isEmpty())
-                sb.append("DB  - ").append(a.getSourceNom()).append("\n");
             if (a.getDoi() != null && !a.getDoi().isEmpty())
                 sb.append("DO  - ").append(a.getDoi()).append("\n");
             if (a.getUrl() != null && !a.getUrl().isEmpty())

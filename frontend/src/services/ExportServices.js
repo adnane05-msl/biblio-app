@@ -1,10 +1,11 @@
 const downloadFile = async (url, filename) => {
     const token = localStorage.getItem('token');
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:9090';
 
-    const response = await fetch(url, {
+    const response = await fetch(`${baseURL}${url}`, {
         method: 'GET',
         headers: {
-        'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
         },
     });
 

@@ -21,7 +21,7 @@ public class RechercheService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
-    // ── Sauvegarder requête + résultats JSON dans table `recherche` ────────
+    // ── Sauvegarder requête + résultats JSON dans `recherche` ────────
     public void saveRecherche(Long userId, String requete, int nbResultats, String resultatsJson) {
         Utilisateur utilisateur = utilisateurRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + userId));

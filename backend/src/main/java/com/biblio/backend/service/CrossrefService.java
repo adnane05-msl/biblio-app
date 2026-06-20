@@ -12,7 +12,7 @@ import java.util.List;
 public class CrossrefService {
 
     private static final String API_URL = "https://api.crossref.org/works";
-    private static final int MAX_RESULTS = 100;
+    private static final int MAX_RESULTS = 300;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();

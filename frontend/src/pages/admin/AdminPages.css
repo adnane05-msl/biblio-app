@@ -567,32 +567,198 @@
 /* ══════════════════════════════════════════════════════════════
    ACTION LIST (Maintenance)
 ══════════════════════════════════════════════════════════════ */
-.action-list { display: flex; flex-direction: column; gap: 0; }
+.maintenance-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px;
+}
 
-.action-item {
+.maintenance-tools-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.maintenance-tool-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 0;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
 }
 
-.action-item:last-child { border-bottom: none; }
+.maintenance-tool-info { min-width: 0; }
 
-.action-label {
-  margin: 0 0 2px;
+.maintenance-tool-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e3a5f;
+  margin: 0 0 4px;
+}
+
+.maintenance-tool-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Alerte action ── */
+.maintenance-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  margin-bottom: 16px;
+}
+.maintenance-alert--ok {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.maintenance-alert--error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAINTENANCE — État des composants
+══════════════════════════════════════════════════════════════ */
+.composants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.composant-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+/* ✅ clé du problème : on contraint la taille de l'icône */
+.composant-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;          /* taille de l'icône FontAwesome */
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.composant-card-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.composant-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.composant-valeur {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.composant-detail {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 6px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MAINTENANCE — Test des sources (table desktop / cartes mobile)
+══════════════════════════════════════════════════════════════ */
+.sources-table-wrap {
+  overflow-x: auto;
+}
+
+.sources-url-cell {
+  color: #6b7280;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.maintenance-empty {
+  font-size: 14px;
+  color: #9ca3af;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+/* ── Version cartes (mobile) ── */
+.sources-cards {
+  display: none;            /* ✅ masquée sur desktop */
+  flex-direction: column;
+  gap: 12px;
+}
+
+.source-mobile-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  background: #f9fafb;
+}
+
+.source-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.source-mobile-name {
+  font-size: 14px;
+  font-weight: 600;
   color: #1e3a5f;
 }
 
-.action-desc {
-  margin: 0;
+.source-mobile-url {
   font-size: 12px;
-  color: #9ca3af;
+  color: #6b7280;
+  word-break: break-all;
+  margin: 0 0 10px;
 }
 
+.source-mobile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.source-mobile-latence {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ── Bascule responsive ── */
+@media (max-width: 768px) {
+  .sources-table-wrap { display: none; }   /* ✅ cache le tableau */
+  .sources-cards      { display: flex; }   /* ✅ montre les cartes */
+}
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
