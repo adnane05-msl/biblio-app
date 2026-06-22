@@ -96,7 +96,7 @@ function Footer() {
                         <li>
                             <span className="footer-link">
                                 <FontAwesomeIcon icon={faEnvelope} />
-                                biblioapp@gmail.com
+                                biblioapp.support@gmail.com
                             </span>
                         </li>
                         <li>

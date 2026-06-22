@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
         "http://localhost:3000",
         "http://localhost:3008",
         "http://127.0.0.1:3008",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
+        "https://biblio-app-bay.vercel.app"
 })
 public class AuthController {
 

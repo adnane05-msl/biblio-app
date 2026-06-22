@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recherche")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://localhost:3008"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://localhost:3008","https://biblio-app-bay.vercel.app"})
 public class SearchController {
 
     @Autowired

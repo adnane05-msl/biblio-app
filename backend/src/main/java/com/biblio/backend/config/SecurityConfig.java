@@ -52,7 +52,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3008",
                 "http://localhost:5173",
-                "https://biblio-app.vercel.app",   // ← ton URL Vercel (à adapter)
+                "https://biblio-app-bay.vercel.app/",
                 "https://*.vercel.app"
         ));
 
