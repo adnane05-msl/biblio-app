@@ -14,16 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/authentification")
-@CrossOrigin(origins = {
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://localhost:3000",
-        "http://localhost:3008",
-        "http://127.0.0.1:3008",
-        "http://127.0.0.1:5173",
-        "https://biblio-app-bay.vercel.app"
-})
 public class AuthController {
 
     private final UtilisateurService utilisateurService;

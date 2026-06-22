@@ -55,7 +55,7 @@ public class SecurityConfig {
                 "https://biblio-app-bay.vercel.app",
                 "https://*.vercel.app"
         ));
-        
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
