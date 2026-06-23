@@ -1,8 +1,7 @@
 // src/services/adminService.js
 // Toutes les fonctions d'appel API pour le module admin.
 
-import apiClient from './apiClient';
-
+import apiClient from './Api';
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
