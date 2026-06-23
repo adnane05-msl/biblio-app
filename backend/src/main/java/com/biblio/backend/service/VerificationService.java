@@ -34,6 +34,9 @@ public class VerificationService {
 
     private void sendEmail(String toEmail, String code) throws Exception {
         String apiKey = System.getenv("BREVO_API_KEY");
+        System.out.println("BREVO KEY présente: " + (apiKey != null && !apiKey.isEmpty())
+                + " | longueur: " + (apiKey != null ? apiKey.length() : 0));
+
 
         String textContent = "Bienvenue sur BiblioApp !\\n\\n" +
                 "Votre code de verification est : " + code + "\\n\\n" +
