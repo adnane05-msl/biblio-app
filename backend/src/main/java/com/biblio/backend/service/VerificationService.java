@@ -1,7 +1,6 @@
 package com.biblio.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import java.util.Random;
@@ -9,9 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class VerificationService {
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     private final ConcurrentHashMap<String, VerificationCodeData> verificationCodes = new ConcurrentHashMap<>();
 
@@ -36,18 +32,38 @@ public class VerificationService {
         }
     }
 
-    private void sendEmail(String toEmail, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("biblioapp.support@gmail.com");
-        message.setTo(toEmail);
-        message.setSubject("Code de vérification - BiblioApp");
-        message.setText("Bienvenue sur BiblioApp !\n\n" +
-                "Votre code de vérification est : " + code + "\n\n" +
-                "Ce code expire dans 15 minutes.\n\n" +
-                "Cordialement,\n" +
-                "L'équipe BiblioApp");
+    private void sendEmail(String toEmail, String code) throws Exception {
+        String apiKey = System.getenv("BREVO_API_KEY");
 
-        mailSender.send(message);
+        String textContent = "Bienvenue sur BiblioApp !\\n\\n" +
+                "Votre code de verification est : " + code + "\\n\\n" +
+                "Ce code expire dans 15 minutes.\\n\\n" +
+                "Cordialement,\\nL'equipe BiblioApp";
+
+        String body = "{"
+                + "\"sender\":{\"name\":\"BiblioApp\",\"email\":\"biblioapp.support@gmail.com\"},"
+                + "\"to\":[{\"email\":\"" + toEmail + "\"}],"
+                + "\"subject\":\"Code de verification - BiblioApp\","
+                + "\"textContent\":\"" + textContent + "\""
+                + "}";
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                .header("api-key", apiKey)
+                .header("Content-Type", "application/json")
+                .header("accept", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        java.net.http.HttpResponse<String> response =
+                client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("Brevo response: " + response.statusCode() + " " + response.body());
+
+        if (response.statusCode() >= 300) {
+            throw new RuntimeException("Brevo error: " + response.statusCode() + " " + response.body());
+        }
     }
 
     public boolean verifyCode(String email, String userCode) {
