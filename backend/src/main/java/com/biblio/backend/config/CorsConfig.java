@@ -2,11 +2,14 @@ package com.biblio.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+// ── Config CORS pour le DÉVELOPPEMENT LOCAL uniquement
 @Configuration
+@Profile("!prod")
 public class CorsConfig {
 
     @Bean

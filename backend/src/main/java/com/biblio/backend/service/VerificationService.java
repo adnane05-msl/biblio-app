@@ -14,7 +14,7 @@ public class VerificationService {
         return String.format("%06d", random.nextInt(1000000));
     }
 
-    // ── Envoi du code : crée une entrée "non vérifiée" 
+    // ── Envoi du code : crée une entrée "non vérifiée"
     public boolean sendVerificationCode(String email) {
         try {
             String code = generateCode();
