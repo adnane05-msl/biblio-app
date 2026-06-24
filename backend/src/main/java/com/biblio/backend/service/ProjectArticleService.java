@@ -191,7 +191,7 @@ public class ProjectArticleService {
 
                         if (avant != ProjectArticle.Statut.DOUBLON) {
                             projectArticleRepository.save(pa);
-                            doublonsMarques++;  
+                            doublonsMarques++;
                         } else {
                             doublonsExistants++;
                         }

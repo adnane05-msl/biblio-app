@@ -14,10 +14,16 @@ public class VerificationService {
         return String.format("%06d", random.nextInt(1000000));
     }
 
+    // ── Envoi du code : crée une entrée "non vérifiée" 
     public boolean sendVerificationCode(String email) {
         try {
             String code = generateCode();
-            verificationCodes.put(email, new VerificationCodeData(code, System.currentTimeMillis() + 15 * 60 * 1000));
+            // Nouvelle entrée = verified=false, donc isEmailVerified() renverra
+            // false jusqu'à ce que verifyCode() soit appelé avec succès.
+            verificationCodes.put(email, new VerificationCodeData(
+                    code,
+                    System.currentTimeMillis() + 15 * 60 * 1000
+            ));
 
             sendEmail(email, code);
 
@@ -34,7 +40,6 @@ public class VerificationService {
         String apiKey = System.getenv("BREVO_API_KEY");
         System.out.println("BREVO KEY présente: " + (apiKey != null && !apiKey.isEmpty())
                 + " | longueur: " + (apiKey != null ? apiKey.length() : 0));
-
 
         String textContent = "Bienvenue sur BiblioApp !\\n\\n" +
                 "Votre code de verification est : " + code + "\\n\\n" +
@@ -67,22 +72,30 @@ public class VerificationService {
         }
     }
 
+    // ── Vérification du code
     public boolean verifyCode(String email, String userCode) {
         VerificationCodeData stored = verificationCodes.get(email);
         if (stored == null) return false;
+
         if (System.currentTimeMillis() > stored.expirationTime) {
             verificationCodes.remove(email);
             return false;
         }
+
         if (stored.code.equals(userCode)) {
-            verificationCodes.remove(email);
+            stored.verified = true;
             return true;
         }
         return false;
     }
 
+    // ── État réel de vérification
+
     public boolean isEmailVerified(String email) {
-        return !verificationCodes.containsKey(email);
+        VerificationCodeData stored = verificationCodes.get(email);
+        return stored != null
+                && stored.verified
+                && System.currentTimeMillis() <= stored.expirationTime;
     }
 
     public void clearVerificationCode(String email) {
@@ -92,6 +105,8 @@ public class VerificationService {
     private static class VerificationCodeData {
         String code;
         long expirationTime;
+        boolean verified = false;
+
         VerificationCodeData(String code, long expirationTime) {
             this.code = code;
             this.expirationTime = expirationTime;
