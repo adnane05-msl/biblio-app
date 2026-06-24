@@ -172,6 +172,8 @@ public class ProjectArticleService {
 
         //  Conserver le 1er (plus ancien), marquer les autres DOUBLON
         int doublonsMarques = 0;
+        int doublonsExistants = 0;
+
         for (List<Integer> group : groups.values()) {
             if (group.size() > 1) {
                 group.sort(Comparator.comparing(idx ->
@@ -181,19 +183,27 @@ public class ProjectArticleService {
 
                 for (int k = 1; k < group.size(); k++) {
                     ProjectArticle pa = list.get(group.get(k));
-                    if (pa.getStatut() == ProjectArticle.Statut.A_LIRE
-                            || pa.getStatut() == ProjectArticle.Statut.DOUBLON) {
+                    ProjectArticle.Statut avant = pa.getStatut();
+
+                    if (avant == ProjectArticle.Statut.A_LIRE
+                            || avant == ProjectArticle.Statut.DOUBLON) {
                         pa.setStatut(ProjectArticle.Statut.DOUBLON);
-                        projectArticleRepository.save(pa);
-                        doublonsMarques++;
+
+                        if (avant != ProjectArticle.Statut.DOUBLON) {
+                            projectArticleRepository.save(pa);
+                            doublonsMarques++;  
+                        } else {
+                            doublonsExistants++;
+                        }
                     }
                 }
             }
         }
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("doublonsMarques", doublonsMarques);
-        result.put("totalTraites",    n);
+        result.put("doublonsMarques",    doublonsMarques);
+        result.put("doublonsExistants",  doublonsExistants);
+        result.put("totalTraites",       n);
         return result;
     }
 

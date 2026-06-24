@@ -179,7 +179,9 @@ function ProjectDetail() {
 
         if (result.doublonsMarques > 0) {
             handleFilterChange('DOUBLON')
-            setSuccess(`${result.doublonsMarques} doublon(s) détecté(s) sur ${result.totalTraites} articles`)
+            setSuccess(`${result.doublonsMarques} nouveau(x) doublon(s) détecté(s) sur ${result.totalTraites} articles`)
+        } else if (result.doublonsExistants > 0) {
+            setSuccess(`Aucun nouveau doublon — ${result.doublonsExistants} doublon(s) déjà détecté(s) précédemment`)
         } else {
             setSuccess(`Aucun doublon trouvé parmi ${result.totalTraites} articles`)
         }
