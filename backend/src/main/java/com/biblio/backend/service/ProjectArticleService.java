@@ -21,6 +21,7 @@ public class ProjectArticleService {
     private final ProjectArticleRepository projectArticleRepository;
     private final ProjectRepository projectRepository;
     private final ArticleRepository articleRepository;
+    private final BatchSaveService batchSaveService;
 
     // Seuil de similarité titre pour considérer deux titres "très proches"
     private static final double TITRE_SIMILARITY_THRESHOLD = 0.85;
@@ -28,10 +29,12 @@ public class ProjectArticleService {
     public ProjectArticleService(
             ProjectArticleRepository projectArticleRepository,
             ProjectRepository projectRepository,
-            ArticleRepository articleRepository) {
+            ArticleRepository articleRepository,
+            BatchSaveService batchSaveService) {
         this.projectArticleRepository = projectArticleRepository;
         this.projectRepository = projectRepository;
         this.articleRepository = articleRepository;
+        this.batchSaveService = batchSaveService;
     }
 
     // ── Sauvegarde unitaire ──────────────────────────────────────────────────
@@ -50,9 +53,9 @@ public class ProjectArticleService {
     }
 
     // ── Sauvegarde en lot ─────────────────────────────────────────────────────
-    // Chaque article est sauvegardé INDÉPENDAMMENT dans son propre try/catch :
-    // si l'un échoue, il est ignoré sans bloquer les autres. Aucune erreur n'est
-    // remontée à l'utilisateur, tous les articles valides sont enregistrés.
+    // Chaque article est sauvegardé dans SA PROPRE transaction (REQUIRES_NEW via
+    // BatchSaveService) : un échec n'affecte jamais les autres. On sauvegarde
+    // donc TOUT sans exception (doublons, doi null, titre null inclus).
     public Map<String, Object> saveBatch(SaveBatchRequest batchRequest) {
         Project project = projectRepository.findById(batchRequest.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
@@ -85,14 +88,7 @@ public class ProjectArticleService {
 
         for (SaveArticleRequest req : batchRequest.getArticles()) {
             try {
-                req.setProjectId(batchRequest.getProjectId());
-                Article article = findOrCreateArticleNoBlock(req);
-
-                ProjectArticle pa = new ProjectArticle();
-                pa.setProject(project);
-                pa.setArticle(article);
-                pa.setStatut(ProjectArticle.Statut.A_LIRE);
-                projectArticleRepository.save(pa);
+                batchSaveService.saveOne(batchRequest.getProjectId(), req); // transaction isolée
                 saved++;
             } catch (Exception e) {
                 failed++;
@@ -109,57 +105,88 @@ public class ProjectArticleService {
         return result;
     }
 
-    // ── Déduplication intelligente ────────────────────────────────────────────
-    //
-    // Critères (ordre de priorité) :
-    //   1. DOI identique (non vide)                          -> doublon certain
-    //   2. Titre très proche (similarité >= 85%)
-    //      ET (mêmes auteurs OU même année)                  -> doublon probable
-    //   3. Titre très proche seul (similarité >= 85%)        -> doublon possible
-    //
-    // Dans chaque groupe, le 1er article (plus ancien dateAjout) est conservé,
-    // les suivants sont marqués DOUBLON.
+    // ── Déduplication intelligente (optimisée) ─────────────────────────────────
+
     public Map<String, Object> deduplicate(Long projectId) {
         List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
-
-        // Union-Find pour regrouper les doublons
         int n = list.size();
+
+        // ── Pré-calcul des caractéristiques ──
+        List<String> doiN = new ArrayList<>(n);
+        List<Set<String>> titreBg = new ArrayList<>(n);
+        List<Set<String>> auteurBg = new ArrayList<>(n);
+        List<Integer> annee = new ArrayList<>(n);
+        boolean[] generique = new boolean[n];
+
+        for (int i = 0; i < n; i++) {
+            Article a = list.get(i).getArticle();
+
+            String doi = a.getDoi();
+            doiN.add(doi != null && !doi.trim().isEmpty() ? normalize(doi) : null);
+
+            String t = a.getTitre() != null ? a.getTitre() : "";
+            generique[i] = t.startsWith("Article sans titre #");
+            titreBg.add(bigrams(normalize(t)));
+
+            String aut = a.getAuteurs();
+            auteurBg.add(aut != null && !aut.isEmpty()
+                    ? bigrams(normalize(aut.split("[,;]")[0].trim()))
+                    : null);
+
+            annee.add(a.getAnnee());
+        }
+
+        // ── Union-Find pour regrouper les doublons ──
         int[] parent = new int[n];
         for (int i = 0; i < n; i++) parent[i] = i;
 
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                if (find(parent, i) == find(parent, j)) continue; // déjà dans le même groupe
+                if (find(parent, i) == find(parent, j)) continue;
 
-                Article a = list.get(i).getArticle();
-                Article b = list.get(j).getArticle();
+                boolean dup = false;
 
-                if (areDoublons(a, b)) {
-                    union(parent, i, j);
+                // Critère 1 : DOI identique
+                if (doiN.get(i) != null && doiN.get(i).equals(doiN.get(j))) {
+                    dup = true;
                 }
+                // Critère 2 & 3 : similarité de titre
+                else if (!generique[i] && !generique[j]) {
+                    double sim = jaccardFromSets(titreBg.get(i), titreBg.get(j));
+                    if (sim >= TITRE_SIMILARITY_THRESHOLD) {
+                        boolean memeAnnee = annee.get(i) != null
+                                && annee.get(i).equals(annee.get(j));
+                        boolean memesAuteurs = auteurBg.get(i) != null
+                                && auteurBg.get(j) != null
+                                && jaccardFromSets(auteurBg.get(i), auteurBg.get(j)) >= 0.80;
+                        if (sim >= 0.95 || memeAnnee || memesAuteurs) {
+                            dup = true;
+                        }
+                    }
+                }
+
+                if (dup) union(parent, i, j);
             }
         }
 
-        // Regrouper par racine
+        // ── Regrouper par racine ──
         Map<Integer, List<Integer>> groups = new LinkedHashMap<>();
         for (int i = 0; i < n; i++) {
             int root = find(parent, i);
             groups.computeIfAbsent(root, k -> new ArrayList<>()).add(i);
         }
 
+        // ── Conserver le 1er (plus ancien), marquer les autres DOUBLON ──
         int doublonsMarques = 0;
         for (List<Integer> group : groups.values()) {
             if (group.size() > 1) {
-                // Trier par dateAjout ASC : le plus ancien est conservé
                 group.sort(Comparator.comparing(idx ->
                         list.get(idx).getDateAjout() != null
                                 ? list.get(idx).getDateAjout()
                                 : java.time.LocalDateTime.MIN));
 
-                // Conserver le 1er, marquer les autres DOUBLON
                 for (int k = 1; k < group.size(); k++) {
                     ProjectArticle pa = list.get(group.get(k));
-                    // Ne pas écraser un statut RETENU ou EXCLU manuellement défini
                     if (pa.getStatut() == ProjectArticle.Statut.A_LIRE
                             || pa.getStatut() == ProjectArticle.Statut.DOUBLON) {
                         pa.setStatut(ProjectArticle.Statut.DOUBLON);
@@ -176,56 +203,19 @@ public class ProjectArticleService {
         return result;
     }
 
-    // ── Logique de comparaison ────────────────────────────────────────────────
+    // ── Jaccard à partir de bigrammes déjà calculés ──
+    private double jaccardFromSets(Set<String> bg1, Set<String> bg2) {
+        if (bg1.isEmpty() && bg2.isEmpty()) return 1.0;
+        if (bg1.isEmpty() || bg2.isEmpty()) return 0.0;
 
-    private boolean areDoublons(Article a, Article b) {
-        // Critère 1 : DOI identique (non vide)
-        if (hasDoi(a) && hasDoi(b)) {
-            if (normalize(a.getDoi()).equals(normalize(b.getDoi()))) {
-                return true;
-            }
-        }
+        Set<String> smaller = bg1.size() < bg2.size() ? bg1 : bg2;
+        Set<String> larger  = (smaller == bg1) ? bg2 : bg1;
 
-        // Critère 2 & 3 : similarité de titre
-        String titreA = a.getTitre() != null ? a.getTitre() : "";
-        String titreB = b.getTitre() != null ? b.getTitre() : "";
+        int inter = 0;
+        for (String s : smaller) if (larger.contains(s)) inter++;
 
-        // Ignorer les titres génériques ("Article sans titre #xxx")
-        if (titreA.startsWith("Article sans titre #") || titreB.startsWith("Article sans titre #")) {
-            return false;
-        }
-
-        double simTitre = jaccardBigrams(normalize(titreA), normalize(titreB));
-
-        if (simTitre >= TITRE_SIMILARITY_THRESHOLD) {
-            // Critère 2 : titre proche + (mêmes auteurs OU même année)
-            boolean memeAnnee    = a.getAnnee() != null && a.getAnnee().equals(b.getAnnee());
-            boolean memesAuteurs = sameAuthors(a.getAuteurs(), b.getAuteurs());
-
-            // Titre très proche seul (>= 0.95) suffit aussi
-            if (simTitre >= 0.95 || memeAnnee || memesAuteurs) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    // Jaccard sur bigrammes — mesure de similarité entre deux chaînes
-    private double jaccardBigrams(String s1, String s2) {
-        if (s1.isEmpty() && s2.isEmpty()) return 1.0;
-        if (s1.isEmpty() || s2.isEmpty()) return 0.0;
-
-        Set<String> bg1 = bigrams(s1);
-        Set<String> bg2 = bigrams(s2);
-
-        Set<String> intersection = new HashSet<>(bg1);
-        intersection.retainAll(bg2);
-
-        Set<String> union = new HashSet<>(bg1);
-        union.addAll(bg2);
-
-        return union.isEmpty() ? 0.0 : (double) intersection.size() / union.size();
+        int union = bg1.size() + bg2.size() - inter;
+        return union == 0 ? 0.0 : (double) inter / union;
     }
 
     private Set<String> bigrams(String s) {
@@ -236,7 +226,7 @@ public class ProjectArticleService {
         return result;
     }
 
-    // Normalise une chaîne : minuscules, sans accents, sans ponctuation, espaces réduits
+    // Normalise : minuscules, sans accents, sans ponctuation, espaces réduits
     private String normalize(String s) {
         if (s == null) return "";
         return java.text.Normalizer
@@ -248,19 +238,7 @@ public class ProjectArticleService {
                 .trim();
     }
 
-    private boolean hasDoi(Article a) {
-        return a.getDoi() != null && !a.getDoi().trim().isEmpty();
-    }
-
-    // Compare les auteurs : extrait le premier auteur et compare par bigrammes
-    private boolean sameAuthors(String auteursA, String auteursB) {
-        if (auteursA == null || auteursB == null) return false;
-        String firstA = auteursA.split("[,;]")[0].trim();
-        String firstB = auteursB.split("[,;]")[0].trim();
-        return jaccardBigrams(normalize(firstA), normalize(firstB)) >= 0.80;
-    }
-
-    // ── Union-Find ────────────────────────────────────────────────────────────
+    // ── Union-Find ──
     private int find(int[] parent, int i) {
         if (parent[i] != i) parent[i] = find(parent, parent[i]);
         return parent[i];
@@ -270,17 +248,12 @@ public class ProjectArticleService {
         parent[find(parent, i)] = find(parent, j);
     }
 
-    // ── Helpers sauvegarde ────────────────────────────────────────────────────
+    // ── Helper sauvegarde unitaire (réutilise un article même DOI + même année) ──
     private Article findOrCreateArticleNoBlock(SaveArticleRequest request) {
         String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
         String titre = request.getTitre() != null ? request.getTitre().trim() : null;
 
-        // Réutilise un article existant SEULEMENT si même DOI ET même année.
-        // Si l'année diffère, on crée une nouvelle entrée (ce sont des
-        // exemplaires distincts du point de vue de l'utilisateur).
         if (doi != null && !doi.isEmpty()) {
-            // On ne réutilise un article existant que s'il a la MÊME année.
-            // findAllByDoi évite le plantage quand plusieurs lignes ont ce DOI.
             Article existing = articleRepository.findAllByDoi(doi).stream()
                     .filter(a -> a.getAnnee() != null
                             && a.getAnnee().equals(request.getAnnee()))
@@ -291,7 +264,6 @@ public class ProjectArticleService {
             }
         }
 
-        // Titre toujours non vide (contrainte NOT NULL)
         if (titre == null || titre.isEmpty()) {
             String suffix = UUID.randomUUID().toString().substring(0, 8);
             titre = (doi != null && !doi.isEmpty())
@@ -314,8 +286,7 @@ public class ProjectArticleService {
         return articleRepository.save(article);
     }
 
-    // Tronque une chaîne à la longueur max de la colonne pour éviter
-    // toute erreur d'insertion (valeur trop longue).
+    // Tronque une chaîne à la longueur max de la colonne
     private String cut(String s, int max) {
         if (s == null) return null;
         s = s.trim();
