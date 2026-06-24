@@ -20,7 +20,6 @@ public class StatistiquesDTO {
     private Map<Integer, Long> articlesByYear;
     private Map<String, Long> articlesByStatut;
 
-    // ← Type corrigé
     private List<Map<String, Object>> topAuteurs;
 
     private List<TopArticleDTO> topArticlesByCitations;

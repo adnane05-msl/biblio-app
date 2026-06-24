@@ -23,21 +23,16 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    /**
-     * Génère un token JWT avec le role inclus dans les claims.
-     * Le claim "role" est lu par JwtAuthFilter pour autoriser /api/admin/**.
-     */
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role)           // ← INDISPENSABLE pour l'admin
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /** Compatibilité — à éviter, pas de role dans le token */
     public String generateToken(String email) {
         return generateToken(email, "ROLE_USER");
     }

@@ -37,7 +37,7 @@ public class ProjectArticleService {
         this.batchSaveService = batchSaveService;
     }
 
-    // ── Sauvegarde unitaire ──────────────────────────────────────────────────
+    // Sauvegarde unitaire
     public ProjectArticleDTO saveArticle(SaveArticleRequest request) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
@@ -52,15 +52,12 @@ public class ProjectArticleService {
         return convertToDTO(projectArticleRepository.save(pa));
     }
 
-    // ── Sauvegarde en lot ─────────────────────────────────────────────────────
-    // Chaque article est sauvegardé dans SA PROPRE transaction (REQUIRES_NEW via
-    // BatchSaveService) : un échec n'affecte jamais les autres. On sauvegarde
-    // donc TOUT sans exception (doublons, doi null, titre null inclus).
+    // Sauvegarde en lot
     public Map<String, Object> saveBatch(SaveBatchRequest batchRequest) {
         Project project = projectRepository.findById(batchRequest.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
-        // ── Cumul du total de recherche (fusion des recherches du projet) ──
+        // Cumul du total de recherche (fusion des recherches du projet)
         if (batchRequest.getTotalRecherche() != null && batchRequest.getTotalRecherche() > 0) {
 
             String nouvelleRequete = batchRequest.getQuery() != null
@@ -105,8 +102,7 @@ public class ProjectArticleService {
         return result;
     }
 
-    // ── Déduplication intelligente (optimisée) ─────────────────────────────────
-
+    // Déduplication intelligente (optimisée)
     public Map<String, Object> deduplicate(Long projectId) {
         List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
         int n = list.size();
@@ -136,7 +132,7 @@ public class ProjectArticleService {
             annee.add(a.getAnnee());
         }
 
-        // ── Union-Find pour regrouper les doublons ──
+        //  Union-Find pour regrouper les doublons
         int[] parent = new int[n];
         for (int i = 0; i < n; i++) parent[i] = i;
 
@@ -146,11 +142,9 @@ public class ProjectArticleService {
 
                 boolean dup = false;
 
-                // Critère 1 : DOI identique
                 if (doiN.get(i) != null && doiN.get(i).equals(doiN.get(j))) {
                     dup = true;
                 }
-                // Critère 2 & 3 : similarité de titre
                 else if (!generique[i] && !generique[j]) {
                     double sim = jaccardFromSets(titreBg.get(i), titreBg.get(j));
                     if (sim >= TITRE_SIMILARITY_THRESHOLD) {
@@ -169,14 +163,14 @@ public class ProjectArticleService {
             }
         }
 
-        // ── Regrouper par racine ──
+        // Regrouper par racine
         Map<Integer, List<Integer>> groups = new LinkedHashMap<>();
         for (int i = 0; i < n; i++) {
             int root = find(parent, i);
             groups.computeIfAbsent(root, k -> new ArrayList<>()).add(i);
         }
 
-        // ── Conserver le 1er (plus ancien), marquer les autres DOUBLON ──
+        //  Conserver le 1er (plus ancien), marquer les autres DOUBLON
         int doublonsMarques = 0;
         for (List<Integer> group : groups.values()) {
             if (group.size() > 1) {
@@ -203,7 +197,7 @@ public class ProjectArticleService {
         return result;
     }
 
-    // ── Jaccard à partir de bigrammes déjà calculés ──
+    //  Jaccard à partir de bigrammes déjà calculés
     private double jaccardFromSets(Set<String> bg1, Set<String> bg2) {
         if (bg1.isEmpty() && bg2.isEmpty()) return 1.0;
         if (bg1.isEmpty() || bg2.isEmpty()) return 0.0;
@@ -238,7 +232,7 @@ public class ProjectArticleService {
                 .trim();
     }
 
-    // ── Union-Find ──
+    //  Union-Find
     private int find(int[] parent, int i) {
         if (parent[i] != i) parent[i] = find(parent, parent[i]);
         return parent[i];
@@ -248,7 +242,7 @@ public class ProjectArticleService {
         parent[find(parent, i)] = find(parent, j);
     }
 
-    // ── Helper sauvegarde unitaire (réutilise un article même DOI + même année) ──
+    // Helper sauvegarde unitaire (réutilise un article même DOI + même année)
     private Article findOrCreateArticleNoBlock(SaveArticleRequest request) {
         String doi   = request.getDoi()   != null ? request.getDoi().trim()   : null;
         String titre = request.getTitre() != null ? request.getTitre().trim() : null;
@@ -293,7 +287,7 @@ public class ProjectArticleService {
         return s.length() > max ? s.substring(0, max) : s;
     }
 
-    // ── Autres méthodes ─────────────────────────────────────────────────────
+    // Autres méthodes
     public List<ProjectArticleDTO> getArticlesByProject(Long projectId) {
         return projectArticleRepository.findByProject_Id(projectId)
                 .stream()

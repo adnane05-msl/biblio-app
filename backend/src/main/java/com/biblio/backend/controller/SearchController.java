@@ -22,7 +22,7 @@ public class SearchController {
     @Autowired
     private RechercheService rechercheService;
 
-    // ── Recherche pure ────────────────────────────────────────────────────
+    //  Recherche pure
     @GetMapping
     public ResponseEntity<List<ArticleDTO>> search(
             @RequestParam String query,
@@ -34,7 +34,7 @@ public class SearchController {
     }
 
 
-    // ── Sauvegarder dans l'historique (query + résultats JSON) ────────────
+    //  Sauvegarder dans l'historique
     @PostMapping("/historique")
     public ResponseEntity<Void> saveHistorique(@RequestBody SaveHistoriqueRequest request) {
         System.out.println("=== SAVE HISTORIQUE ===");
@@ -57,7 +57,7 @@ public class SearchController {
         return ResponseEntity.ok().build();
     }
 
-    // ── Récupérer l'historique (avec résultats JSON) ──────────────────────
+    // Récupérer l'historique
     @GetMapping("/historique/{userId}")
     public ResponseEntity<List<RechercheDTO>> getHistorique(@PathVariable Long userId) {
         return ResponseEntity.ok(rechercheService.getHistorique(userId));

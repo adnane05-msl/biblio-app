@@ -23,7 +23,6 @@ public class PrismaService {
 
     public PrismaDTO getPrisma(Long projectId) {
 
-        // ── Récupère le projet pour lire totalRecherche stocké en BDD ──────
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
@@ -40,10 +39,9 @@ public class PrismaService {
                 .filter(pa -> pa.getStatut() == ProjectArticle.Statut.A_LIRE).count();
         int apresDeduplication  = totalSauvegardes - doublons;
 
-        // totalRecherche vient maintenant directement de la BDD (persisté par projet)
         int totalRecherche = project.getTotalRecherche() != null
                 ? project.getTotalRecherche()
-                : totalSauvegardes;   // fallback si jamais null
+                : totalSauvegardes;
 
         return new PrismaDTO(
                 totalRecherche,

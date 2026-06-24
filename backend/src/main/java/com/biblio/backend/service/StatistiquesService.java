@@ -25,7 +25,7 @@ public class StatistiquesService {
 
         StatistiquesDTO dto = new StatistiquesDTO();
 
-        // ── Stats globales ──────────────────────────────
+        // Stats globales
         dto.setTotalArticles(list.size());
         dto.setTotalRetenus((int) list.stream()
                 .filter(pa -> pa.getStatut() ==
@@ -40,7 +40,7 @@ public class StatistiquesService {
                 .filter(pa -> pa.getStatut() ==
                         ProjectArticle.Statut.DOUBLON).count());
 
-        // ── Publications par année ──────────────────────
+        // Publications par année
         Map<Integer, Long> byYear = list.stream()
                 .map(pa -> pa.getArticle().getAnnee())
                 .filter(Objects::nonNull)
@@ -48,14 +48,14 @@ public class StatistiquesService {
                         y -> y, Collectors.counting()));
         dto.setArticlesByYear(new TreeMap<>(byYear));
 
-        // ── Répartition par statut ──────────────────────
+        // Répartition par statut
         Map<String, Long> byStatut = list.stream()
                 .collect(Collectors.groupingBy(
                         pa -> pa.getStatut().name(),
                         Collectors.counting()));
         dto.setArticlesByStatut(byStatut);
 
-        // ── Top auteurs ─────────────────────────────────
+        // Top auteurs
         Map<String, Long> auteurCount = new HashMap<>();
         for (ProjectArticle pa : list) {
             String auteurs = pa.getArticle().getAuteurs();
@@ -83,7 +83,7 @@ public class StatistiquesService {
 
         dto.setTopAuteurs(topAuteurs);
 
-        // ── Top articles par citations ──────────────────
+        //Top articles par citations
         List<StatistiquesDTO.TopArticleDTO> topArticles = list.stream()
                 .map(ProjectArticle::getArticle)
                 .filter(a -> a.getNbCitations() != null

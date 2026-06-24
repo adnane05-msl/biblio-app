@@ -71,7 +71,7 @@ public class UtilisateurService {
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
-        // ── NOUVEAU : bloquer les comptes désactivés par l'admin ───────────
+        //bloquer les comptes désactivés par l'admin
         if ("INACTIF".equalsIgnoreCase(user.getStatut())) {
             logService.warn("Authentification",
                     "Tentative de connexion sur compte désactivé : " + request.getEmail(),

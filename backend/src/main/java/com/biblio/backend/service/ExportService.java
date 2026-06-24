@@ -17,7 +17,7 @@ public class ExportService {
         this.projectArticleRepository = projectArticleRepository;
     }
 
-    // ── Filtre par statut ──
+    //  Filtre par statut
     private List<ProjectArticle> getFilteredList(Long projectId, String statut) {
         List<ProjectArticle> list = projectArticleRepository.findByProject_Id(projectId);
 
@@ -40,9 +40,7 @@ public class ExportService {
         }
     }
 
-    // ================================
     // EXPORT BIBTEX
-    // ================================
     public String exportBibtex(Long projectId, String statut) {
         List<ProjectArticle> list = getFilteredList(projectId, statut);
 
@@ -92,9 +90,7 @@ public class ExportService {
         return sb.toString();
     }
 
-    // ================================
     // EXPORT CSV
-    // ================================
     public String exportCsv(Long projectId, String statut) {
         List<ProjectArticle> list = getFilteredList(projectId, statut);
 
@@ -122,9 +118,7 @@ public class ExportService {
         return sb.toString();
     }
 
-    // ================================
     // EXPORT RIS
-    // ================================
     public String exportRis(Long projectId, String statut) {
         List<ProjectArticle> list = getFilteredList(projectId, statut);
 
@@ -168,9 +162,7 @@ public class ExportService {
         return sb.toString();
     }
 
-    // ================================
     // HELPERS
-    // ================================
     private String generateBibtexKey(Article a) {
         String author = "unknown";
         if (a.getAuteurs() != null && !a.getAuteurs().isEmpty()) {

@@ -21,14 +21,8 @@ public class SearchService {
     @Autowired
     private AdminSourceRepository adminSourceRepository;
 
-    // ════════════════════════════════════════════════════════════════════
     //  Vérification du statut admin d'une source
-    // ════════════════════════════════════════════════════════════════════
-    //  La page admin "Sources" permet d'activer / désactiver une source.
-    //    - Active      : EN_LIGNE ou LATENCE_ELEVEE
-    //    - Désactivée  : HORS_LIGNE ou MAINTENANCE
-    //  Si la source n'est pas référencée dans la table, elle est considérée
-    //  active par défaut (fallback de sécurité).
+
     private boolean isSourceActive(String nom) {
         return adminSourceRepository.findFirstByNomIgnoreCaseContaining(nom)
                 .map(s -> s.getStatut() == AdminSource.StatutSource.EN_LIGNE
@@ -36,16 +30,14 @@ public class SearchService {
                 .orElse(true);
     }
 
-    // ════════════════════════════════════════════════════════════════════
     //  Recherche multi-sources
-    // ════════════════════════════════════════════════════════════════════
     public List<ArticleDTO> search(String query,
                                    boolean includeCrossref,
                                    boolean includeOpenAlex) {
 
         List<ArticleDTO> allResults = new ArrayList<>();
 
-        // ── Crossref ──────────────────────────────────────────────────────
+        // Crossref
         if (includeCrossref) {
             if (isSourceActive("crossref")) {
                 try {
@@ -58,7 +50,7 @@ public class SearchService {
             }
         }
 
-        // ── OpenAlex ──────────────────────────────────────────────────────
+        //  OpenAlex
         if (includeOpenAlex) {
             if (isSourceActive("openalex")) {
                 try {
@@ -71,8 +63,6 @@ public class SearchService {
             }
         }
 
-        // ── Nettoyage des DOI invalides (transforme un faux DOI en null) ──
-        // On ne SUPPRIME plus l'article : on remet juste son DOI à null.
         allResults.forEach(a -> {
             if (a.getDoi() != null) {
                 String doi = a.getDoi().trim();
@@ -86,10 +76,7 @@ public class SearchService {
             }
         });
 
-        // ── On garde TOUS les articles, avec ou sans DOI ──────────────────
-        // Les articles sans DOI (livres, chapitres, etc.) sont des références
-        // valides : ils doivent pouvoir être affichés ET sauvegardés.
-        // ── Trier par année décroissante ──────────────────────────────────
+        //  Trier par année décroissante
         allResults.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
             if (a.getYear() == null) return 1;

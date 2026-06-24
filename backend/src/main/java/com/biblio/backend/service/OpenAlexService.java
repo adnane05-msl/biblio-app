@@ -45,7 +45,6 @@ public class OpenAlexService {
                     article.setAuthors(authorNames.toString());
                 }
 
-                // Journal
                 JsonNode hostVenue = item.path("host_venue");
                 article.setJournal(hostVenue.path("display_name").asText());
 
@@ -54,7 +53,6 @@ public class OpenAlexService {
                 article.setCitations(item.path("cited_by_count").asInt());
                 article.setSource("OpenAlex");
 
-                // Résumé
                 String abstractText = item.path("abstract").asText();
                 if (abstractText == null || abstractText.isBlank()) {
                     abstractText = item.path("abstract_inverted_index").isMissingNode()
@@ -89,7 +87,6 @@ public class OpenAlexService {
         try {
             java.util.TreeMap<Integer, String> positionMap = new java.util.TreeMap<>();
 
-            // properties() retourne un Set, on itère directement
             for (java.util.Map.Entry<String, JsonNode> entry : invertedIndex.properties()) {
                 String word = entry.getKey();
                 JsonNode positions = entry.getValue();

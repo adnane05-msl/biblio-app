@@ -25,7 +25,7 @@ public class ProjectService {
         this.utilisateurRepository = utilisateurRepository;
     }
 
-    // ── Créer un projet ────────────────────────────────────────────────────
+    //  Créer un projet
     public ProjectDTO createProject(Long utilisateurId, ProjectRequest request) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
@@ -39,7 +39,7 @@ public class ProjectService {
         return convertToDTO(saved);
     }
 
-    // ── Récupérer tous les projets d'un utilisateur ────────────────────────
+    // Récupérer tous les projets d'un utilisateur
     public List<ProjectDTO> getProjectsByUtilisateur(Long utilisateurId) {
         List<Project> projets = projectRepository.findByUtilisateurId(utilisateurId);
         return projets.stream()
@@ -47,14 +47,14 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    // ── Récupérer un projet par ID ─────────────────────────────────────────
+    //  Récupérer un projet par ID
     public ProjectDTO getProjectById(Long projetId) {
         Project projet = projectRepository.findById(projetId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
         return convertToDTO(projet);
     }
 
-    // ── Modifier un projet ─────────────────────────────────────────────────
+    //  Modifier un projet
     public ProjectDTO updateProject(Long projetId, ProjectRequest request) {
         Project projet = projectRepository.findById(projetId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
@@ -67,7 +67,7 @@ public class ProjectService {
         return convertToDTO(updated);
     }
 
-    // ── Supprimer un projet ────────────────────────────────────────────────
+    // Supprimer un projet
     @Transactional
     public void deleteProject(Long projetId) {
         Project projet = projectRepository.findById(projetId)
@@ -75,7 +75,7 @@ public class ProjectService {
         projectRepository.delete(projet);
     }
 
-    // ── Conversion Entity → DTO ────────────────────────────────────────────
+    //  Conversion Entity → DTO
     private ProjectDTO convertToDTO(Project project) {
         ProjectDTO dto = new ProjectDTO();
         dto.setId(project.getId());

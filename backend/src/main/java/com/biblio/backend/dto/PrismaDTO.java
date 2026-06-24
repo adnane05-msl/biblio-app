@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrismaDTO {
-    private int totalRecherche;           // Résultats de la recherche API
+    private int totalRecherche;
 
-    private int totalSauvegardes;         // Articles sauvegardés dans le projet
+    private int totalSauvegardes;
 
-    private int totalDoublons;             // Doublons détectés
-    private int totalExclus;               // Articles exclus
-    private int totalRetenus;              // Articles retenus
-    private int totalALire;                // Encore à lire
+    private int totalDoublons;
+    private int totalExclus;
+    private int totalRetenus;
+    private int totalALire;
 
-    private int apresDeduplication;        // Après suppression doublons
+    private int apresDeduplication;
 }

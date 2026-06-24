@@ -21,12 +21,11 @@ public class RechercheService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
-    // ── Sauvegarder requête + résultats JSON dans `recherche` ────────
+    //  Sauvegarder requête + résultats JSON dans recherche
     public void saveRecherche(Long userId, String requete, int nbResultats, String resultatsJson) {
         Utilisateur utilisateur = utilisateurRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + userId));
 
-        // Anti-doublon : même requête dans les 30 dernières secondes
         List<Recherche> recent = rechercheRepository
                 .findByUtilisateurIdOrderByDateRechercheDesc(userId);
 
@@ -36,7 +35,6 @@ public class RechercheService {
             boolean tresRecente = last.getDateRecherche()
                     .isAfter(LocalDateTime.now().minusSeconds(30));
             if (memeRequete && tresRecente) {
-                // Mettre à jour les résultats même si doublon (résultats peuvent avoir changé)
                 last.setNbResultats(nbResultats);
                 last.setResultatsJson(resultatsJson);
                 rechercheRepository.save(last);
@@ -57,7 +55,7 @@ public class RechercheService {
                 + requete + " (" + nbResultats + " résultats) userId=" + userId);
     }
 
-    // ── Récupérer l'historique avec les résultats JSON ─────────────────────
+    //  Récupérer l'historique avec les résultats JSON
     public List<RechercheDTO> getHistorique(Long userId) {
         return rechercheRepository
                 .findByUtilisateurIdOrderByDateRechercheDesc(userId)
@@ -72,7 +70,7 @@ public class RechercheService {
         dto.setRequete(r.getRequete());
         dto.setDateRecherche(r.getDateRecherche());
         dto.setNbResultats(r.getNbResultats());
-        dto.setResultatsJson(r.getResultatsJson());  // ← inclus pour le cache frontend
+        dto.setResultatsJson(r.getResultatsJson());
         return dto;
     }
 }
