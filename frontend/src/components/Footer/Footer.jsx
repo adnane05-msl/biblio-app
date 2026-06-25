@@ -10,7 +10,6 @@ import {
     faGraduationCap
 } from '@fortawesome/free-solid-svg-icons'
 import './Footer.css'
-import '../../../public/image/logo FSBM.jpeg'
 
 function Footer() {
     const currentYear = new Date().getFullYear()
@@ -94,16 +93,16 @@ function Footer() {
                     <h4 className="footer-col-title">Contact</h4>
                     <ul className="footer-links">
                         <li>
-                            <span className="footer-link">
+                            <a href="mailto:biblioapp.support@gmail.com" className="footer-link">
                                 <FontAwesomeIcon icon={faEnvelope} />
                                 biblioapp.support@gmail.com
-                            </span>
+                            </a>
                         </li>
                         <li>
-                            <span className="footer-link">
+                            <a href="https://www.fsbm.ma/" className="footer-link" target="_blank" rel="noopener noreferrer">
                                 <FontAwesomeIcon icon={faGraduationCap} />
                                 Université — Faculté des Sciences
-                            </span>
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -111,9 +110,9 @@ function Footer() {
 
             {/* ── Logo Université ── */}
             <div className="footer-university">
-                <img 
-                    src="../../../public/image/logo FSBM.jpeg" 
-                    alt="Logo Faculté des Sciences" 
+                <img
+                    src="/image/logo%20FSBM.jpeg"
+                    alt="Logo Faculté des Sciences"
                     className="university-logo"
                 />
                 <div className="university-text">
