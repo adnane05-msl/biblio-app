@@ -77,7 +77,7 @@ public class SearchService {
                 }
             }
         });
-        
+
         // ── Trier par année décroissante ──────────────────────────────────
         allResults.sort((a, b) -> {
             if (a.getYear() == null && b.getYear() == null) return 0;
